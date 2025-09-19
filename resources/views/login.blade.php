@@ -30,8 +30,8 @@
     <div class="form-box login">
     <form action="#">
         <div class="input-box">
-            <p>Username</p>
-            <input type="text" placeholder="Enter your username" required>
+            <p>Email</p>
+            <input type="email" placeholder="Enter your email" required>
         </div>
         <div class="input-box">
             <p>Password</p>
