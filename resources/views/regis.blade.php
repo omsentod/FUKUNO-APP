@@ -29,42 +29,40 @@
 <div class="container">
     <h1 class="regis-text">DAFTAR AKUN BARU</h1>
     <div class="form-box regis">
-    <form action="#">
-        <div class="input-box">
-            <p>Username</p>
-            <input type="text" placeholder="Enter your username" required>
-        </div>
-        <div class="input-box">
-            <p>Email</p>
-            <input type="email" placeholder="Enter your email" required>
-        </div>
-        <div class="input-box">
-            <p>Mobile Number</p>
-            <input type="tel" placeholder="Enter your mobile number" required pattern="[0-9]+" inputmode="numeric">
-        </div>             
-        <div class="input-box">
-            <p>Position</p>
-            <select class="role-select" required>
-                <option value="" disabled selected>Select your position</option>
-                <option value="manager">User</option>
-                <option value="developer">Admin</option>
-            </select>
-        </div>        
-        <div class="input-box">
-            <p>Password</p>
-            <input type="password" placeholder="Enter your password" required>
-        </div>
-        <div class="input-box">
-            <p>Confirm Password</p>
-            <input type="password" placeholder="Confirm your password" required>
-        <div class="submit-regis">
-            <a href="">
-                <button type="submit" class="regis-btn">Daftar</button>
-            </a>
+        <form action="{{ route('register.post') }}" method="POST">
+            @csrf
+            <div class="input-box">
+                <p>Username</p>
+                <input type="text" name="name" placeholder="Enter your username" required>
             </div>
-            
-        </div>
-    </form>      
+            <div class="input-box">
+                <p>Email</p>
+                <input type="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <div class="input-box">
+                <p>Mobile Number</p>
+                <input type="tel" name="phone" placeholder="Enter your mobile number" required pattern="[0-9]+" inputmode="numeric">
+            </div>
+            <div class="input-box">
+                <p>Position</p>
+                <select class="role-select" name="role" required>
+                    <option value="" disabled selected>Select your position</option>
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="input-box">
+                <p>Password</p>
+                <input type="password" name="password" placeholder="Enter your password" required>
+            </div>
+            <div class="input-box">
+                <p>Confirm Password</p>
+                <input type="password" name="password_confirmation" placeholder="Confirm your password" required>
+            </div>
+            <div class="submit-regis">
+                <button type="submit" class="regis-btn">Daftar</button>
+            </div>
+        </form>
 </div>
 </div>
 

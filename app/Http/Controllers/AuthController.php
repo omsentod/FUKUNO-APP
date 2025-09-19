@@ -9,113 +9,64 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+    // REGISTER
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
+            'phone' => 'required|string|max:20',
+            'role' => 'required|in:user,admin',
             'password' => 'required|string|min:3|confirmed',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return back()->withErrors($validator)->withInput();
         }
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'phone' => $request->phone,
+            'role' => $request->role,
             'password' => Hash::make($request->password),
         ]);
 
+        // Buat token Sanctum
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'message' => 'User registered successfully',
-            'user' => $user,
-            'token' => $token,
-        ], 201);
+        return redirect()->route('login')->with('success', 'User registered successfully');
     }
 
+    // LOGIN
     public function login(Request $request)
     {
+        // validasi input
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
             'password' => 'required|string',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return back()->withErrors($validator)->withInput();
         }
 
+        // cek user berdasarkan email
         $user = User::where('email', $request->email)->first();
 
+        // cek user & password
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return back()->with('error', 'Email atau password salah!');
         }
 
+        // login manual ke session Laravel
+        auth()->login($user);
+        $request->session()->regenerate();
+
+        // buat token sanctum (kalau butuh API access)
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'message' => 'Login successful',
-            'user' => $user,
-            'token' => $token,
-        ]);
+        // redirect ke dashboard
+        return redirect()->route('dashboard')->with('success', 'Login successful');
     }
-
-
-    public function deleteUser(Request $request, $id)
-{
-    $authUser = $request->user(); // user yang sedang login
-
-    // hanya admin yang bisa delete
-    if ($authUser->role !== 'admin') {
-        return response()->json(['message' => 'Unauthorized'], 403);
-    }
-
-    $user = User::find($id);
-
-    if (!$user) {
-        return response()->json(['message' => 'User not found'], 404);
-    }
-
-    $user->delete();
-
-    return response()->json(['message' => 'User deleted successfully']);
-}
-
-
-
-    public function updateRole(Request $request, $id)
-{
-    $authUser = $request->user(); // user yang login
-
-    // hanya admin yang bisa ubah role
-    if ($authUser->role !== 'admin') {
-        return response()->json(['message' => 'Unauthorized'], 403);
-    }
-
-    // validasi role
-    $validator = Validator::make($request->all(), [
-        'role' => 'required|in:admin,user',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
-    }
-
-    $user = User::find($id);
-
-    if (!$user) {
-        return response()->json(['message' => 'User not found'], 404);
-    }
-
-    $user->role = $request->role;
-    $user->save();
-
-    return response()->json([
-        'message' => 'User role updated successfully',
-        'user' => $user,
-    ]);
-}
-
 }

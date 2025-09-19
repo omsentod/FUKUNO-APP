@@ -28,20 +28,18 @@
 <div class="container">
     <h1 class="login-text">LOGIN</h1>
     <div class="form-box login">
-    <form action="#">
-        <div class="input-box">
-            <p>Email</p>
-            <input type="email" placeholder="Enter your email" required>
-        </div>
-        <div class="input-box">
-            <p>Password</p>
-            <input type="password" placeholder="Enter your password" required>
-        <div class="forgot-link">
-            <a href="">Forgot Password?</a>
-        </div>
-        <button type="submit" class="btn">Masuk</button>
-        </div>
-    </form>      
+        <form action="{{ route('login.submit') }}" method="POST">
+            @csrf
+            <div class="input-box">
+                <p>Email</p>
+                <input type="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <div class="input-box">
+                <p>Password</p>
+                <input type="password" name="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn">Masuk</button>
+        </form>
 </div>
 </div>
 
