@@ -16,10 +16,10 @@
     </div>
 
     <div class="regis-whisp">
-      <p>Belum punya akun?</p>
-      <a href="{{ route('regis') }}">
+    <p>Belum punya akun?</p>
+    <a href="{{ route('regis') }}">
         <button> Daftar</button>
-      </a>
+    </a>
     </div>
 </div>
 
