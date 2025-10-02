@@ -32,16 +32,12 @@
         <form action="{{ route('register.post') }}" method="POST">
             @csrf
             <div class="input-box">
-                <p>Username</p>
+                <p>Full Name</p>
                 <input type="text" name="name" placeholder="Enter your username" required>
             </div>
             <div class="input-box">
                 <p>Email</p>
                 <input type="email" name="email" placeholder="Enter your email" required>
-            </div>
-            <div class="input-box">
-                <p>Mobile Number</p>
-                <input type="tel" name="phone" placeholder="Enter your mobile number" required pattern="[0-9]+" inputmode="numeric">
             </div>
             <div class="input-box">
                 <p>Position</p>
