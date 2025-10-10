@@ -70,6 +70,25 @@ body{
       .icon-kanan:hover{
         color: var(--main-color);
       }
+
+      .notification {
+        position: absolute;
+        top: 60px; 
+        right: 10px;
+        background-color: var(--ctn-color);
+        color: var(--txt-color);
+        padding: 10px;
+        border-radius: 5px;
+        display: none; 
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000; 
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+            .notification.show {
+        display: block;
+        opacity: 1;
+      }
       
       
       .profile {
@@ -274,9 +293,9 @@ body{
       
      
       .data-table tr:hover td {
-        background-color: var(--main-color); 
+        background-color: rgba(226, 226, 226, 0.803); 
         cursor: pointer;
-        color: var(--ctn-color);
+        color: var(--txt-color);
       }
       
       .data-table th:hover{
