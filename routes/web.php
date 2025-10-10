@@ -2,6 +2,8 @@
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
+
+// PAGE ROUTE
 Route::get('/', function () {
     return view('login');
 })->name('login');
@@ -10,10 +12,9 @@ Route::get('/register', function () {
     return view('regis');
 })->name('regis');
 
-// Dashboard
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->name('dashboard');
+})->middleware(['auth'])->name('dashboard');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -46,6 +47,11 @@ Route::get('/archive', function () {
 Route::get('/trash', function () {
     return view('trash-sb');
 })->name('trash');
+
+
+// MIDDLEWARE
+Route::middleware('auth')->get('/user-name', [AuthController::class, 'getUserName']);
+
 
 // Logout
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
