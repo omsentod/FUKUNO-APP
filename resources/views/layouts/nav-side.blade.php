@@ -11,65 +11,54 @@
   @stack('styles')
 </head>
 <body>
-    @php
-    use Illuminate\Support\Facades\Auth;
+  @php
+  use Illuminate\Support\Facades\Auth;
 
-    $user = Auth::user();
-    $initials = '';
+  $user = Auth::user();
+  $initials = '';
 
-    if ($user && $user->name) {
-        $words = explode(' ', $user->name);
-        $initials = strtoupper(substr($words[0], 0, 1) . (isset($words[1]) ? substr($words[1], 0, 1) : ''));
-    }
+  if ($user && $user->name) {
+      $words = explode(' ', $user->name);
+      $initials = strtoupper(substr($words[0], 0, 1) . (isset($words[1]) ? substr($words[1], 0, 1) : ''));
+  }
 
-    // Warna dinamis berdasarkan huruf pertama nama
-    $colors = ['#2ecc71', '#3498db', '#9b59b6', '#e67e22', '#e74c3c'];
-    $bgColor = $colors[ord(strtoupper(substr($initials ?? 'A', 0, 1))) % count($colors)];
+  // Warna dinamis berdasarkan huruf pertama nama (hitung sekali saja)
+  $colors = ['#2ecc71', '#3498db', '#9b59b6', '#e67e22', '#e74c3c'];
+  $bgColor = $colors[ord(strtoupper(substr($initials ?? 'A', 0, 1))) % count($colors)];
 @endphp
 
-  <!-- navbar -->
+<!-- Navbar -->
 <nav class="navbar">
   <div class="header-logo">
-    <img src="assets/img/web-logo.png" alt="header logo">
-</div>
-
-  <!-- Notifikasi -->
-<div class="navbarkanan">
-    <i class="bi bi-bell-fill icon-kanan" id="bell-icon"></i>
-    <div class="notification" id="notification">
-        <p>You have new notifications!</p>
-    <div class="notification" id="notification">
-        <p>No notification yet!</p>
-    </div>
-
-  <!-- Profile -->
-<!-- Profile -->
-<div class="dropdown">
-    @php
-        $colors = ['#2ecc71', '#3498db', '#9b59b6', '#e67e22', '#e74c3c'];
-        $bgColor = $colors[ord(strtoupper(substr($initials ?? 'A', 0, 1))) % count($colors)];
-    @endphp
-
-    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="profileDropdown"
-       data-bs-toggle="dropdown" aria-expanded="false" style="gap: 8px;">
-        <div class="profile-inisial" style="background-color: {{ $bgColor }}">
-            {{ $initials ?? '??' }}
-        </div>
-    </a>
-
-    <ul class="dropdown-menu dropdown-menu-end mt-2 shadow" aria-labelledby="profileDropdown" style="min-width: 180px;">
-        <li class="dropdown-item-text fw-bold text-center">{{ $user->name ?? 'Guest' }}</li>
-        <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item" href="#">Profile</a></li>
-        <li><a class="dropdown-item" href="#">Settings</a></li>
-        <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item text-danger" href="{{ route('logout') }}">Logout</a></li>
-    </ul>
+      <img src="assets/img/web-logo.png" alt="header logo">
   </div>
 
+  <!-- Navbarkanan -->
+  <div class="navbarkanan">
+      <!-- Notifikasi -->
+      <i class="bi bi-bell-fill icon-kanan" id="bell-icon"></i>
+      <div class="notification" id="notification">  <!-- Hapus duplikasi, gunakan satu div -->
+          <p>No notification yet!</p>  <!-- Atau gunakan konten dinamis, misalnya dari database -->
+      </div>
 
+      <!-- Profile Dropdown -->
+      <div class="dropdown">
+          <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="profileDropdown"
+             data-bs-toggle="dropdown" aria-expanded="false" style="gap: 8px;">
+              <div class="profile-inisial" style="background-color: {{ $bgColor }};">
+                  {{ $initials ?? '??' }}
+              </div>
+          </a>
 
-</div>
+          <ul class="dropdown-menu dropdown-menu-end mt-2 shadow" aria-labelledby="profileDropdown" style="min-width: 180px;">
+              <li class="dropdown-item-text fw-bold text-center">{{ $user->name ?? 'Guest' }}</li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#">Profile</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="{{ route('login') }}">Logout</a></li>
+          </ul>
+      </div>
+  </div>
 </nav>
 
 

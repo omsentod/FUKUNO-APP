@@ -15,7 +15,6 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'phone' => 'required|string|max:20',
             'role' => 'required|in:user,admin',
             'password' => 'required|string|min:3|confirmed',
         ]);
@@ -69,4 +68,5 @@ class AuthController extends Controller
         // redirect ke dashboard
         return redirect()->route('dashboard')->with('success', 'Login successful');
     }
+    
 }

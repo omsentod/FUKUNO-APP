@@ -102,31 +102,19 @@ body{
         cursor: pointer;
       }
 
-      /* .profile-inisial {
+      .profile-inisial {
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background-color: #4CAF50;
         color: white;
-        display: none;
+        display: flex;
         align-items: center;
         justify-content: center;
         font-size: 16px;
-        font-weight: var(--font-regular);
+        font-weight: var(--font-regular); 
         text-transform: uppercase;
-      } */
-
-
-      /* .profile.active #person-icon {
-        display: none;
-      }
-
-      .profile.active .profile-inisial {
-        display: flex;
-      } */
-
-
-
+    }
+    
       /* Styling Sidebar */
     .sidebar {
         position:fixed;
