@@ -87,31 +87,19 @@
             <td>Kaos SD SAIM</td>
             <td>To Do</td>
             <td>3 Hari lagi</td>
-             <td class="pic-task"><div class="pic-profile">RW</div></td>
+            <td class="center-text">DTF</td>
           </tr>
           <tr>
             <td>Kaos SD SAIM</td>
             <td>To Do</td>
-            <td>9-Dec-2025</td>
-             <td class="pic-task"><div class="pic-profile">RW</div></td>
+            <td>3 Hari lagi</td>
+            <td class="center-text">DTF</td>
           </tr>
-          <tr>
+            <tr>
             <td>Kaos SD SAIM</td>
             <td>To Do</td>
-            <td>9-Dec-2025</td>
-             <td class="pic-task"><div class="pic-profile">RW</div></td>
-          </tr>
-          <tr>
-            <td>Kaos SD SAIM</td>
-            <td>To Do</td>
-            <td>9-Dec-2025</td>
-             <td class="pic-task"><div class="pic-profile">RW</div></td>
-          </tr>
-          <tr>
-            <td>Kaos SD SAIM</td>
-            <td>To Do</td>
-            <td>9-Dec-2025</td>
-             <td class="pic-task"><div class="pic-profile">RW</div></td>
+            <td>3 Hari lagi</td>
+            <td class="center-text">DTF</td>
           </tr>
       
         </tbody>
