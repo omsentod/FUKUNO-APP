@@ -185,7 +185,7 @@ body{
         display: flex;
         flex-direction: row;
         padding: 20px;
-        width: 100%;
+        width: 135vh;
         height: 100%;
         top: 130px;
         margin-left: 330px;
@@ -202,7 +202,7 @@ body{
         left: 0;
         display: flex;
         align-items: flex-start;
-        width: 80%;
+        width: 1000px;
         height: 100px;
         /* background-color: var(--ctn-color); */
       }
