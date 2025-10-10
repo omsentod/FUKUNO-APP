@@ -8,36 +8,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="icon" href="{{ asset('assets/img/web-logo.ico') }}" type="image/x-icon">
   <link rel="stylesheet" href="{{ asset('css/dash.css') }}">
-  <style>
-.profile {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.profile-inisial {
-  width: 45px;
-  height: 45px;
-  color: white;
-  font-weight: bold;
-  font-size: 18px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-transform: uppercase;
-  box-shadow: 0 0 5px rgba(0,0,0,0.2);
-  cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.3s ease;
-}
-
-.profile-inisial:hover {
-  transform: scale(1.1);
-}
-
-
-  </style>
+  @stack('styles')
 </head>
 <body>
     @php
@@ -159,5 +130,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('js/dash.js') }}"></script>
+@stack('scripts')
 </body>
 </html>

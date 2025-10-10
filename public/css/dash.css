@@ -292,6 +292,9 @@ body{
         font-size: small;
       }
 
+      .center-text{
+        text-align: center;
+      }
 
       .data-table tr:hover td {
         background-color: var(--main-color);
@@ -341,9 +344,9 @@ body{
       .dltable-tittle{
         font-size: 24px;
         font-weight: var(--font-regular);
-        margin-top: 10px; /* Jarak antara judul dan tabel */
-        text-align: center; /* Menyelaraskan judul ke tengah */
-        color: var(--ctn-color); /* Warna judul */
+        margin-top: 10px;
+        text-align: center;
+        color: var(--ctn-color);
       }
 
       .dldata-table th {
