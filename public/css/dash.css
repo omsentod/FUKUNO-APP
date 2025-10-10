@@ -19,11 +19,11 @@
 
 /* Font Weight */
 
---font-light: 300;   
---font-regular: 500; 
---font-semibold: 600; 
---font-bold: 700;    
---font-extrabold: 900; 
+--font-light: 300;
+--font-regular: 500;
+--font-semibold: 600;
+--font-bold: 700;
+--font-extrabold: 900;
 
 }
 
@@ -41,7 +41,7 @@ body{
         background-color: var(--ctn-color);
         z-index: 10;
       }
-      
+
       .header-logo img{
         margin-left: 20px;
         width: 80%;
@@ -64,14 +64,14 @@ body{
         font-size: 25px;
         padding: 10px;
         cursor: pointer;
-        
+
       }
 
       .icon-kanan:hover{
         color: var(--main-color);
       }
-      
-      
+
+
       .profile {
         display: flex;
         align-items: center;
@@ -81,12 +81,12 @@ body{
         position: relative;
         cursor: pointer;
       }
-      
-      .profile-inisial {
+
+      /* .profile-inisial {
         width: 40px;
         height: 40px;
-        border-radius: 50%; 
-        background-color: #4CAF50; 
+        border-radius: 50%;
+        background-color: #4CAF50;
         color: white;
         display: none;
         align-items: center;
@@ -94,19 +94,19 @@ body{
         font-size: 16px;
         font-weight: var(--font-regular);
         text-transform: uppercase;
-      }
-      
+      } */
 
-      .profile.active #person-icon {
-        display: none; 
+
+      /* .profile.active #person-icon {
+        display: none;
       }
-      
+
       .profile.active .profile-inisial {
-        display: flex; 
-      }
-      
+        display: flex;
+      } */
 
-      
+
+
       /* Styling Sidebar */
     .sidebar {
         position:fixed;
@@ -147,7 +147,7 @@ body{
         color: var(--txt-color);
         font-weight: var(--font-regular);
       }
-   
+
       .sidebar .sidebar-item .sidebar-cell:hover {
         border-radius: 20px;
         background-color: var(--main-color);
@@ -159,7 +159,7 @@ body{
         text-decoration: none;
         color: var(--txt-color);
       }
-      
+
       /* Style untuk konten utama di samping sidebar */
       .page {
         position: absolute;
@@ -175,7 +175,7 @@ body{
         /* background-color: var(--main-color); */
       }
 
-      
+
 
       .dashboard{
         position: absolute;
@@ -197,14 +197,14 @@ body{
         height: 100px;
         margin-left: 25px ;
         outline: 0.5px solid rgb(88, 88, 88) ;
-        border-radius: 10px;   
-        box-shadow: 2px 5px;  
-        transition: transform 0.3s ease, box-shadow 0.3s ease; 
+        border-radius: 10px;
+        box-shadow: 2px 5px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
       }
 
       .task-category:hover {
         cursor: pointer;
-        transform: translateY(-10px); 
+        transform: translateY(-10px);
         /* box-shadow: 0 0 0 6px #ff0000;  */
       }
 
@@ -244,7 +244,7 @@ body{
       .data-table {
         width: 100%;
         border-collapse: collapse;
-        margin: 20px 0; 
+        margin: 20px 0;
       }
 
       .table-tittle{
@@ -262,23 +262,23 @@ body{
         font-weight: var(--font-semibold);
         font-size: small;
       }
-      
+
       .data-table tr {
         border-bottom: 1px solid var(--txt-color); /* Menambahkan garis bawah di setiap baris */
       }
-      
+
       .data-table td {
-        padding: 10px;      
+        padding: 10px;
         font-size: small;
       }
-      
-     
+
+
       .data-table tr:hover td {
-        background-color: var(--main-color); 
+        background-color: var(--main-color);
         cursor: pointer;
         color: var(--ctn-color);
       }
-      
+
       .data-table th:hover{
         cursor: pointer;
         color: var(--main-color);
@@ -296,7 +296,7 @@ body{
         color: white; /* Warna teks */
         display: flex;
         align-items:center;
-        justify-content:center; 
+        justify-content:center;
         font-size: 14px;
         font-weight: var(--font-regular);
       }
@@ -310,11 +310,11 @@ body{
         outline: 2px solid rgb(88, 88, 88) ;
         border-radius: 10px;
       }
-      
+
       .dldata-table {
         width: 100%;
         border-collapse: collapse;
-        margin: 20px 0; 
+        margin: 20px 0;
       }
 
       .dltable-tittle{
@@ -332,32 +332,31 @@ body{
         font-weight: var(--font-semibold);
         font-size: small;
       }
-      
+
       .dldata-table tr {
         color: var(--ctn-color);
         border-bottom: 1px solid var(--ctn-color); /* Menambahkan garis bawah di setiap baris */
       }
-      
+
       .dldata-table td {
-        padding: 10px;      
+        padding: 10px;
         font-size: small;
       }
-      
-     
+
+
       .dldata-table tr:hover td {
         color: var(--txt-color);
-        background-color: #f2f2f2; 
+        background-color: #f2f2f2;
         cursor: pointer;
       }
-      
+
       .dldata-table th:hover{
         cursor: pointer;
         color:var(--txt-color);
       }
 
-      
+
       .dldata-table th, .data-table td {
         text-align: left;
       }
-  
-     
+

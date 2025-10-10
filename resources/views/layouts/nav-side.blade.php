@@ -9,10 +9,52 @@
   <link rel="icon" href="{{ asset('assets/img/web-logo.ico') }}" type="image/x-icon">
   <link rel="stylesheet" href="{{ asset('css/dash.css') }}">
   <style>
+.profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.profile-inisial {
+  width: 45px;
+  height: 45px;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+.profile-inisial:hover {
+  transform: scale(1.1);
+}
+
 
   </style>
 </head>
 <body>
+    @php
+    use Illuminate\Support\Facades\Auth;
+
+    $user = Auth::user();
+    $initials = '';
+
+    if ($user && $user->name) {
+        $words = explode(' ', $user->name);
+        $initials = strtoupper(substr($words[0], 0, 1) . (isset($words[1]) ? substr($words[1], 0, 1) : ''));
+    }
+
+    // Warna dinamis berdasarkan huruf pertama nama
+    $colors = ['#2ecc71', '#3498db', '#9b59b6', '#e67e22', '#e74c3c'];
+    $bgColor = $colors[ord(strtoupper(substr($initials ?? 'A', 0, 1))) % count($colors)];
+@endphp
 
   <!-- navbar -->
 <nav class="navbar">
@@ -23,15 +65,36 @@
   <!-- Notifikasi -->
 <div class="navbarkanan">
     <i class="bi bi-bell-fill icon-kanan" id="bell-icon"></i>
-    <div class="notification" id="notification">  
+    <div class="notification" id="notification">
         <p>You have new notifications!</p>
     </div>
 
   <!-- Profile -->
-  <div class="profile" id="profile">
-    <i class="bi bi-person-fill icon-kanan" id="person-icon"></i>
-  <div class="profile-inisial" id="initials">RW</div>
-</div>
+<!-- Profile -->
+<div class="dropdown">
+    @php
+        $colors = ['#2ecc71', '#3498db', '#9b59b6', '#e67e22', '#e74c3c'];
+        $bgColor = $colors[ord(strtoupper(substr($initials ?? 'A', 0, 1))) % count($colors)];
+    @endphp
+
+    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="profileDropdown"
+       data-bs-toggle="dropdown" aria-expanded="false" style="gap: 8px;">
+        <div class="profile-inisial" style="background-color: {{ $bgColor }}">
+            {{ $initials ?? '??' }}
+        </div>
+    </a>
+
+    <ul class="dropdown-menu dropdown-menu-end mt-2 shadow" aria-labelledby="profileDropdown" style="min-width: 180px;">
+        <li class="dropdown-item-text fw-bold text-center">{{ $user->name ?? 'Guest' }}</li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="#">Profile</a></li>
+        <li><a class="dropdown-item" href="#">Settings</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item text-danger" href="{{ route('logout') }}">Logout</a></li>
+    </ul>
+  </div>
+
+
 
 </div>
 </nav>

@@ -17,7 +17,7 @@
 
 @extends('layouts.nav-side')
 
-@section('title', 'Home Page') 
+@section('title', 'Home Page')
 
 @section('content')
   <!-- Konten utama -->
@@ -113,7 +113,7 @@
             <td>9-Dec-2025</td>
              <td class="pic-task"><div class="pic-profile">RW</div></td>
           </tr>
-      
+
         </tbody>
       </table>
     </div>
