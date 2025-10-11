@@ -98,6 +98,7 @@ td {
     padding: 10px;
 }
 
+
 th {
     padding: 10px;
     text-align: center;
@@ -131,13 +132,22 @@ th {
     border-radius: 20px;
 }
 
-.status-done {
-    background-color: #24FF00;
+
+.dropdown-menu {
+    min-width: 150px;
 }
 
-.status-hold {
-    background-color: #ff9999;
+.dropdown-item {
+    padding: 8px 16px;
 }
+
+.status-done {background-color: #24FF00;}
+.status-hold {background-color: #ff9999;}
+.status-in-progress { background-color: #ffffcc; }
+.status-needs-work { background-color: #ffcccc !important;  }
+
+
+
 
 .mockup-dot {
     display: inline-block;
@@ -165,23 +175,41 @@ th {
 }
 
 .progress {
-    width: 30px;
-    height: 30px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    background-color: #007bff;
-    color: white;
+    background-color: #007bff; /* Warna default biru */
+    color: var(--txt-color);
+    font-weight: var(--font-regular);
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto;
-    font-size: 12px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
 }
 
+.progress-text {
+    font-weight: bold;
+}
+
+.dropdown-menu .form-check {
+    margin-bottom: 10px;
+}
+
+.progress.dropdown-toggle::after {
+    display: none !important; /* Menghilangkan ikon caret default Bootstrap */
+}
+
+.dropdown-menu.p-3 {
+    min-width: 200px !important;
+}
 
 
 .icon-cell {
     cursor: pointer;
-    font-size: 15px;
+    font-size: 13px;
 }
 
 .icon-edit {

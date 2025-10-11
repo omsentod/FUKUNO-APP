@@ -37,11 +37,50 @@
                 <td>12</td>
                 <td><button class="line-btn">DTF</button></td>
                 <td>Urgent</td>
-                <td><button class="status-btn status-done">Done and Ready</button></td>
+                <td>
+                    <div class="dropdown">
+                        <button class="status-btn status-done dropdown-toggle" type="button" id="statusDropdown1" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="status-text">Needs Work</span>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="statusDropdown1">
+                            <a class="dropdown-item" href="#" data-status="Done and Ready">Done and Ready</a>
+                            <a class="dropdown-item" href="#" data-status="In Progress">In Progress</a>
+                            <a class="dropdown-item" href="#" data-status="Hold">Hold</a>
+                            <a class="dropdown-item" href="#" data-status="Needs Work">Needs Work</a>
+                        </div>
+                    </div>
+                </td>
                 <td>5 hari lagi</td>
                 <td><span class="mockup-dot"></span></td>
                 <td><div class="pic">AKT</div></td>
-                <td><div class="progress">70%</div></td>
+                <td>
+                    <div class="dropdown">
+                        <button class="progress dropdown-toggle" type="button" id="progressDropdown1" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="progress-text">0%</span>
+                        </button>
+                        <div class="dropdown-menu p-3" aria-labelledby="progressDropdown1" style="width: 200px;">
+                            <form class="progress-form">
+                                <div class="form-check">
+                                    <input class="form-check-input progress-check" type="checkbox" id="check1">
+                                    <label class="form-check-label" for="check1">Design</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input progress-check" type="checkbox" id="check2">
+                                    <label class="form-check-label" for="check2">Production</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input progress-check" type="checkbox" id="check3">
+                                    <label class="form-check-label" for="check3">Quality Check</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input progress-check" type="checkbox" id="check5">
+                                    <label class="form-check-label" for="check5">Packaging</label>
+                                </div>
+                                <button type="button" class="btn btn-primary mt-3 done-btn" data-bs-toggle="dropdown">Done</button>
+                            </form>
+                        </div>
+                    </div>
+                </td>
                 <td class="icon-cell">
                     <i class="bi bi-pencil-square icon-edit"></i>
                     <i class="bi bi-cloud-download-fill icon-download"></i>
@@ -54,11 +93,50 @@
                 <td>12</td>
                 <td><button class="line-btn">DTF</button></td>
                 <td>Normal</td>
-                <td><button class="status-btn">BUTUH DIKERJAKAN</button></td>
+                <td>
+                    <div class="dropdown">
+                        <button class="status-btn status-done dropdown-toggle" type="button" id="statusDropdown1" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="status-text">Needs Work</span>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="statusDropdown1">
+                            <a class="dropdown-item" href="#" data-status="Done and Ready">Done and Ready</a>
+                            <a class="dropdown-item" href="#" data-status="In Progress">In Progress</a>
+                            <a class="dropdown-item" href="#" data-status="Hold">Hold</a>
+                            <a class="dropdown-item" href="#" data-status="Needs Work">Needs Work</a>
+                        </div>
+                    </div>
+                </td>
                 <td>5 hari lagi</td>
                 <td><span class="mockup-dot"></span></td>
                 <td><div class="pic">AKT</div></td>
-                <td><div class="progress">70%</div></td>
+                <td>
+                    <div class="dropdown">
+                        <button class="progress dropdown-toggle" type="button" id="progressDropdown1" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="progress-text">0%</span>
+                        </button>
+                        <div class="dropdown-menu p-3" aria-labelledby="progressDropdown1" style="width: 200px;">
+                            <form class="progress-form">
+                                <div class="form-check">
+                                    <input class="form-check-input progress-check" type="checkbox" id="check1">
+                                    <label class="form-check-label" for="check1">Design</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input progress-check" type="checkbox" id="check2">
+                                    <label class="form-check-label" for="check2">Production</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input progress-check" type="checkbox" id="check3">
+                                    <label class="form-check-label" for="check3">Quality Check</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input progress-check" type="checkbox" id="check5">
+                                    <label class="form-check-label" for="check5">Packaging</label>
+                                </div>
+                                <button type="button" class="btn btn-primary mt-3 done-btn" data-bs-toggle="dropdown">Done</button>
+                            </form>
+                        </div>
+                    </div>
+                </td>
                 <td class="icon-cell">
                     <i class="bi bi-pencil-square icon-edit"></i>
                     <i class="bi bi-cloud-download-fill icon-download"></i>
@@ -71,11 +149,50 @@
                 <td>12</td>
                 <td><button class="line-btn">DTF</button></td>
                 <td>Urgent</td>
-                <td><button class="status-btn status-done">Done and Ready</button></td>
+                <td>
+                    <div class="dropdown">
+                        <button class="status-btn status-needs-work dropdown-toggle" type="button" id="statusDropdown1" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="status-text">Needs Work</span>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="statusDropdown1">
+                            <a class="dropdown-item" href="#" data-status="Done and Ready">Done and Ready</a>
+                            <a class="dropdown-item" href="#" data-status="In Progress">In Progress</a>
+                            <a class="dropdown-item" href="#" data-status="Hold">Hold</a>
+                            <a class="dropdown-item" href="#" data-status="Needs Work">Needs Work</a>
+                        </div>
+                    </div>
+                </td>
                 <td>5 hari lagi</td>
                 <td><span class="mockup-dot"></span></td>
                 <td><div class="pic">AKT</div></td>
-                <td><div class="progress">70%</div></td>
+                <td>
+                    <div class="dropdown">
+                        <button class="progress dropdown-toggle" type="button" id="progressDropdown1" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="progress-text">0%</span>
+                        </button>
+                        <div class="dropdown-menu p-3" aria-labelledby="progressDropdown1" style="width: 200px;">
+                            <form class="progress-form">
+                                <div class="form-check">
+                                    <input class="form-check-input progress-check" type="checkbox" id="check1">
+                                    <label class="form-check-label" for="check1">Design</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input progress-check" type="checkbox" id="check2">
+                                    <label class="form-check-label" for="check2">Production</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input progress-check" type="checkbox" id="check3">
+                                    <label class="form-check-label" for="check3">Quality Check</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input progress-check" type="checkbox" id="check5">
+                                    <label class="form-check-label" for="check5">Packaging</label>
+                                </div>
+                                <button type="button" class="btn btn-primary mt-3 done-btn" data-bs-toggle="dropdown">Done</button>
+                            </form>
+                        </div>
+                    </div>
+                </td>
                 <td class="icon-cell">
                     <i class="bi bi-pencil-square icon-edit"></i>
                     <i class="bi bi-cloud-download-fill icon-download"></i>

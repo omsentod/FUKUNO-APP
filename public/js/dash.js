@@ -9,4 +9,5 @@ document.addEventListener('DOMContentLoaded', function () {
           bellIcon.style.pointerEvents = 'auto';
       });
   }
+
 });
