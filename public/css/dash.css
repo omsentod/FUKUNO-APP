@@ -168,6 +168,18 @@ body{
         color: var(--txt-color);
       }
 
+      .sidebar-item.active a {
+        border-radius: 20px;
+        background-color: var(--main-color); 
+        color: white; 
+      }
+
+      .sidebar-item.active a:hover {
+        border-radius: 20px;
+        background-color: var(--ctn-color);  
+        color: black;  
+      }
+
       /* Style untuk konten utama di samping sidebar */
       .page {
         position: absolute;

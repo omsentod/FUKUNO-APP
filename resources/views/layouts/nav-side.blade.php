@@ -61,56 +61,62 @@
   </div>
 </nav>
 
-
-<!-- Sidebar -->
-   <div class="sidebar" id="sidebar">
-    <div class="sidebar-menu">
-      <div class="sidebar-item">
-        <a class="sidebar-cell" href="{{ route('dashboard') }}">
-          <i class="bi bi-bar-chart-line-fill" style="margin-right: 8px;"></i>
-          Dashboard</a>
+{{-- sidebar --}}
+<div class="sidebar">
+  <div class="sidebar-menu">
+      <div class="sidebar-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+          <a class="sidebar-cell" href="{{ route('dashboard') }}">
+              <i class="bi bi-bar-chart-line-fill" style="margin-right: 8px;"></i>
+              Dashboard
+          </a>
       </div>
-      <div class="sidebar-item">
-        <a class="sidebar-cell" href="{{ route('task') }}">
-          <i class="bi bi-list-task" style="margin-right: 8px;"></i>
-          Task</a>
+      <div class="sidebar-item {{ request()->routeIs('task') ? 'active' : '' }}">
+          <a class="sidebar-cell" href="{{ route('task') }}">
+              <i class="bi bi-list-task" style="margin-right: 8px;"></i>
+              Task
+          </a>
       </div>
-      <div class="sidebar-item">
-        <a class="sidebar-cell" href="{{ route('workline') }}">
-          <i class="bi bi-wrench-adjustable" style="margin-right: 8px;"></i>
-          Line Pekerjaan</a>
+      <div class="sidebar-item {{ request()->routeIs('workline') ? 'active' : '' }}">
+          <a class="sidebar-cell" href="{{ route('workline') }}">
+              <i class="bi bi-wrench-adjustable" style="margin-right: 8px;"></i>
+              Line Pekerjaan
+          </a>
       </div>
-      <div class="sidebar-item">
-        <a class="sidebar-cell"href="{{ route('status') }}">
-          <i class="bi bi-arrow-repeat" style="margin-right: 8px;"></i>
-          Status</a>
+      <div class="sidebar-item {{ request()->routeIs('status') ? 'active' : '' }}">
+          <a class="sidebar-cell" href="{{ route('status') }}">
+              <i class="bi bi-arrow-repeat" style="margin-right: 8px;"></i>
+              Status
+          </a>
       </div>
-      <div class="sidebar-item">
-        <a class="sidebar-cell"href="{{ route('checklist') }}">
-          <i class="bi bi-card-checklist" style="margin-right: 8px;"></i>
-          Checklist</a>
+      <div class="sidebar-item {{ request()->routeIs('checklist') ? 'active' : '' }}">
+          <a class="sidebar-cell" href="{{ route('checklist') }}">
+              <i class="bi bi-card-checklist" style="margin-right: 8px;"></i>
+              Checklist
+          </a>
       </div>
-      <div class="sidebar-item">
-        <a class="sidebar-cell"href="{{  route('user')  }}">
-          <i class="bi bi-people-fill" style="margin-right: 8px;"></i>
-          User</a>
+      <div class="sidebar-item {{ request()->routeIs('user') ? 'active' : '' }}">
+          <a class="sidebar-cell" href="{{ route('user') }}">
+              <i class="bi bi-people-fill" style="margin-right: 8px;"></i>
+              User
+          </a>
       </div>
-      <div class="sidebar-item">
-        <a class="sidebar-cell"href="{{  route('archive')  }}">
-          <i class="bi bi-archive-fill" style="margin-right: 8px;"></i>
-          Archive</a>
+      <div class="sidebar-item {{ request()->routeIs('archive') ? 'active' : '' }}">
+          <a class="sidebar-cell" href="{{ route('archive') }}">
+              <i class="bi bi-archive-fill" style="margin-right: 8px;"></i>
+              Archive
+          </a>
       </div>
-      <div class="sidebar-item">
-        <a class="sidebar-cell"href="{{  route('trash')  }}">
-          <i class="bi bi-trash-fill" style="margin-right: 8px;"></i>
-          Trash</a>
-          <div class="setting">
-            <a href=""><i class="bi bi-gear-wide-connected" style="margin-right: 8px;"></i>Setting
-            </a>
-        </div>
+      <div class="sidebar-item {{ request()->routeIs('trash') ? 'active' : '' }}">
+          <a class="sidebar-cell" href="{{ route('trash') }}">
+              <i class="bi bi-trash-fill" style="margin-right: 8px;"></i>
+              Trash
+          </a>
       </div>
+      <div class="setting">
+          <a href=""><i class="bi bi-gear-wide-connected" style="margin-right: 8px;"></i>Setting</a>
       </div>
- </div>
+  </div>
+</div>
 
  <!-- The Content -->
  <main>
