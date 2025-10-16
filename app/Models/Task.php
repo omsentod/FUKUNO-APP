@@ -7,21 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Task extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'no_invoice', 'nama_pelanggan', 'judul_task', 'start_date', 'urgent',
-        'mockup_link', 'penanggung_jawab', 'jumlah', 'jenis_pekerjaan',
-        'line_pekerjaan_id', 'deadline', 'note', 'user_id'
+        'invoice_number', 'nama_pelanggan', 'judul', 'catatan', 
+        'penanggung_jawab', 'urgensi', 'jumlah', 'warna', 
+        'model', 'bahan', 'mockup', 'jenis_size'
     ];
 
-    public function pekerjaan()
-    {
-        return $this->belongsTo(Pekerjaan::class, 'line_pekerjaan_id');
-    }
+    protected $casts = [
+        'mockup' => 'array',
+        'jenis_size' => 'array',
+    ];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
+    public function lines() {
+        return $this->hasMany(Pekerjaan::class);
     }
 }

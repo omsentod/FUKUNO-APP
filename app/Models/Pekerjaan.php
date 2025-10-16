@@ -7,6 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Pekerjaan extends Model
 {
-    use HasFactory;
+    protected $fillable = ['task_id', 'nama_pekerjaan', 'deadline'];
 
-    protected $fillable = ['nama']; }
+    public function checklists() {
+        return $this->hasMany(Checklist::class);
+    }
+
+    public function task() {
+        return $this->belongsTo(Task::class);
+    }
+}
