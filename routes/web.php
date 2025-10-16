@@ -8,6 +8,10 @@ Route::get('/login', function () {
     return view('login');
 })->name('login');
 
+Route::get('/addtask', function () {
+    return view('addtask');
+})->name('addtask');
+
 Route::get('/register', function () {
     return view('regis');
 })->name('regis');

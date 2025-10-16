@@ -57,25 +57,19 @@ body{
     display: inline-block;
   }
 
-.add-new-btn {
-    display: flex;
-    justify-content: center;
-    font-size: 18px;
-    font-weight: var(--font-regular);
-    margin-top: 10px;
+.btn-add {
     background-color: var(--main-color);
     color: white;
     border: none;
-    width: 147px;
-    height: 33px;
-    border-radius: 10px;
+    padding: 8px 15px;
+    border-radius: 8px;
     cursor: pointer;
-    text-decoration: none;
-}
-
-.add-new-btn p{
-    padding: 3px 10px ;
-}
+    font-weight: var(--font-semibold);
+  }
+  .btn-add:hover {
+    background-color: #a91a15;
+  }
+  
 
 
 table {
@@ -226,3 +220,55 @@ th {
 .icon-trash {
     color: #dc3545; 
 }
+
+  /* Popup Styling */
+  .popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
+  
+  .popup {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+    width: 350px;
+  }
+  
+  .popup h5 {
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+  
+  .popup input {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 10px;
+  }
+  
+  .popup .btn {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 15px;
+    cursor: pointer;
+  }
+  
+  .popup .btn-primary {
+    background-color: var(--main-color);
+    color: white;
+  }
+  
+  .popup .btn-secondary {
+    background-color: #ccc;
+    color: black;
+  }

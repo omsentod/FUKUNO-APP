@@ -8,12 +8,20 @@
 <div class="page">
     <div class="archive-container">
       <div class="archive-header">
-        <h2>Archive</h2>
-        <div class="archive-actions">
-          <button id="selectToggle" class="select-btn">Pilih</button>
-          <i class="bi bi-arrow-counterclockwise bulk-action restore" title="Restore Selected"></i>
-          <i class="bi bi-trash-fill bulk-action delete" title="Delete Selected"></i>
+        <h3>Archive</h3>
+
+        <div class="archive-header-actions">
+          <button class="select-toggle">Pilih</button>
+          <div class="archive-actions">
+            <button class="restore-all">
+              <i class="bi bi-arrow-clockwise"></i> Restored All
+            </button>
+            <button class="delete-all">
+              <i class="bi bi-archive-fill"></i> Delete All
+            </button>
+          </div>
         </div>
+        
       </div>
   
       <div class="archive-table-container">

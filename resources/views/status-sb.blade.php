@@ -25,7 +25,6 @@
             <td>WIP</td>
             <td class="action-icons">
               <i class="bi bi-pencil-square text-warning edit-btn"></i>
-              <i class="bi bi-download text-success download-btn"></i>
               <i class="bi bi-trash-fill text-danger delete-btn"></i>
             </td>
           </tr>
@@ -34,7 +33,6 @@
             <td>DONE AND READY</td>
             <td class="action-icons">
               <i class="bi bi-pencil-square text-warning edit-btn"></i>
-              <i class="bi bi-download text-success download-btn"></i>
               <i class="bi bi-trash-fill text-danger delete-btn"></i>
             </td>
           </tr>
@@ -43,7 +41,6 @@
             <td>BUTUH DIKERJAKAN</td>
             <td class="action-icons">
               <i class="bi bi-pencil-square text-warning edit-btn"></i>
-              <i class="bi bi-download text-success download-btn"></i>
               <i class="bi bi-trash-fill text-danger delete-btn"></i>
             </td>
           </tr>
@@ -57,8 +54,10 @@
     <div class="popup-content">
       <h4>Tambah Status Baru</h4>
       <input type="text" id="newStatusInput" placeholder="Masukkan nama status">
-      <button id="saveStatus">Simpan</button>
-      <button class="close-popup">Batal</button>
+      <div class="popup-footer">
+        <button class="close-popup">Batal</button>
+        <button id="saveStatus">Simpan</button>
+      </div>
     </div>
   </div>
 
