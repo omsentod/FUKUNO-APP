@@ -31,7 +31,19 @@ body{
     background-color: var(--bg-color);
 }
 
-
+.page {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    width: 135vh;
+    height: min-content;
+    top: 130px;
+    margin-left: 330px;
+    padding: 20px;
+    z-index: -2;
+    /* background-color: var(--main-color); */
+  }
 
 /* === Status Container (TAMBAHAN) === */
 .status-container {
@@ -43,14 +55,14 @@ body{
     margin-bottom:40px ;
   }
   
-  .status-header {
+  .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
   }
   
-  .status-header h2 {
+  .header-content h2 {
     font-weight: var(--font-bold);
   }
   

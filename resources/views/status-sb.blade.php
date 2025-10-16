@@ -6,13 +6,12 @@
 
 <!-- Konten utama -->
 <div class="page">
-    <div class="status-container">
-      <div class="status-header">
+    <div class="header-content">
         <h2>Status</h2>
         <button class="btn-add" id="addBtn"><i class="bi bi-plus-lg"></i> Add new</button>
       </div>
-
-      <table class="table-status">
+    <div class="status-container">
+        <table class="table-status">
         <thead>
           <tr>
             <th>ID</th>
