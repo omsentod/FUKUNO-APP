@@ -12,9 +12,9 @@
     <div class="title-page">
         <h2>User</h2>   
         <a class="add-new-btn" href="javascript:void(0);" onclick="showPopup()">
-            <p> + </p>
-           <p>Add New</p>
-        </a>
+          <p> + </p>
+          <p>Add New</p>
+      </a>
     </div>
 
     <!-- Konten utama Team Frame -->
@@ -115,38 +115,28 @@
 
 
 </div>
+
 <!-- Pop-up Modal -->
-<div id="popupModal" class="add-team-container hidden">
-  <div class="popip-content">
-    <div class="heading-form">
-        Add Team Member
-        <span class="close-btn" onclick="closePopup()"> × </span>
+<div id="addUserPopup" class="popup-overlay hidden">
+  <div class="popup-content">
+    <h4>Add New Member</h4>
+    <label>Full Name</label>
+    <input type="text" id="newName" class="form-control mb-2" placeholder="Enter full name" required>
+
+    <label>Email</label>
+    <input type="email" id="newEmail" class="form-control mb-2" placeholder="Enter email" required>
+
+    <label>Role</label>
+    <input type="text" id="newRole" class="form-control mb-3" placeholder="Enter role" required>
+
+    <div style="text-align:right;">
+      <button id="cancelAdd" class="btn btn-secondary btn-sm">Cancel</button>
+      <button id="saveAdd" class="btn btn-success btn-sm">Save</button>
     </div>
-    <form id="addTeamForm" class="add-team-form" onsubmit="submitForm(event)">
-      <div class="form-group">
-        <label for="name">Full Name</label>
-        <input type="text" id="name" name="name" placeholder="Enter full name" required>
-      </div>
-      <div class="form-group">
-        <label for="title">Title</label>
-        <input type="text" id="title" name="title" placeholder="Enter title (e.g., Designer)" required>
-      </div>
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="Enter email address" required>
-      </div>
-      <div class="form-group">
-        <label for="role">Role</label>
-        <input type="text" id="role" name="role" placeholder="Enter role (e.g., Frontend Developer)" required>
-      </div>
-
-      <button type="submit" class="btn-submit">Add Member</button>
-    </form>
   </div>
-
-    <!-- Notifikasi -->
-    <div id="notif" class="notif hidden">✅ Data berhasil ditambahkan!</div>
 </div>
+
+
 @endsection
 
 @push('styles')
