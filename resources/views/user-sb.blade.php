@@ -10,7 +10,7 @@
 
 <div class="page">
     <div class="title-page">
-        <h2>Task</h2>   
+        <h2>User</h2>   
         <a class="add-new-btn" href="javascript:void(0);" onclick="showPopup()">
             <p> + </p>
            <p>Add New</p>
@@ -117,6 +117,7 @@
 </div>
 <!-- Pop-up Modal -->
 <div id="popupModal" class="add-team-container hidden">
+  <div class="popip-content">
     <div class="heading-form">
         Add Team Member
         <span class="close-btn" onclick="closePopup()"> × </span>
@@ -141,6 +142,7 @@
 
       <button type="submit" class="btn-submit">Add Member</button>
     </form>
+  </div>
 
     <!-- Notifikasi -->
     <div id="notif" class="notif hidden">✅ Data berhasil ditambahkan!</div>

@@ -1,0 +1,207 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+*{
+    font-family:"Poppins", sans-serif ;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+    list-style: none;
+}
+
+:root{
+/* coloring */
+
+    --ctn-color:#ffff;
+    --bg-color:#F5F5F5;
+    --main-color: #CF221B;
+    --txt-color:#000;
+
+/* Font Weight */
+
+--font-light: 300;   
+--font-regular: 500; 
+--font-semibold: 600; 
+--font-bold: 700;    
+--font-extrabold: 900; 
+
+}
+
+body{
+    background-color: var(--bg-color);
+}
+
+/* Style untuk konten utama di samping sidebar */
+  .page {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    width: 78%;
+    height: 100%;
+    top: 130px;
+    margin-left: 320px;
+    padding: 20px;
+    z-index: -2;
+    /* background-color: var(--main-color); */
+  }
+  
+/* Trash Page */
+.trash-page {
+    background: var(--ctn-color);
+    padding: 20px;
+    border-radius: 10px;
+  }
+  
+  .trash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .trash-header h3 {
+    font-weight: var(--font-bold);
+  }
+  
+  .trash-actions button {
+    border: none;
+    background: none;
+    margin-left: 15px;
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+  }
+  
+  .restore-all i {
+    margin-right: 5px;
+  }
+  
+  .delete-all {
+    color: red;
+  }
+  
+  .delete-all i {
+    margin-right: 5px;
+  }
+  
+  /* Table Styling */
+  .trash-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+  }
+  
+  .trash-table th, .trash-table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    word-wrap: break-word;
+    white-space: normal;
+  }
+  
+  .trash-table th {
+    font-weight: var(--font-semibold);
+  }
+  
+  .trash-table td .dot {
+    height: 12px;
+    width: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+  }
+  
+  .dot.yellow {
+    background-color: #FD9F01;
+  }
+  
+  .dot.pink {
+    background-color: #E14D7C;
+  }
+  
+  .actions i {
+    margin-right: 10px;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  
+  .restore-icon {
+    color: #555;
+  }
+  
+  .delete-icon {
+    color: red;
+  }
+  
+
+  /* === Header Action tambahan === */
+  .trash-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .select-toggle {
+    border: none;
+    background: var(--main-color);
+    color: white;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .select-toggle:hover {
+    background-color: #b61d16;
+  }
+  
+  /* === Checkbox mode === */
+  .checkbox-mode .dot {
+    display: none;
+  }
+  
+  .checkbox-mode td:first-child {
+    position: relative;
+  }
+  
+  .checkbox-mode td:first-child::before {
+    content: "";
+  }
+  
+  .checkbox-mode input[type="checkbox"] {
+    margin-right: 8px;
+  }
+  
+  /* === Popup konfirmasi hapus === */
+  .confirm-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 100;
+    text-align: center;
+  }
+  
+  .confirm-popup button {
+    margin: 10px 8px 0;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .confirm-yes {
+    background-color: var(--main-color);
+    color: white;
+  }
+  
+  .confirm-no {
+    background-color: #ccc;
+  }
