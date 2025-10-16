@@ -9,6 +9,7 @@
   <link rel="icon" href="{{ asset('assets/img/web-logo.ico') }}" type="image/x-icon">
   <link rel="stylesheet" href="{{ asset('css/dash.css') }}">
   @stack('styles')
+  <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
   @php

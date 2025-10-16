@@ -1,7 +1,7 @@
 <?php
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\PekerjaansController;
 
 // PAGE ROUTE
 Route::get('/login', function () {
@@ -24,9 +24,13 @@ Route::get('/task', function () {
     return view('task-sb');
 })->name('task');
 
-Route::get('/workline', function () {
-    return view('work-line-sb');
-})->name('workline');
+
+
+// routes/web.php
+Route::get('/workline', [PekerjaansController::class, 'index'])->name('workline');
+Route::post('/workline', [PekerjaansController::class, 'store'])->name('pekerjaan.store');
+Route::put('/workline/{id}', [PekerjaansController::class, 'update'])->name('pekerjaan.edit');
+Route::delete('/workline/{id}', [PekerjaansController::class, 'destroy'])->name('pekerjaan.destroy');
 
 Route::get('/status', function () {
     return view('status-sb');

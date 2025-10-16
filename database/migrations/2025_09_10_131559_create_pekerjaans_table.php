@@ -8,7 +8,6 @@ return new class extends Migration {
     public function up(): void {
     Schema::create('pekerjaans', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('task_id')->constrained('tasks')->onDelete('cascade');
     $table->string('nama_pekerjaan');
     $table->date('deadline')->nullable();
     $table->timestamps();
