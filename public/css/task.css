@@ -223,25 +223,28 @@ th {
 
   /* Popup Styling */
   .popup-overlay {
+    display: none;  /* Menyembunyikan pop-up saat belum ditampilkan */
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0,0,0,0.4);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
-  }
-  
-  .popup {
-    background: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 5px 12px rgba(0,0,0,0.2);
-    width: 350px;
-  }
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);  /* Semi-transparent background */
+    z-index: 9999;  /* Agar pop-up berada di atas elemen lainnya */
+    justify-content: center;  /* Center secara horizontal */
+    align-items: center;  /* Center secara vertikal */
+    padding: 20px;
+}
+
+.popup {
+    background-color: white;
+    margin-left : 40vh;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 850px;
+    width: 100%;
+    height: min-content;
+}
   
   .popup h5 {
     font-weight: 600;
