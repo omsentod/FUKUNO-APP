@@ -25,7 +25,6 @@
             <td>WIP</td>
             <td class="action-icons">
               <i class="bi bi-pencil-square text-warning edit-btn"></i>
-              <i class="bi bi-download text-success download-btn"></i>
               <i class="bi bi-trash-fill text-danger delete-btn"></i>
             </td>
           </tr>
@@ -34,7 +33,6 @@
             <td>DONE AND READY</td>
             <td class="action-icons">
               <i class="bi bi-pencil-square text-warning edit-btn"></i>
-              <i class="bi bi-download text-success download-btn"></i>
               <i class="bi bi-trash-fill text-danger delete-btn"></i>
             </td>
           </tr>
@@ -43,7 +41,6 @@
             <td>BUTUH DIKERJAKAN</td>
             <td class="action-icons">
               <i class="bi bi-pencil-square text-warning edit-btn"></i>
-              <i class="bi bi-download text-success download-btn"></i>
               <i class="bi bi-trash-fill text-danger delete-btn"></i>
             </td>
           </tr>

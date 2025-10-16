@@ -46,33 +46,6 @@ body{
   }
 
 /* === ARCHIVE CONTAINER === */
-.archive-container {
-    background-color: var(--ctn-color);
-    border-radius: 10px;
-    padding: 25px;
-    width: 90%;
-    margin-top: 50px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  }
-  
-  .archive-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-  }
-  
-  .archive-header h2 {
-    font-weight: var(--font-bold);
-    font-size: 24px;
-  }
-  
-  .archive-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
   .select-btn {
     background: none;
     border: none;
@@ -111,7 +84,7 @@ body{
   .archive-table {
     width: 100%;
     border-collapse: collapse;
-    text-align: left;
+    text-align: center;
   }
   
   .archive-table th, 
@@ -185,15 +158,65 @@ body{
   
   /* Kontainer utama tabel */
   .archive-container {
-    margin: 0 auto;
-    width: 100%;
-    max-width: 1500px; /* batas aman di tengah layar */
     background-color: var(--ctn-color);
     border-radius: 10px;
     padding: 25px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   }
+
+  .archive-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
   
+  .archive-header h3 {
+    font-weight: var(--font-bold);
+  }
+  
+  .archive-actions button {
+    border: none;
+    background: none;
+    margin-left: 15px;
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+  }
+  
+  .restore-all i {
+    margin-right: 5px;
+  }
+  
+  .delete-all {
+    color: red;
+  }
+  
+  .delete-all i {
+    margin-right: 5px;
+  }
+  
+    /* === Header Action tambahan === */
+    .archive-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .select-toggle {
+      border: none;
+      background: var(--main-color);
+      color: white;
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    
+    .select-toggle:hover {
+      background-color:var(--main-color);
+    }
+
   /* Kontainer tabel */
   .archive-table-container {
     overflow-x: hidden; /* Cegah geser kanan kiri */
