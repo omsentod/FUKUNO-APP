@@ -7,10 +7,7 @@
    <div class="page">
     <div class="title-page">
         <h2>Task</h2>   
-        <a class="add-new-btn" href="">
-           <p> + </p>
-           <p>Add New</p>
-        </a>
+        <button class="btn-add" id="addBtn"><i class="bi bi-plus-lg"></i> Add new</button>
     </div>
     <table>
         <thead>
@@ -206,6 +203,8 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/task.css') }}">
 @endpush
+
+
 
 @push('scripts')
     <script src="{{ asset('js/task.js') }}"></script>

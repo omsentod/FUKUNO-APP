@@ -17,8 +17,8 @@ class TaskController extends Controller
     public function create()
     {
         // Ambil semua user untuk dropdown (opsional kalau admin bisa pilih)
-        $users = User::all(['id', 'name']);
-        return view('addtask', compact('users'));
+    $users = User::where('role', 'admin')->get(['id', 'name']);
+    return view('task-sb', compact('users'));
     }
 
     /**
@@ -111,7 +111,7 @@ class TaskController extends Controller
             }
         }
 
-        return redirect()->route('tasks.success')->with('success', '✅ Task berhasil ditambahkan!');
+        return redirect()->route('task')->with('success', '✅ Task berhasil ditambahkan!');
     }
 
     /**
@@ -120,7 +120,7 @@ class TaskController extends Controller
     public function index()
     {
         $tasks = Task::with('pekerjaan.checklist')->get();
-        return view('tasks.index', compact('tasks'));
+        return view('task.index', compact('tasks'));
     }
 
     /**

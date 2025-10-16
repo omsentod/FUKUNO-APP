@@ -51,7 +51,7 @@
         <h4 class="mb-3">Add Task</h4>
 
         <!-- Form Add Task -->
-        <form action="{{ route('tasks.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('dashboard') }}" method="POST" enctype="multipart/form-data">
           @csrf
 
           <div class="mb-3">
@@ -79,12 +79,7 @@
     <label class="form-label">Penanggung Jawab</label>
     <select name="penanggung_jawab" id="penanggung_jawab" class="form-select">
       <option value="">-- Pilih Penanggung Jawab --</option>
-      @foreach ($users as $user)
-        <option value="{{ $user->id }}" 
-          {{ Auth::check() && Auth::user()->id == $user->id ? 'selected' : '' }}>
-          {{ $user->name }}
-        </option>
-      @endforeach
+      
     </select>
   </div>
 
