@@ -22,7 +22,7 @@
 }
 
 body {
-    background-color: var(--ctn-color);
+    background-color: var(--bg-color);
 }
 
 /* === LINE PEKERJAAN CONTENT === */
@@ -68,7 +68,7 @@ body {
   .table-line td {
     padding: 12px 15px;
     border-bottom: 1px solid #ddd;
-    text-align: left;
+    text-align: center;
   }
   
   .table-line th {

@@ -164,7 +164,7 @@
                 </td>
                 <td>5 hari lagi</td>
                 <td><span class="mockup-dot"></span></td>
-                <td><div class="pic">AKT</div></td>
+                <td><img src="path/to/your/image.jpg" alt="Deskripsi gambar" class="mockup"></td>
                 <td>
                     <div class="dropdown">
                         <button class="progress dropdown-toggle" type="button" id="progressDropdown1" data-bs-toggle="dropdown" aria-expanded="false">
