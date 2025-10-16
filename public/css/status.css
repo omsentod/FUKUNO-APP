@@ -145,8 +145,14 @@ body{
   .popup-content button#saveStatus,
   .popup-content button#updateStatus,
   .popup-content button#confirmDelete {
+    
     background-color: var(--main-color);
     color: white;
+  }
+
+  .popup-footer{
+    display: flex;
+    justify-content: flex-end;
   }
   
   .popup-content button.close-popup {

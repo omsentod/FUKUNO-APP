@@ -54,8 +54,10 @@
     <div class="popup-content">
       <h4>Tambah Status Baru</h4>
       <input type="text" id="newStatusInput" placeholder="Masukkan nama status">
-      <button id="saveStatus">Simpan</button>
-      <button class="close-popup">Batal</button>
+      <div class="popup-footer">
+        <button class="close-popup">Batal</button>
+        <button id="saveStatus">Simpan</button>
+      </div>
     </div>
   </div>
 
