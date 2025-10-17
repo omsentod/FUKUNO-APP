@@ -22,7 +22,7 @@
 }
 
 body {
-    background-color: var(--bg-color);
+    background-color: var(--ctn-color);
 }
 
 /* === LINE PEKERJAAN CONTENT === */
@@ -68,7 +68,7 @@ body {
   .table-line td {
     padding: 12px 15px;
     border-bottom: 1px solid #ddd;
-    text-align: center;
+    text-align: left;
   }
   
   .table-line th {
@@ -86,6 +86,25 @@ body {
     color: #e74c3c;
   }
   
+.btn-delete,
+.btn-delete i {
+    border: none; 
+    background: none;
+    padding: 0;
+    display: inline-flex;
+}
+
+
+.btn-delete i {
+    border: none;
+}
+
+
+.btn-delete i:hover {
+    color: red; 
+    cursor: pointer; 
+}
+
   .action-icon:hover {
     opacity: 0.7;
   }

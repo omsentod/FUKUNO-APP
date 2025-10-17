@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const addBtn = document.querySelector(".btn-add");
     const tableBody = document.getElementById("tableBody");
 
-    // ADD NEW
+    // ADD NEW (tampilkan popup untuk tambah pekerjaan)
     addBtn.addEventListener("click", () => {
         showPopup("Tambah Line Pekerjaan", "", (nama) => {
             if (nama.trim() === "") {
@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Buat form untuk submit ke Laravel
             const form = document.createElement("form");
             form.method = "POST";
-            form.action = "/workline"; // route penyimpanan
+            form.action = "/pekerjaan"; // rute untuk menyimpan pekerjaan
             form.innerHTML = `
                 <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
                 <input type="text" name="nama_pekerjaan" value="${nama}">
@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Tambahkan event edit/delete ke semua baris awal
+    // Tambahkan event edit/delete ke setiap baris pekerjaan
     document.querySelectorAll("#tableBody tr").forEach(row => attachActions(row));
 });
 
@@ -49,12 +49,12 @@ function showPopup(title, currentName, onSubmit) {
 
     const namaField = popup.querySelector("#nama_pekerjaan");
 
-    // Cancel
+    // Cancel button
     popup.querySelector("#cancelBtn").addEventListener("click", () => {
         document.body.removeChild(overlay);
     });
 
-    // Save
+    // Save button
     popup.querySelector("#saveBtn").addEventListener("click", () => {
         const namaInput = namaField.value.trim();
         if (namaInput === "") {
@@ -71,17 +71,17 @@ function attachActions(row) {
     const editBtn = row.querySelector(".edit");
     const deleteBtn = row.querySelector(".delete");
 
-    // Edit
+    // Edit action (tampilkan popup untuk edit pekerjaan)
     editBtn.addEventListener("click", () => {
         const namaSekarang = row.children[1].textContent.trim();
         showPopup("Edit Line Pekerjaan", namaSekarang, (namaBaru) => {
             // Update table sementara
             row.children[1].textContent = namaBaru;
 
-            // Buat form submit untuk update ke Laravel
+            // Buat form untuk submit update ke Laravel
             const form = document.createElement("form");
             form.method = "POST";
-            form.action = `/workline/${row.children[0].textContent}`;
+            form.action = `/pekerjaan/${row.children[0].textContent}`;
             form.innerHTML = `
                 <input type="hidden" name="_method" value="PUT">
                 <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
@@ -89,35 +89,35 @@ function attachActions(row) {
                 <button type="submit">Simpan</button>
             `;
             document.body.appendChild(form);
-            form.submit();
+            form.submit(); // kirim form update
         });
     });
 
-    // Delete
+    // Delete action (hapus pekerjaan)
     deleteBtn.addEventListener("click", () => {
         if (confirm("Apakah kamu yakin ingin menghapus line pekerjaan ini?")) {
             const rowId = row.children[0].textContent;
 
-            // Buat form submit untuk delete ke Laravel
+            // Buat form untuk submit delete ke Laravel
             const form = document.createElement("form");
             form.method = "POST";
-            form.action = `/workline/${rowId}`;
+            form.action = `/pekerjaan/${rowId}`;
             form.innerHTML = `
                 <input type="hidden" name="_method" value="DELETE">
                 <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}">
                 <button type="submit">Hapus</button>
             `;
             document.body.appendChild(form);
-            form.submit();
+            form.submit(); // kirim form delete
         }
     });
 }
 
-// === FUNCTION: Notifikasi kecil ===
+// === FUNCTION: Notifikasi kecil (Toast) ===
 function showToast(message) {
     const toast = document.createElement("div");
     toast.classList.add("toast");
     toast.textContent = message;
     document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
+    setTimeout(() => toast.remove(), 3000); // Hapus setelah 3 detik
 }

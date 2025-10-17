@@ -15,7 +15,6 @@
         <tr>
           <th>ID</th>
           <th>Nama Line Pekerjaan</th>
-          <th>Deadline</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -24,9 +23,10 @@
         <tr>
           <td>{{ $pekerjaan->id }}</td>
           <td>{{ $pekerjaan->nama_pekerjaan }}</td>
-          <td>{{ $pekerjaan->deadline ?? '-' }}</td>
           <td>
-            <a action="{{ route('pekerjaan.edit', $pekerjaan->id) }}"><i class="bi bi-pencil-square action-icon edit"></i></a>
+            <a href="{{ route('pekerjaan.edit', $pekerjaan->id) }}" class="edit-link">
+              <i class="bi bi-pencil-square action-icon edit"></i>
+            </a>
             <form action="{{ route('pekerjaan.destroy', $pekerjaan->id) }}" method="POST" style="display:inline;">
               @csrf
               @method('DELETE')
@@ -49,11 +49,6 @@
       <div class="mb-3">
         <label for="nama_pekerjaan" class="form-label">Nama Pekerjaan</label>
         <input type="text" name="nama_pekerjaan" id="nama_pekerjaan" class="form-control" required>
-      </div>
-
-      <div class="mb-3">
-        <label for="deadline" class="form-label">Deadline</label>
-        <input type="date" name="deadline" id="deadline" class="form-control">
       </div>
 
       <button type="submit" class="btn btn-primary">Simpan</button>
