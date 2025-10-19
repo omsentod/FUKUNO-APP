@@ -35,8 +35,6 @@ Route::get('/task', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/workline', [PekerjaansController::class, 'index'])->name('workline');
     Route::post('/pekerjaan', [PekerjaansController::class, 'store'])->name('pekerjaan.store');
-    Route::get('/pekerjaan/edit/{id}', [PekerjaansController::class, 'edit'])->name('pekerjaan.edit');
-    Route::put('/pekerjaan/{id}', [PekerjaansController::class, 'update'])->name('pekerjaan.update');
     Route::delete('/pekerjaan/{id}', [PekerjaansController::class, 'destroy'])->name('pekerjaan.destroy');
 });
 

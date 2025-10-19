@@ -10,23 +10,20 @@ class Pekerjaan extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nama_pekerjaan'];
+    // Hanya kolom 'job_name' yang bisa diisi secara massal
+    protected $fillable = ['job_name'];
 
     // Fungsi untuk mereset ID dan memastikan urutan ID yang benar
     public static function resetIds()
     {
-        // Ambil semua pekerjaan yang terurut berdasarkan ID
         $pekerjaans = self::orderBy('id')->get();
         $id = 1;
 
-        // Loop untuk setiap pekerjaan dan reset ID
         foreach ($pekerjaans as $pekerjaan) {
-            $pekerjaan->id = $id++;  // Atur ulang ID secara berurutan
-            $pekerjaan->save();  // Simpan perubahan
+            $pekerjaan->id = $id++;
+            $pekerjaan->save();
         }
 
-        // Mengubah AUTO_INCREMENT sesuai ID terakhir yang ada
-        // Pastikan $id adalah ID terakhir + 1 agar tidak ada duplikasi ID
         DB::statement("ALTER TABLE pekerjaans AUTO_INCREMENT = $id");
     }
 }

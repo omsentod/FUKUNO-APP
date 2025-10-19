@@ -22,11 +22,9 @@
         @foreach($pekerjaans as $pekerjaan)
         <tr>
           <td>{{ $pekerjaan->id }}</td>
-          <td>{{ $pekerjaan->nama_pekerjaan }}</td>
+          <td>{{ $pekerjaan->job_name }}</td>
           <td>
-            <a href="{{ route('pekerjaan.edit', $pekerjaan->id) }}" class="edit-link">
-              <i class="bi bi-pencil-square action-icon edit"></i>
-            </a>
+              <i class="bi bi-pencil-square action-icon edit"></i>            
             <form action="{{ route('pekerjaan.destroy', $pekerjaan->id) }}" method="POST" style="display:inline;">
               @csrf
               @method('DELETE')
@@ -40,18 +38,18 @@
   </div>
 </div>
 
-{{-- Popup form --}}
+{{-- Popup form Add new--}}
 <div class="popup" id="popupForm" style="display:none;">
   <div class="popup-content">
     <h3>Tambah Pekerjaan Baru</h3>
     <form action="{{ route('pekerjaan.store') }}" method="POST">
       @csrf
       <div class="mb-3">
-        <label for="nama_pekerjaan" class="form-label">Nama Pekerjaan</label>
-        <input type="text" name="nama_pekerjaan" id="nama_pekerjaan" class="form-control" required>
+        <label for="job_name" class="form-label">Nama Pekerjaan</label>
+        <input type="text" name="job_name" id="job_name" class="form-control" required>
       </div>
 
-      <button type="submit" class="btn btn-primary">Simpan</button>
+      <button type="submit" class="btn btn-dancok">Simpan</button>
       <button type="button" id="closePopup" class="btn btn-secondary">Batal</button>
     </form>
   </div>

@@ -1,45 +1,36 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Pekerjaan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB; 
-
+use Illuminate\Support\Facades\DB;
 
 class PekerjaansController extends Controller
 {
     public function index() {
-        $pekerjaans = Pekerjaan::orderBy('id', 'asc')->get(); 
+        // Menampilkan pekerjaan yang diurutkan berdasarkan ID secara ascending
+        $pekerjaans = Pekerjaan::orderBy('id', 'asc')->get();
         return view('work-line-sb', compact('pekerjaans'));
     }
 
     public function store(Request $request) {
+        // Validasi input yang diperlukan: hanya nama pekerjaan
         $validated = $request->validate([
-            'nama_pekerjaan' => 'required|string|max:255',
+            'job_name' => 'required|string|max:255',
         ]);
-        Pekerjaan::create($validated);
+        
+        // Menyimpan data pekerjaan baru ke dalam tabel
+        Pekerjaan::create([
+            'job_name' => $validated['job_name'],
+        ]);
+
         return redirect()->route('workline')->with('success', 'Line pekerjaan ditambahkan.');
     }
 
-    public function edit($id) {
-        $pekerjaan = Pekerjaan::findOrFail($id);
-        // kalau tak butuh halaman edit terpisah, kamu bisa hapus route edit ini.
-        return view('edit-pekerjaan', compact('pekerjaan'));
-    }
+  
 
-    public function update(Request $request, $id) {
-        $validated = $request->validate([
-            'nama_pekerjaan' => 'required|string|max:255',
-        ]);
-    
-        $pekerjaan = Pekerjaan::findOrFail($id);
-    
-        $pekerjaan->update([
-            'nama_pekerjaan' => $validated['nama_pekerjaan'],
-        ]);
-    
-        return redirect()->route('workline')->with('success', 'Line pekerjaan diupdate.');
-    }
+
     public function destroy($id)
     {
         // Mulai transaksi
