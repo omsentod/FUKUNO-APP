@@ -92,6 +92,15 @@ body {
     color: #e74c3c;
   }
   
+
+.edit-btn{
+    background: none;
+    border: none;
+    cursor: pointer;
+        display: inline-flex;
+
+}
+
 .btn-delete,
 .btn-delete i {
     border: none; 
@@ -197,7 +206,7 @@ body {
     cursor: pointer;
   }
   
-  .popup .btn-dancok {
+  .popup .btn-save {
     background-color: var(--main-color);
     color: white;
   }

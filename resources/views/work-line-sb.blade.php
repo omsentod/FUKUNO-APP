@@ -24,11 +24,16 @@
           <td>{{ $pekerjaan->id }}</td>
           <td>{{ $pekerjaan->job_name }}</td>
           <td>
-              <i class="bi bi-pencil-square action-icon edit"></i>            
+            <button type="button" class="btn-icon edit-btn" data-id="{{ $pekerjaan->id }}" data-name="{{ $pekerjaan->job_name }}">
+              <i class="bi bi-pencil-square action-icon edit"></i>
+            </button>
+            
             <form action="{{ route('pekerjaan.destroy', $pekerjaan->id) }}" method="POST" style="display:inline;">
               @csrf
               @method('DELETE')
-              <button type="submit" class="btn-delete"><i class="bi bi-trash-fill action-icon delete"></i></button>
+              <button type="submit" class="btn-delete">
+                <i class="bi bi-trash-fill action-icon delete"></i>
+              </button>
             </form>
           </td>
         </tr>
@@ -38,18 +43,21 @@
   </div>
 </div>
 
-{{-- Popup form Add new--}}
+{{-- Popup form Add new/Edit--}}
 <div class="popup" id="popupForm" style="display:none;">
   <div class="popup-content">
-    <h3>Tambah Pekerjaan Baru</h3>
-    <form action="{{ route('pekerjaan.store') }}" method="POST">
+    <h3 id="popupTitle">Tambah Pekerjaan Baru</h3>
+    <form id="pekerjaanForm" method="POST">
       @csrf
+      <input type="hidden" name="_method" id="formMethod" value="POST">
+      <input type="hidden" name="id" id="pekerjaanId">
+      
       <div class="mb-3">
         <label for="job_name" class="form-label">Nama Pekerjaan</label>
         <input type="text" name="job_name" id="job_name" class="form-control" required>
       </div>
 
-      <button type="submit" class="btn btn-dancok">Simpan</button>
+      <button type="submit" class="btn btn-save">Simpan</button>
       <button type="button" id="closePopup" class="btn btn-secondary">Batal</button>
     </form>
   </div>

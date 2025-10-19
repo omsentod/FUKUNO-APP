@@ -15,68 +15,88 @@ class PekerjaansController extends Controller
     }
 
     public function store(Request $request) {
-        // Validasi input yang diperlukan: hanya nama pekerjaan
         $validated = $request->validate([
             'job_name' => 'required|string|max:255',
         ]);
         
-        // Menyimpan data pekerjaan baru ke dalam tabel
-        Pekerjaan::create([
+        $pekerjaan = Pekerjaan::create([
             'job_name' => $validated['job_name'],
         ]);
-
+    
+        // Jika request AJAX, return JSON
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'pekerjaan' => $pekerjaan,
+                'message' => 'Pekerjaan berhasil ditambahkan.'
+            ]);
+        }
+    
         return redirect()->route('workline')->with('success', 'Line pekerjaan ditambahkan.');
     }
 
-  
+    public function update(Request $request, $id)
+{
+    $validated = $request->validate([
+        'job_name' => 'required|string|max:255',
+    ]);
+    
+    $pekerjaan = Pekerjaan::findOrFail($id);
+    $pekerjaan->update([
+        'job_name' => $validated['job_name'],
+    ]);
 
-
-    public function destroy($id)
-    {
-        // Mulai transaksi
-        DB::beginTransaction();
-
-        try {
-            // Cari pekerjaan yang akan dihapus
-            $pkj = Pekerjaan::findOrFail($id);
-            $pkj->delete();  // Hapus pekerjaan
-
-            // Menonaktifkan pengecekan foreign key (hati-hati)
-            DB::statement('SET FOREIGN_KEY_CHECKS=0');
-            Pekerjaan::resetIds();  // Reset ID jika perlu
-            DB::statement('SET FOREIGN_KEY_CHECKS=1');
-
-            // Commit transaksi jika semua berjalan lancar
-            DB::commit();
-
-            return redirect()->route('workline')->with('success', 'Line pekerjaan dihapus & ID dirapikan.');
-        } catch (\Exception $e) {
-            // Rollback transaksi jika ada error
-            DB::rollBack();
-
-            // Menangani error jika transaksi gagal
-            return redirect()->route('workline')->with('error', 'Terjadi kesalahan saat menghapus pekerjaan.');
-        }
+    // Jika request AJAX, return JSON
+    if ($request->expectsJson()) {
+        return response()->json([
+            'success' => true,
+            'pekerjaan' => $pekerjaan,
+            'message' => 'Pekerjaan berhasil diupdate.'
+        ]);
     }
 
-    public static function resetIds()
-    {
-        // Ambil total baris
-        $rows = self::orderBy('id')->get(['id']);
-        if ($rows->isEmpty()) return;
+    return redirect()->route('workline')->with('success', 'Line pekerjaan diperbarui.');
+}
 
-        // Langkah 1: geser semua id ke rentang aman sementara (mis. +1_000_000)
-        foreach ($rows as $row) {
-            self::where('id', $row->id)->update(['id' => $row->id + 1000000]);
+public function destroy($id)
+{
+    try {
+        // Cari dan hapus data
+        $pkj = Pekerjaan::findOrFail($id);
+        $pkj->delete();
+
+        // Reset AUTO_INCREMENT hanya jika tabel kosong
+        $count = Pekerjaan::count();
+        if ($count == 0) {
+            DB::statement("ALTER TABLE pekerjaans AUTO_INCREMENT = 1");
         }
 
-        // Langkah 2: beri id baru mulai dari 1 sesuai urutan lama
-        $newId = 1;
-        foreach ($rows as $row) {
-            self::where('id', $row->id + 1000000)->update(['id' => $newId++]);
+        // Response untuk AJAX
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Pekerjaan berhasil dihapus.' . ($count == 0 ? ' ID akan dimulai dari 1 untuk data baru.' : '')
+            ]);
         }
 
-        // Set auto increment ke id berikutnya
-        DB::statement("ALTER TABLE pekerjaans AUTO_INCREMENT = {$newId}");
+        // Response untuk redirect
+        return redirect()->route('workline')->with('success', 'Line pekerjaan berhasil dihapus.');
+        
+    } catch (\Exception $e) {
+        // Log error untuk debugging
+        \Log::error('Error deleting pekerjaan ID ' . $id . ': ' . $e->getMessage());
+
+        // Response error untuk AJAX
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus pekerjaan: ' . $e->getMessage()
+            ], 500);
+        }
+
+        // Response error untuk redirect
+        return redirect()->route('workline')->with('error', 'Gagal menghapus pekerjaan: ' . $e->getMessage());
     }
+}
+
 }
