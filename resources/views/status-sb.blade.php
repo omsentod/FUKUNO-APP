@@ -5,6 +5,8 @@
 @section('content')
 
 <!-- Konten utama -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 <div class="page">
     <div class="header-content">
         <h2>Status</h2>

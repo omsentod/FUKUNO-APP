@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\PekerjaansController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\StatusController;
 use Illuminate\Support\Facades\Route;
 
 // Rute utama
@@ -43,6 +44,10 @@ Route::middleware('auth')->group(function () {
 Route::get('/status', function () {
     return view('status-sb');
 })->name('status');
+Route::get('/status/all', [StatusController::class, 'getAll'])->name('status.all');
+Route::post('/status/store', [StatusController::class, 'store'])->name('status.store');
+Route::put('/status/update/{id}', [StatusController::class, 'update'])->name('status.update');
+Route::delete('/status/delete/{id}', [StatusController::class, 'destroy'])->name('status.destroy');
 
 Route::get('/checklist', function () {
     return view('checklist-sb');
