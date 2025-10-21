@@ -1,36 +1,58 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
-* {
-  font-family:"Poppins", sans-serif;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  text-decoration: none;
-  list-style: none;
+*{
+    font-family:"Poppins", sans-serif ;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+    list-style: none;
 }
 
-:root {
-  --ctn-color:#fff;
-  --bg-color:#F5F5F5;
-  --main-color:#CF221B;
-  --txt-color:#000;
+:root{
+/* coloring */
 
-  --font-light: 300;   
-  --font-regular: 500; 
-  --font-semibold: 600; 
-  --font-bold: 700;    
+    --ctn-color:#ffff;
+    --bg-color:#F5F5F5;
+    --main-color: #CF221B;
+    --txt-color:#000;
+
+/* Font Weight */
+
+--font-light: 300;   
+--font-regular: 500; 
+--font-semibold: 600; 
+--font-bold: 700;    
+--font-extrabold: 900; 
+
 }
 
-body {
+body{
     background-color: var(--bg-color);
 }
 
-/* === LINE PEKERJAAN CONTENT === */
-.line-pekerjaan {
+.page {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    width: 135vh;
+    height: min-content;
+    top: 130px;
+    margin-left: 330px;
+    padding: 20px;
+    z-index: -2;
+    /* background-color: var(--main-color); */
+  }
+
+/* === Checklist Container (TAMBAHAN) === */
+.checklist-container {
     background: var(--ctn-color);
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 2px 5px 10px rgba(0,0,0,0.1);
+    box-shadow: 2px 4px 6px rgba(0,0,0,0.1);
+    width: calc(100% - 40px);
+    margin-bottom:40px ;
   }
   
   .header-content {
@@ -46,160 +68,110 @@ body {
   
   .btn-add {
     background-color: var(--main-color);
-    color: var(--ctn-color);
-    padding: 8px 15px;
+    color: white;
     border: none;
+    padding: 8px 15px;
     border-radius: 8px;
-    font-weight: var(--font-semibold);
     cursor: pointer;
+    font-weight: var(--font-semibold);
   }
-  
   .btn-add:hover {
-    background-color: #a51813;
+    background-color: #a91a15;
   }
   
-  .table-line {
+  .table-checklist {
     width: 100%;
     border-collapse: collapse;
-    background: var(--ctn-color);
-  }
-  
-  .table-line th,
-  .table-line td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #ddd;
     text-align: center;
   }
   
-  .table-line th {
-    font-weight: var(--font-bold);
+  .table-checklist th, .table-checklist td {
+    border-bottom: 1px solid #aaa;
+    padding: 12px;
   }
   
-  .action-icon {
+  .table-checklist th {
+    font-weight: var(--font-semibold);
+  }
+  
+  .action-icons i {
     font-size: 18px;
-    margin-right: 10px;
+    margin: 0 6px;
     cursor: pointer;
-    color: #f39c12;
   }
   
-  .action-icon.delete {
-    color: #e74c3c;
-  }
   
-  .action-icon:hover {
-    opacity: 0.7;
-  }
   
-  /* === Search bar (TAMBAHAN) === */
-  .search-bar {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .search-bar input {
-    width: 40%;
-    height: 40px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    padding: 0 10px;
-    font-size: 14px;
-  }
-  
-  /* === Scroll Fix === */
-  body, html {
-    overflow-x: hidden;
-  }
-  
-  .page {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    width: 135vh;
-    height: min-content;
-    top: 130px;
-    margin-left: 330px;
-    padding: 20px;
-    z-index: -2;
-    /* background-color: var(--main-color); */
-  }
-  
-  /* Sidebar Settings di bawah */
-  .sidebar-settings {
-    position: absolute;
-    bottom: 20px;
-    left: 35px;
-  }
-  
-  /* Popup Styling */
-  .popup-overlay {
+  /* === POPUP === */
+  .popup {
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     background: rgba(0,0,0,0.4);
-    display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 999;
+    z-index: 9999;
   }
   
-  .popup {
+  .popup-content {
     background: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+    padding: 20px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    text-align: center;
     width: 350px;
   }
   
-  .popup h5 {
-    font-weight: 600;
-    margin-bottom: 15px;
-  }
-  
-  .popup input {
+  .popup-content input {
     width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 8px;
     padding: 8px;
-    margin-bottom: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
   }
   
-  .popup .btn {
-    border: none;
-    border-radius: 8px;
+  .popup-content button {
+    margin: 5px;
     padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
     cursor: pointer;
+    font-weight: 500;
   }
   
-  .popup .btn-primary {
+  .popup-content button#saveChecklist,
+  .popup-content button#updateChecklist,
+  .popup-content button#confirmDelete {
+    
     background-color: var(--main-color);
     color: white;
   }
-  
-  .popup .btn-secondary {
-    background-color: #ccc;
-    color: black;
+
+  .popup-footer{
+    display: flex;
+    justify-content: flex-end;
   }
   
-  /* Notifikasi */
-  .toast {
+  .popup-content button.close-popup {
+    background-color: #ccc;
+    color: #000;
+  }
+  
+  /* === NOTIFIKASI === */
+  .notif {
+    display: none;
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #4CAF50;
+    bottom: 30px;
+    right: 30px;
+    background-color: var(--main-color);
     color: white;
     padding: 10px 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    animation: fadeInOut 3s ease;
-  }
-  
-  @keyframes fadeInOut {
-    0% {opacity: 0; transform: translateY(20px);}
-    10%, 90% {opacity: 1; transform: translateY(0);}
-    100% {opacity: 0; transform: translateY(20px);}
+    font-weight: 500;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 99999;
   }
   

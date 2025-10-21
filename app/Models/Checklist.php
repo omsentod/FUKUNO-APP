@@ -7,10 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Checklist extends Model
 {
-    protected $fillable = ['task_line_id', 'nama_checklist', 'is_done'];
-
-    public function line() {
-        return $this->belongsTo(Pekerjaan::class, 'task_line_id');
-    }
+    use HasFactory;
+    protected $fillable = ['name'];
 }
-

@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const deletePopup = document.getElementById("deletePopup");
   const notif = document.getElementById("notif");
   const closeBtns = document.querySelectorAll(".close-popup");
-  const statusTable = document.getElementById("statusTable");
+  const statusTable = document.getElementById("statusesTable");
   const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
   let currentRow = null;

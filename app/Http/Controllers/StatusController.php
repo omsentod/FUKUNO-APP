@@ -25,7 +25,11 @@ class StatusController extends Controller
         $request->validate(['name' => 'required|string|max:255']);
         $status = Status::findOrFail($id);
         $status->update(['name' => $request->name]);
-        return response()->json($status);
+        return response()->json([
+            'success' => true,
+            'message' => 'Status updated successfully',
+            'data' => $status
+        ]);
     }
 
     public function destroy($id)

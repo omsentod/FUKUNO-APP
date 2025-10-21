@@ -3,40 +3,46 @@
 namespace App\Http\Controllers;
 
 use App\Models\Checklist;
-use App\Models\Task;
 use Illuminate\Http\Request;
 
 class ChecklistController extends Controller
 {
-    // Tambah checklist baru
-    public function store(Request $request, $task_id)
+    public function index()
     {
-        $request->validate([
-            'nama_item' => 'required|string|max:255',
-        ]);
-
-        Checklist::create([
-            'task_id' => $task_id,
-            'nama_item' => $request->nama_item,
-        ]);
-
-        return back()->with('success', 'Checklist berhasil ditambahkan!');
+        // Kembalikan semua data status dalam bentuk JSON
+        return response()->json(Checklist::all());
     }
 
-    // Update status checklist (centang)
-    public function toggle($id)
+    public function store(Request $request)
     {
+        $request->validate(['name' => 'required|string|max:255']);
+        $checklist = Checklist::create(['name' => $request->name]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Checklist created successfully',
+            'data' => $checklist
+        ], 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate(['name' => 'required|string|max:255']);
+
         $checklist = Checklist::findOrFail($id);
-        $checklist->selesai = !$checklist->selesai;
-        $checklist->save();
+        $checklist->update(['name' => $request->name]);
 
-        return back();
+        return response()->json([
+            'success' => true,
+            'message' => 'Checklist updated successfully',
+            'data' => $checklist
+        ]);
     }
 
-    // Hapus checklist
     public function destroy($id)
     {
-        Checklist::findOrFail($id)->delete();
-        return back()->with('success', 'Checklist dihapus!');
+        $checklist = Checklist::findOrFail($id);
+        $checklist->delete();
+
+        return response()->json(['success' => true, 'message' => 'Checklist deleted successfully']);
     }
 }

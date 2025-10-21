@@ -21,31 +21,7 @@
             <th>Action</th>
           </tr>
         </thead>
-        <tbody id="statusTable">
-          <tr>
-            <td>1</td>
-            <td>WIP</td>
-            <td class="action-icons">
-              <i class="bi bi-pencil-square text-warning edit-btn"></i>
-              <i class="bi bi-trash-fill text-danger delete-btn"></i>
-            </td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>DONE AND READY</td>
-            <td class="action-icons">
-              <i class="bi bi-pencil-square text-warning edit-btn"></i>
-              <i class="bi bi-trash-fill text-danger delete-btn"></i>
-            </td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>BUTUH DIKERJAKAN</td>
-            <td class="action-icons">
-              <i class="bi bi-pencil-square text-warning edit-btn"></i>
-              <i class="bi bi-trash-fill text-danger delete-btn"></i>
-            </td>
-          </tr>
+        <tbody id="statusesTable">
         </tbody>
       </table>
     </div>
