@@ -9,6 +9,7 @@
         <h2>Task</h2>   
         <button class="btn-add" id="addBtn"><i class="bi bi-plus-lg"></i> Add new</button>
     </div>
+    <div class="task">
     <table>
         <thead>
             <tr>
@@ -25,7 +26,7 @@
                 <th>Action</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="table-bg">
             <tr>
                 <td>FKN/024/051</td>
                 <td>DTF Ulang tahun</td>
@@ -197,8 +198,8 @@
             </tr>
         </tbody>
     </table>
+</div>
    </div>
-
 
   
     <!-- Popup Form -->
@@ -307,6 +308,7 @@
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
             </form>
+
         </div>
     </div>
 @endsection

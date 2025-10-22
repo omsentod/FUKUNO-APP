@@ -6,7 +6,9 @@
 <div class="page">
   <div class="header-content">
     <h2>Line Pekerjaan</h2>
-    <button type="button" class="btn-add"><i class="bi bi-plus-lg"></i> Add new</button>
+    <button type="button" class="btn-add">
+      <i class="bi bi-plus-lg"></i> Add new
+    </button>
   </div>
 
   <div class="line-pekerjaan">
@@ -22,17 +24,19 @@
         @foreach($pekerjaans as $pekerjaan)
         <tr>
           <td>{{ $pekerjaan->id }}</td>
-          <td>{{ $pekerjaan->job_name }}</td>
+          <td>{{ $pekerjaan->nama_pekerjaan }}</td>
           <td>
-            <button type="button" class="btn-icon edit-btn" data-id="{{ $pekerjaan->id }}" data-name="{{ $pekerjaan->job_name }}">
-              <i class="bi bi-pencil-square action-icon edit"></i>
+            {{-- Tombol edit tidak membuka halaman baru, tapi ditangani oleh JS --}}
+            <button type="button" class="btn-icon edit" title="Edit">
+              <i class="bi bi-pencil-square"></i>
             </button>
-            
+
+            {{-- Tombol delete tetap langsung kirim form --}}
             <form action="{{ route('pekerjaan.destroy', $pekerjaan->id) }}" method="POST" style="display:inline;">
               @csrf
               @method('DELETE')
-              <button type="submit" class="btn-delete">
-                <i class="bi bi-trash-fill action-icon delete"></i>
+              <button type="submit" class="btn-icon delete" title="Hapus">
+                <i class="bi bi-trash-fill"></i>
               </button>
             </form>
           </td>
@@ -43,25 +47,7 @@
   </div>
 </div>
 
-{{-- Popup form Add new/Edit--}}
-<div class="popup" id="popupForm" style="display:none;">
-  <div class="popup-content">
-    <h3 id="popupTitle">Tambah Pekerjaan Baru</h3>
-    <form id="pekerjaanForm" method="POST">
-      @csrf
-      <input type="hidden" name="_method" id="formMethod" value="POST">
-      <input type="hidden" name="id" id="pekerjaanId">
-      
-      <div class="mb-3">
-        <label for="job_name" class="form-label">Nama Pekerjaan</label>
-        <input type="text" name="job_name" id="job_name" class="form-control" required>
-      </div>
-
-      <button type="submit" class="btn btn-save">Simpan</button>
-      <button type="button" id="closePopup" class="btn btn-secondary">Batal</button>
-    </form>
-  </div>
-</div>
+{{-- Popup akan ditampilkan dari JS, jadi tidak perlu ditulis di sini --}}
 @endsection
 
 @push('styles')

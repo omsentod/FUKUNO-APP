@@ -10,7 +10,7 @@ class CreatePekerjaansTable extends Migration
     {
         Schema::create('pekerjaans', function (Blueprint $table) {
             $table->id();
-            $table->string('job_name');  // hanya job_name yang ada
+            $table->string('nama_pekerjaan');  // hanya job_name yang ada
             $table->timestamps();
         });
     }
