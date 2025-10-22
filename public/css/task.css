@@ -148,17 +148,28 @@ th {
 
 
 
-.mockup-dot {
+/* CSS .mockup asli Anda */
+.mockup {
     display: inline-block;
-    width: 10px;
-    height: 10px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
-    background-color: red;
+    object-fit: cover;
+    cursor: pointer;    
+    transition: all 0.2s ease-in-out;
+    z-index: 10;
 }
 
-.blue-dot {
-    background-color: blue;
+/* Efek hover untuk memperbesar */
+.mockup:hover {
+    transform: scale(8); 
+    width: 50%;
+    height: auto;
+    z-index: 100;        
+    border-radius: 1px; 
+    /* box-shadow: 1px 1px  rgb(0, 0, 0); */
 }
+
 
 .pic {
     width: 30px;
@@ -178,7 +189,7 @@ th {
     height: 50px;
     border-radius: 50%;
     background-color: #007bff; /* Warna default biru */
-    color: var(--txt-color);
+    color: var(--ctn-color);
     font-weight: var(--font-regular);
     display: flex;
     align-items: center;
@@ -189,9 +200,7 @@ th {
     cursor: pointer;
 }
 
-.progress-text {
-    font-weight: bold;
-}
+
 
 .dropdown-menu .form-check {
     margin-bottom: 10px;
