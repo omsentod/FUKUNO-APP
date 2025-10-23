@@ -311,6 +311,8 @@
 
         </div>
     </div>
+    {{-- end pop up --}}
+    
 @endsection
 
 @push('styles')

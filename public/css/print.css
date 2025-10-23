@@ -1,0 +1,250 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+/* ========================================================== */
+/* === GAYA DEFAULT (UNTUK LAYAR) === */
+/* ========================================================== */
+
+*{
+    font-family:"Poppins", sans-serif ;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+    list-style: none;
+}
+
+:root{
+    --ctn-color:#ffff;
+    --bg-color:#FAFBFC;
+    --main-color: #CF221B;
+    --font-light: 300;   
+    --font-regular: 500; 
+    --font-semibold: 600; 
+    --font-bold: 700;    
+    --font-extrabold: 900; 
+}
+
+/* Pengaturan Halaman (Saat dibuka di tab baru) */
+body {
+    /* Biarkan 'font-family' dari '*' yang mengambil alih */
+    margin: 0;
+    padding: 0;
+    background-color: #f4f7f6;
+    color: #333;
+}
+
+/* Kontainer Utama PO (Saat dibuka di tab baru) */
+.po-container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 30px 40px;
+    background-color: #ffffff;
+    border: 1px solid #dcdcdc;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Header */
+header {
+    text-align: center;
+    padding-bottom: 20px;
+    border-bottom: 3px solid #000;
+}
+header h1 {
+    margin: 0;
+    font-size: 28px;
+    letter-spacing: 1px;
+    color: #000;
+}
+header h2 {
+    margin: 5px 0 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #555;
+}
+
+/* Detail Utama PO */
+.po-details {
+    width: 100%;
+    margin-top: 25px;
+    border-collapse: collapse;
+}
+.po-details th,
+.po-details td {
+    padding: 10px 12px;
+    text-align: left;
+    border: 1px solid #e0e0e0;
+    font-size: 14px;
+    vertical-align: top;
+}
+.po-details th {
+    background-color: #f9f9f9;
+    font-weight: 600;
+    width: 18%;
+}
+
+/* Konten Utama (2 kolom) */
+.main-content {
+    display: flex;
+    margin-top: 25px;
+    gap: 30px;
+}
+
+/* Kolom Kiri */
+.product-info {
+    flex: 1;
+}
+.product-image {
+    width: 100%; /* Ubah dari 500px agar responsif */
+    height: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+}
+
+/* Kolom Kanan */
+.order-details {
+    flex: 1;
+}
+
+/* Spesifikasi & Daftar Logo */
+.specs-list, .logo-list {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #fdfdfd;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+}
+.specs-list h3, .logo-list h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+.specs-list ul, .logo-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.specs-list li {
+    font-size: 15px;
+    margin-bottom: 8px;
+}
+.specs-list li strong {
+    display: inline-block;
+    width: 80px;
+    font-weight: 600;
+}
+.logo-list ul {
+    padding-left: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+}
+.logo-list li {
+    font-size: 14px;
+}
+
+/* Tabel Ukuran */
+.size-table-container {
+    margin-top: 20px;
+}
+.size-table-container h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+.size-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+.size-table th,
+.size-table td {
+    border: 1px solid #000;
+    padding: 10px;
+    font-size: 14px;
+}
+.size-table th {
+    background-color: #333;
+    color: #ffffff;
+    font-weight: 600;
+}
+.size-table .total-row {
+    background-color: #f0f0f0;
+    font-weight: 700;
+}
+
+/* Footer (Tanda Tangan) */
+footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+}
+.signature-box {
+    margin-top: 30px;
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    padding: 100px 30px 20px;
+    font-weight: var(--font-semibold);
+    border-width: 2px;
+    font-size: 12px;
+    text-align: center;
+}
+
+.signature-box p{
+    white-space: nowrap; 
+    margin: 0 100px 0 0;
+}
+.sign {
+    border-top: 2px solid #000; 
+    padding-top: 5px; 
+    width: 150px;
+}
+
+/* ===  PRINT (A4) === */
+
+@media print {
+    
+    /* Mengatur halaman cetak menjadi A4 dan memberi margin */
+    @page {
+        size: A4;
+        margin: 15mm; /* 1.5cm margin di semua sisi */
+    }
+
+    /* Menghilangkan gaya web-only */
+    body {
+        background-color: #ffffff;
+        margin: 0;
+        padding: 0;
+        /* Memaksa browser mencetak warna latar belakang */
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* Memaksa kontainer agar pas dengan area cetak */
+    .po-container {
+        width: 100%;
+        max-width: none; /* Menghapus batas 1000px */
+        margin: 0;
+        padding: 0;
+        border: none;
+        box-shadow: none;
+    }
+
+    /* Memastikan gambar tidak meluap */
+    .product-image {
+        width: 100%;
+        height: auto;
+    }
+
+    /* Mencegah tabel terpotong di antara halaman */
+    .size-table {
+        page-break-inside: avoid;
+    }
+    
+    /* Mencegah footer terpotong */
+    footer {
+        page-break-before: auto; /* Pindah ke halaman baru jika perlu */
+        page-break-inside: avoid;
+    }
+}
