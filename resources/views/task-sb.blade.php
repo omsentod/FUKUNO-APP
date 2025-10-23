@@ -4,8 +4,8 @@
 
 @section('content')
 
-   <div class="page">
-    <div class="title-page">
+<div class="page" data-user-name="{{ Auth::user()->name }}">
+        <div class="title-page">
         <h2>Task</h2>   
         <button class="btn-add" id="addBtn"><i class="bi bi-plus-lg"></i> Add new</button>
     </div>
@@ -204,7 +204,7 @@
   
     <!-- Popup Form -->
     <div class="popup-overlay" style="display: none;">
-        <div class="popup" style="max-width: 850px; width: 95%; max-height: 90vh; overflow-y: auto;">
+        <div class="popup">
             <h5 class="mb-3">Tambah Task Baru</h5>
             <form id="taskForm">
                 <div class="mb-2">
@@ -229,15 +229,6 @@
 
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <label>Penanggung Jawab</label>
-                        <select id="penanggungJawab" class="form-select">
-                            <option value="">-- Pilih Penanggung Jawab --</option>
-                            <option value="Raka">Raka</option>
-                            <option value="Tito">Tito</option>
-                            <option value="Arya">Arya</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
                         <label>Urgensi</label>
                         <select id="urgensi" class="form-select">
                             <option value="">Pilih</option>
@@ -257,25 +248,45 @@
                 <hr>
 
                 <h6>Jenis & Size</h6>
-                <table class="table table-bordered text-center align-middle" id="sizeTable">
-                    <thead class="table-danger">
-                        <tr>
-                            <th>Jenis Size</th>
-                            <th>Size</th>
-                            <th>Jumlah</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><input type="text" class="form-control" placeholder="Jenis" value="Baju Anak"></td>
-                            <td><input type="text" class="form-control" placeholder="Size" value="L"></td>
-                            <td><input type="text" class="form-control" placeholder="Jumlah" value="10 Pcs"></td>
-                            <td><button type="button" class="btn btn-danger btn-sm btn-remove">Hapus</button></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <a href="#" id="addRow" class="text-primary small mb-2 d-inline-block">+ Tambah Kolom</a>
+<p class="small text-muted">Klik kanan pada tabel untuk menambah/menghapus baris atau kolom.</p>
+<div class="table-responsive">
+    <table class="table table-bordered text-center align-middle" id="sizeTable">
+        <thead class="table-danger">
+            <tr>
+                <th>Jenis</th>
+                <th>Size S</th>
+                <th>Size M</th>
+                <th>Size L</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="text" class="form-control"></td>
+                <td><input type="text" class="form-control" placeholder="Jumlah"></td>
+                <td><input type="text" class="form-control" placeholder="Jumlah"></td>
+                <td><input type="text" class="form-control" placeholder="Jumlah"></td>
+            </tr>
+            </tbody>
+    </table>
+</div>
+
+<div id="customContextMenu" class="context-menu shadow-lg">
+    <div class="context-menu-item" data-action="insert-row-after">Tambah Baris di Bawah</div>
+    <div class="context-menu-item text-danger" data-action="delete-row">Hapus Baris Ini</div>
+    <hr>
+    <div class="context-menu-item" data-action="insert-col-left">Sisipkan Kolom Kiri</div>
+    <div class="context-menu-item" data-action="insert-col-right">Sisipkan Kolom Kanan</div>
+    <div class="context-menu-item text-danger" data-action="delete-col">Hapus Kolom Ini</div>
+</div>
+                
+                <div id="customContextMenu" class="context-menu shadow-lg">
+                    <div class="context-menu-item" data-action="insert-row-after">Tambah Baris di Bawah</div>
+                    <div class="context-menu-item" data-action="delete-row">Hapus Baris Ini</div>
+                    <hr>
+                    <div class="context-menu-item" data-action="insert-col-left">Sisipkan Kolom Kiri</div>
+                    <div class="context-menu-item" data-action="insert-col-right">Sisipkan Kolom Kanan</div>
+                    <div class="context-menu-item text-danger" data-action="delete-col">Hapus Kolom Ini</div>
+                </div>
 
                 <div class="mb-2">
                     <label>Jumlah</label>

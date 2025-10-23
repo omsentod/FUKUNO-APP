@@ -279,12 +279,12 @@ th {
 
 .popup {
     background-color: white;
-    margin-left : 40vh;
+    margin-left:70vh;
     border-radius: 8px;
     padding: 20px;
-    max-width: 850px;
-    width: 100%;
-    height: min-content;
+    width: 500px;
+    height: 100%;
+    overflow-y: auto;
 }
   
   .popup h5 {
@@ -316,3 +316,84 @@ th {
     background-color: #ccc;
     color: black;
   }
+
+  /* CSS untuk Menu Klik Kanan */
+.context-menu {
+    display: none; /* Sembunyi secara default */
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 5px 0;
+    z-index: 1050; /* Harus di atas overlay popup */
+    width: 180px;
+    font-size: 14px;
+}
+
+/* Kelas 'show' untuk menampilkan menu */
+.context-menu.show {
+    display: block;
+}
+
+.context-menu-item {
+    padding: 8px 15px;
+    cursor: pointer;
+}
+
+.context-menu-item:hover {
+    background-color: #f5f5f5;
+}
+
+.context-menu-item.text-danger:hover {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.context-menu hr {
+    margin: 4px 0;
+    border-color: #eee;
+}
+
+/* CSS Tambahan untuk Tabel */
+#sizeTable thead th,
+#sizeTable tbody td {
+    min-width: 120px; /* Agar kolom tidak terlalu sempit */
+}
+#sizeTable thead th:first-child, /* Kolom "Jenis" */
+#sizeTable tbody td:first-child {
+    min-width: 180px; 
+    /* Membuat kolom 'Jenis' menempel saat di-scroll (opsional) */
+    position: sticky;
+    left: 0;
+    background-color: white;
+    z-index: 10;
+}
+#sizeTable thead.table-danger th {
+    /* Memaksa warna latar agar sticky-nya terlihat bagus */
+    background-color: #f8d7da; 
+}
+.table-responsive {
+    max-height: 300px;
+    overflow: auto;
+}
+
+/* Style untuk input di dalam tabel Size */
+#sizeTable input.form-control {
+    border: none;              /* Hapus border input */
+    background-color: transparent; /* Hapus latar belakang input */
+    outline: none;             /* Hapus outline saat di-klik */
+    box-shadow: none;          /* Hapus shadow (jika ada dari Bootstrap) */
+    width: 100%;               /* Buat input mengisi lebar sel */
+    height: 100%;              /* Buat input mengisi tinggi sel */
+    padding: 8px;              /* Beri sedikit padding (sesuaikan) */
+    text-align: center;        /* Paskan dengan text-align tabel */
+}
+
+/* Beri sedikit highlight saat input di-klik (opsional) */
+#sizeTable input.form-control:focus {
+    background-color: rgba(0, 123, 255, 0.05); /* Warna biru muda transparan */
+}
+
+/* Style khusus untuk input di header saat diedit */
+#sizeTable thead input.header-edit-input {
+    font-weight: bold; /* Samakan dengan gaya header */
+}
