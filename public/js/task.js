@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const notif = document.getElementById("notif");
   const mainTableBody = document.querySelector(".task table tbody.table-bg");
   let clickedCell = null; // Untuk menyimpan sel mana yang di-klik kanan
-  let actionHistory = []; // Untuk menyimpan riwayat aksi
 
 
   // ==========================================================
@@ -19,309 +18,242 @@ document.addEventListener("DOMContentLoaded", () => {
   /**
    * MENAMBAH KOLOM BARU SECARA HORIZONTAL
    */
-  function insertSizeColumn(table, index) {
-      const tHeadRow = table.querySelector("thead tr");
-      const tBody = table.querySelector("tbody");
+/**
+ * MENAMBAH KOLOM BARU SECARA HORIZONTAL
+ */
+ function insertSizeColumn(table, index) {
+  const tHeadRow = table.querySelector("thead tr");
+  const tBody = table.querySelector("tbody");
 
-      // Catat Aksi
-      actionHistory.push({
-          type: 'add-column',
-          columnIndex: index,
-          table: table
-      });
+  // 1. Tambah header (TH) baru
+  const newTh = document.createElement('th');
+  newTh.innerHTML = '<input type="text" class="form-control" placeholder="Size Baru">';
+  tHeadRow.insertBefore(newTh, tHeadRow.children[index]);
 
-      // Tambah header (TH) baru
-      const newTh = document.createElement('th');
-      newTh.innerHTML = '<input type="text" class="form-control" placeholder="Size Baru">';
-      tHeadRow.insertBefore(newTh, tHeadRow.children[index]);
+  // 2. Tambah sel (TD) baru di setiap baris body
+  tBody.querySelectorAll('tr').forEach(row => {
+      // Logika 'actions-row' sudah tidak ada, jadi lebih simpel
+      const newTd = document.createElement('td');
+      newTd.innerHTML = '<input type="text" class="form-control" placeholder="Jumlah">';
+      row.insertBefore(newTd, row.children[index]);
+  });
+}
 
-      // Tambah sel (TD) baru di setiap baris body
-      tBody.querySelectorAll('tr').forEach(row => {
-          const newTd = document.createElement('td');
-          newTd.innerHTML = '<input type="text" class="form-control" placeholder="Jumlah">';
-          row.insertBefore(newTd, row.children[index]);
-      });
-  }
 
   /**
-   * MENGHAPUS KOLOM SECARA HORIZONTAL (Versi dengan isUndo)
+   * MENGHAPUS KOLOM SECARA HORIZONTAL
    */
-  function deleteSizeColumn(table, index, isUndo = false) {
+  function deleteSizeColumn(table, index) {
       const tHeadRow = table.querySelector("thead tr");
       const tBody = table.querySelector("tbody");
 
-      // Jangan hapus kolom "Jenis"
       if (index === 0) {
           alert("Tidak bisa menghapus kolom 'Jenis'.");
           return;
       }
-
-      // Catat Aksi (hanya jika bukan operasi Undo)
-      if (!isUndo) {
-          const columnData = Array.from(tBody.querySelectorAll('tr')).map(r => r.children[index].innerHTML);
-          actionHistory.push({
-              type: 'delete-column',
-              columnIndex: index,
-              headerHTML: tHeadRow.children[index].innerHTML,
-              cellsHTML: columnData,
-              table: table
-          });
-      }
       
-      // Hapus header dan sel
       tHeadRow.children[index].remove();
+
       tBody.querySelectorAll('tr').forEach(row => {
-          row.children[index].remove();
+          if (row.classList.contains('actions-row')) {
+              const actionCell = row.querySelector('td[colspan]');
+              if (actionCell) {
+                  actionCell.colSpan = tHeadRow.children.length - 1;
+              }
+          } else {
+              row.children[index].remove();
+          }
       });
   }
 
   /**
    * MENAMBAH BARIS BARU SECARA VERTIKAL
    */
-  function insertJenisRow(table, referenceRow) {
-      const tBody = table.querySelector("tbody");
-      const columnCount = table.querySelector("thead tr").children.length;
-      
-      const newRow = document.createElement('tr');
-      let rowHTML = '';
+  /**
+ * MENAMBAH BARIS BARU SECARA VERTIKAL
+ */
+function insertJenisRow(table, referenceRow) {
+    const tBody = table.querySelector("tbody");
+    const columnCount = table.querySelector("thead tr").children.length;
+    
+    const newRow = document.createElement('tr');
+    let rowHTML = '';
 
-      // Buat HTML untuk baris baru
-      rowHTML += '<td><input type="text" class="form-control" placeholder="Jenis"></td>';
-      for (let i = 1; i < columnCount; i++) {
-          rowHTML += '<td><input type="text" class="form-control" placeholder="Jumlah"></td>';
-      }
-      newRow.innerHTML = rowHTML;
+    // 1. Tambah sel "Jenis"
+    rowHTML += '<td><input type="text" class="form-control" placeholder="Jenis"></td>';
 
-      // Catat Aksi
-      actionHistory.push({
-          type: 'add-row',
-          addedRow: newRow,
-          table: table,
-          referenceRow: referenceRow
-      });
+    // 2. Tambah sel "Jumlah" sebanyak sisa kolom
+    //    Loop-nya sekarang sederhana: dari 1 sampai akhir
+    for (let i = 1; i < columnCount; i++) {
+        rowHTML += '<td><input type="text" class="form-control" placeholder="Jumlah"></td>';
+    }
+    
+    newRow.innerHTML = rowHTML;
 
-      // Masukkan baris baru
-      tBody.insertBefore(newRow, referenceRow.nextElementSibling);
-  }
+    // 3. Masukkan baris baru di bawah baris yang diklik
+    //    Logika 'actions-row' sudah tidak ada
+    tBody.insertBefore(newRow, referenceRow.nextElementSibling);
+}
 
   /**
-   * MENGHAPUS BARIS (Versi dengan isUndo)
+   * MENGHAPUS BARIS
    */
-  function deleteJenisRow(table, row, isUndo = false) {
-      const normalRows = table.querySelectorAll("tbody tr");
+  function deleteJenisRow(table, row) {
+      const normalRows = table.querySelectorAll("tbody tr:not(.actions-row)");
       if (normalRows.length <= 1) {
           alert("Tidak bisa menghapus baris terakhir.");
           return;
-      }
-      
-      // Catat Aksi (hanya jika bukan operasi Undo)
-      if (!isUndo) {
-          actionHistory.push({
-              type: 'delete-row',
-              deletedRowHTML: row.innerHTML,
-              originalIndex: Array.from(row.parentNode.children).indexOf(row),
-              table: table
-          });
       }
       row.remove();
   }
 
   /**
-   * Membatalkan aksi terakhir yang tercatat di history.
-   */
-  function undoLastAction() {
-    if (actionHistory.length === 0) {
-        console.log("Tidak ada aksi untuk di-undo.");
-        return;
-    }
-
-    const lastAction = actionHistory.pop();
-    console.log("Undoing action:", lastAction.type);
-
-    switch (lastAction.type) {
-        case 'add-row':
-            deleteJenisRow(lastAction.table, lastAction.addedRow, true);
-            break;
-        case 'delete-row':
-            const tBody = lastAction.table.querySelector("tbody");
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = lastAction.deletedRowHTML;
-            tBody.insertBefore(newRow, tBody.children[lastAction.originalIndex]);
-            break;
-        case 'add-column':
-            deleteSizeColumn(lastAction.table, lastAction.columnIndex, true);
-            break;
-        case 'delete-column':
-            const headRow = lastAction.table.querySelector("thead tr");
-            const bodyRows = lastAction.table.querySelectorAll("tbody tr");
-            const newTh = document.createElement('th');
-            newTh.innerHTML = lastAction.headerHTML;
-            headRow.insertBefore(newTh, headRow.children[lastAction.columnIndex]);
-            bodyRows.forEach((row, rowIndex) => {
-                const newTd = document.createElement('td');
-                newTd.innerHTML = lastAction.cellsHTML[rowIndex];
-                row.insertBefore(newTd, row.children[lastAction.columnIndex]);
-            });
-            break;
-        case 'edit-header':
-             lastAction.thElement.textContent = lastAction.oldText;
-             break;
-    }
-  }
-
-  /**
-   * Mengubah header TH menjadi input saat di-double-click.
-   * (FUNGSI INI DIPINDAHKAN KE SINI - LUAR showPopup)
-   */
-  function handleHeaderDoubleClick(thElement) {
-    if (thElement.querySelector('input.header-edit-input')) return;
-
-    const currentText = thElement.textContent.trim();
-    thElement.dataset.originalText = currentText;
-
-    thElement.innerHTML = `<input type="text" class="form-control header-edit-input" value="${currentText}">`;
-
-    const inputElement = thElement.querySelector('input.header-edit-input');
-    inputElement.focus();
-    inputElement.select();
-
-    const finishHeaderEdit = () => {
-        const newValue = inputElement.value.trim();
-        const finalValue = newValue || thElement.dataset.originalText;
-
-        if (finalValue !== thElement.dataset.originalText) {
-            actionHistory.push({
-                type: 'edit-header',
-                thElement: thElement,
-                oldText: thElement.dataset.originalText,
-                newText: finalValue
-            });
-        }
-
-        thElement.textContent = finalValue;
-        // Hapus listener secara eksplisit untuk mencegah kebocoran memori
-        inputElement.removeEventListener('blur', finishHeaderEdit);
-        inputElement.removeEventListener('keydown', handleKeyDown);
-    };
-
-    const handleKeyDown = (event) => {
-        if (event.key === 'Enter') {
-            finishHeaderEdit();
-        } else if (event.key === 'Escape') {
-            thElement.textContent = thElement.dataset.originalText;
-            inputElement.removeEventListener('blur', finishHeaderEdit);
-            inputElement.removeEventListener('keydown', handleKeyDown);
-        }
-    };
-
-    inputElement.addEventListener('blur', finishHeaderEdit);
-    inputElement.addEventListener('keydown', handleKeyDown);
-  }
-
-  /**
    * Menampilkan pop-up dan mengatur listener-nya.
    */
-  function showPopup() {
-    const overlay = document.querySelector(".popup-overlay");
-    if (!overlay) return;
-    const popup = overlay.querySelector(".popup");
-    if (!popup) return;
+  /**
+ * Menampilkan pop-up dan mengatur listener-nya.
+ */
+function showPopup() {
+    
+  // 1. TEMUKAN ELEMEN POPUP TERLEBIH DAHULU
+  const overlay = document.querySelector(".popup-overlay");
+  if (!overlay) return; // Keluar jika overlay tidak ditemukan
+  
+  const popup = overlay.querySelector(".popup");
+  if (!popup) return; // Keluar jika popup tidak ditemukan
 
-    // Listener tombol Add Line
-    popup.querySelector("#addLine").addEventListener("click", (e) => {
-        e.preventDefault();
-        addLine();
-    });
+  // 2. PASANG SEMUA EVENT LISTENER
+  
+  // ▼▼▼ INI ADALAH LISTENER YANG HILANG & SUDAH DITAMBAHKAN KEMBALI ▼▼▼
+  // Listener untuk tombol Add Line
+  popup.querySelector("#addLine").addEventListener("click", (e) => {
+      e.preventDefault();
+      addLine();
+  });
+  // ▲▲▲ AKHIR DARI KODE YANG HILANG ▲▲▲
 
-    // Listener tombol Cancel
-    popup.querySelector("#cancelBtn").addEventListener("click", () => {
-        overlay.style.display = "none";
-        actionHistory = []; // Kosongkan history saat popup ditutup
-    });
+  // Listener untuk tombol Cancel
+  popup.querySelector("#cancelBtn").addEventListener("click", () => {
+      overlay.style.display = "none";
+  });
 
-    // Listener SUBMIT FORM
-    popup.querySelector("#taskForm").addEventListener("submit", (e) => {
-        e.preventDefault();
-        const loggedInUserName = document.querySelector('.page').dataset.userName;
-        const data = {
-            noInvoice: popup.querySelector("#noInvoice").value,
-            namaPelanggan: popup.querySelector("#namaPelanggan").value,
-            judul: popup.querySelector("#judul").value,
-            catatan: popup.querySelector("#catatan").value,
-            penanggungJawab: loggedInUserName,
-            urgensi: popup.querySelector("#urgensi").value,
-            jumlah: popup.querySelector("#jumlah").value,
-            warna: popup.querySelector("#warna").value,
-            model: popup.querySelector("#model").value,
-            bahan: popup.querySelector("#bahan").value
+  // ===========================================
+  // === LISTENER UNTUK SUBMIT FORM ===
+  // ===========================================
+  popup.querySelector("#taskForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      
+      // Ambil nama user yang login
+      const loggedInUserName = document.querySelector('.page').dataset.userName;
+      
+      // Kumpulkan data dari form
+      const data = {
+          noInvoice: popup.querySelector("#noInvoice").value,
+          namaPelanggan: popup.querySelector("#namaPelanggan").value,
+          judul: popup.querySelector("#judul").value,
+          catatan: popup.querySelector("#catatan").value,
+          penanggungJawab: loggedInUserName, // Menggunakan user yang login
+          urgensi: popup.querySelector("#urgensi").value,
+          jumlah: popup.querySelector("#jumlah").value,
+          warna: popup.querySelector("#warna").value,
+          model: popup.querySelector("#model").value,
+          bahan: popup.querySelector("#bahan").value
+      };
+
+      // Panggil fungsi untuk menambah baris ke tabel
+      addTaskToTable(data);
+      
+      showNotif("Task berhasil disimpan!");
+      overlay.style.display = "none"; // Tutup popup
+  });
+
+  // ===========================================
+  // === LOGIKA KLIK KANAN (CONTEXT MENU) ===
+  // ===========================================
+  const sizeTable = popup.querySelector("#sizeTable");
+  const contextMenu = popup.querySelector("#customContextMenu");
+
+  // Tampilkan Menu Saat Klik Kanan
+  sizeTable.addEventListener("contextmenu", (e) => {
+      e.preventDefault(); // Hentikan menu asli browser
+
+      // Cari sel (td atau th) yang diklik
+      clickedCell = e.target.closest('td, th');
+      if (!clickedCell) return;
+
+      // Posisikan menu di lokasi kursor
+      const popupRect = popup.getBoundingClientRect();
+      const x = e.clientX - popupRect.left;
+      const y = e.clientY - popupRect.top + popup.scrollTop;
+
+      contextMenu.style.top = `${y}px`;
+      contextMenu.style.left = `${x}px`;
+      contextMenu.classList.add("show");
+  });
+
+  // Sembunyikan Menu Saat Klik Biasa
+  popup.addEventListener("click", (e) => {
+      // Jangan sembunyikan jika kita klik item menu
+      if (!e.target.closest('.context-menu-item')) {
+          contextMenu.classList.remove("show");
+      }
+  });
+
+  const sizeTableHead = sizeTable.querySelector('thead'); // sizeTable sudah didefinisikan di atas
+    if (sizeTableHead) {
+        // Gunakan .ondblclick untuk menimpa listener lama (jika ada)
+        sizeTableHead.ondblclick = (event) => {
+            const thTarget = event.target.closest('th');
+            // Hapus pembatasan kolom pertama/terakhir jika Anda ingin semua bisa diedit
+            // const totalTh = thTarget?.closest('tr')?.children.length;
+            // if (thTarget && thTarget.cellIndex !== 0 && thTarget.cellIndex !== totalTh - 1) {
+            if (thTarget) { // Biarkan semua TH bisa di-double-click
+                handleHeaderDoubleClick(thTarget);
+            }
         };
-        addTaskToTable(data);
-        showNotif("Task berhasil disimpan!");
-        overlay.style.display = "none";
-        actionHistory = []; // Kosongkan history saat submit berhasil
-    });
+        console.log("Listener Double Click Header terpasang."); // Debugging
+    }
+    // ▲▲▲ AKHIR TAMBAHAN ▲▲▲
 
-    // LOGIKA KLIK KANAN (CONTEXT MENU)
-    const sizeTable = popup.querySelector("#sizeTable");
-    const contextMenu = popup.querySelector("#customContextMenu");
-
-    sizeTable.addEventListener("contextmenu", (e) => {
-        e.preventDefault();
-        clickedCell = e.target.closest('td, th');
-        if (!clickedCell) return;
-        const popupRect = popup.getBoundingClientRect();
-        const x = e.clientX - popupRect.left;
-        const y = e.clientY - popupRect.top + popup.scrollTop;
-        contextMenu.style.top = `${y}px`;
-        contextMenu.style.left = `${x}px`;
-        contextMenu.classList.add("show");
-    });
-
-    popup.addEventListener("click", (e) => {
-        if (!e.target.closest('.context-menu-item')) {
-            contextMenu.classList.remove("show");
-        }
-    });
-
-    contextMenu.addEventListener("click", (e) => {
-        if (!clickedCell) return;
-        const action = e.target.dataset.action;
-        const table = clickedCell.closest('table');
-        const cellIndex = clickedCell.cellIndex;
-        const parentRow = clickedCell.closest('tr');
-
-        switch (action) {
-            case 'insert-row-after': insertJenisRow(table, parentRow); break;
-            case 'delete-row': deleteJenisRow(table, parentRow); break;
-            case 'insert-col-left': insertSizeColumn(table, cellIndex); break;
-            case 'insert-col-right': insertSizeColumn(table, cellIndex + 1); break;
-            case 'delete-col': deleteSizeColumn(table, cellIndex); break;
-        }
-        clickedCell = null;
-        contextMenu.classList.remove("show");
-    });
-
-    // LISTENER DOUBLE-CLICK HEADER
-    const sizeTableHead = sizeTable.querySelector('thead');
-    sizeTableHead.addEventListener('dblclick', (event) => {
-        const thTarget = event.target.closest('th');
-        if (thTarget) {
-            handleHeaderDoubleClick(thTarget);
-        }
-    });
 
     // LISTENER KEYDOWN (UNDO)
     popup.addEventListener('keydown', (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
-          event.preventDefault();
-          undoLastAction();
-      }
+        // ... (kode undo) ...
     });
 
-    // TAMPILKAN POP-UP
-    overlay.style.display = "block";
-    actionHistory = []; // Kosongkan history setiap kali popup dibuka
-  }
+  // Logika Saat Item Menu Diklik
+  contextMenu.addEventListener("click", (e) => {
+      if (!clickedCell) return;
+
+      const action = e.target.dataset.action;
+      const table = clickedCell.closest('table');
+      const cellIndex = clickedCell.cellIndex;
+      const parentRow = clickedCell.closest('tr');
+
+      switch (action) {
+          case 'insert-row-after':
+              insertJenisRow(table, parentRow);
+              break;
+          case 'delete-row':
+              deleteJenisRow(table, parentRow);
+              break;
+          case 'insert-col-left':
+              insertSizeColumn(table, cellIndex);
+              break;
+          case 'insert-col-right':
+              insertSizeColumn(table, cellIndex + 1);
+              break;
+          case 'delete-col':
+              deleteSizeColumn(table, cellIndex);
+              break;
+      }
+      clickedCell = null; // Reset
+      contextMenu.classList.remove("show"); // Sembunyikan menu setelah diklik
+  });
+
+  // 3. SETELAH SEMUA SIAP, TAMPILKAN POP-UP
+  overlay.style.display = "block";
+} 
 
   /**
    * Fungsi untuk menambah line pekerjaan
@@ -329,19 +261,28 @@ document.addEventListener("DOMContentLoaded", () => {
   function addLine() {
       const lineContainer = document.querySelector("#lineContainer");
       if (!lineContainer) return;
+      
       const lineDiv = document.createElement("div");
       lineDiv.classList.add("border", "p-3", "mb-3", "rounded");
+
       lineDiv.innerHTML = `
         <div class="d-flex justify-content-between align-items-center mb-2">
           <strong class="line-title">Line</strong>
           <button type="button" class="btn btn-danger btn-sm btn-remove-line">Hapus</button>
         </div>
         <div class="row mb-2">
-          <div class="col-md-6"><label>Nama Pekerjaan</label><input type="text" class="form-control line-nama" placeholder="Nama pekerjaan..."></div>
-          <div class="col-md-6"><label>Deadline</label><input type="datetime-local" class="form-control line-deadline"></div>
+          <div class="col-md-6">
+            <label>Nama Pekerjaan</label>
+            <input type="text" class="form-control line-nama" placeholder="Nama pekerjaan...">
+          </div>
+          <div class="col-md-6">
+            <label>Deadline</label>
+            <input type="datetime-local" class="form-control line-deadline">
+          </div>
         </div>
         <div class="mb-2">
-          <label>Checklist</label><div class="checklist-container"></div>
+          <label>Checklist</label>
+          <div class="checklist-container"></div>
           <a href="#" class="text-primary small addChecklist">+ Tambah Checklist</a>
         </div>
       `;
@@ -354,10 +295,12 @@ document.addEventListener("DOMContentLoaded", () => {
   function addTaskToTable(data) {
     if (!mainTableBody) {
         console.error("Elemen .task table tbody.table-bg tidak ditemukan!");
-        return;
+        return; 
     }
+
     const newId = 'task-' + Date.now();
     const newRow = document.createElement('tr');
+    
     newRow.innerHTML = `
         <td>${data.noInvoice}</td>
         <td>${data.judul}</td>
@@ -377,7 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             </div>
         </td>
-        <td>-</td>
+        <td>-</td> 
         <td><img src="" class="mockup"></td>
         <td><div class="pic">${buatInisial(data.penanggungJawab)}</div></td>
         <td>
@@ -406,12 +349,17 @@ document.addEventListener("DOMContentLoaded", () => {
             <i class="bi bi-trash3-fill icon-trash"></i>
         </td>
     `;
+
     mainTableBody.appendChild(newRow);
+
+    // Inisialisasi ulang progress bar untuk baris yang baru ditambahkan
     const newProgressBar = newRow.querySelector('.dropdown-toggle.progress');
     const newMenu = newProgressBar.nextElementSibling;
     if (newMenu) {
         const firstCheck = newMenu.querySelector('.progress-check');
-        if (firstCheck) updateProgress(firstCheck);
+        if (firstCheck) {
+            updateProgress(firstCheck);
+        }
     }
   }
 
@@ -421,12 +369,16 @@ document.addEventListener("DOMContentLoaded", () => {
   function addChecklist(button) {
       const checklistContainer = button.previousElementSibling;
       if (!checklistContainer) return;
+      
       const checklistInput = document.createElement("input");
       checklistInput.type = "text";
       checklistInput.className = "form-control mb-2 checklist-item";
       checklistInput.placeholder = "Nama checklist...";
       checklistContainer.appendChild(checklistInput);
   }
+
+  // CATATAN: addRow() yang lama sudah dihapus dan diganti dengan
+  // insertJenisRow() dan insertSizeColumn()
 
   /**
    * Menampilkan notifikasi
@@ -439,23 +391,103 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /**
+ * Mengubah header TH menjadi input saat di-double-click
+ * (VERSI BARU: Semua kolom bisa diedit).
+ */
+function handleHeaderDoubleClick(thElement) {
+  // Jangan lakukan apa-apa jika sudah dalam mode edit
+  if (thElement.querySelector('input.header-edit-input')) return;
+
+  // HAPUS ATAU BERI KOMENTAR BLOK IF DI BAWAH INI JIKA INGIN SEMUA BISA DIEDIT
+  /*
+  const thIndex = thElement.cellIndex;
+  const totalTh = thElement.closest('tr').children.length;
+  if (thIndex === 0 || thIndex === totalTh - 1) { // Mencegah edit kolom pertama/terakhir
+      return;
+  }
+  */
+
+  const currentText = thElement.textContent.trim();
+  thElement.dataset.originalText = currentText; // Simpan teks asli
+
+  // Ganti isi TH dengan input
+  thElement.innerHTML = `<input type="text" class="form-control header-edit-input" value="${currentText}">`;
+
+  const inputElement = thElement.querySelector('input.header-edit-input');
+  if (!inputElement) return; // Pengaman
+
+  inputElement.focus();
+  inputElement.select(); // Pilih semua teks
+
+  // Fungsi untuk menyelesaikan edit (didefinisikan di dalam agar punya akses ke variabel)
+  const finishHeaderEdit = () => {
+      const newValue = inputElement.value.trim();
+      // Kembalikan teks asli jika input kosong
+      const finalValue = newValue || thElement.dataset.originalText;
+
+      // Catat aksi jika nilai berubah (fungsi Undo)
+      // Pastikan actionHistory didefinisikan secara global
+      if (finalValue !== thElement.dataset.originalText && typeof actionHistory !== 'undefined') {
+          actionHistory.push({
+              type: 'edit-header',
+              thElement: thElement, // Simpan referensi ke elemen TH
+              oldText: thElement.dataset.originalText, // Teks sebelum diedit
+              newText: finalValue // Teks setelah diedit
+          });
+      }
+
+      thElement.textContent = finalValue; // Ganti input kembali menjadi teks
+      // Hapus listener agar tidak menumpuk saat double-click lagi
+      inputElement.removeEventListener('blur', finishHeaderEdit);
+      inputElement.removeEventListener('keydown', handleKeyDown);
+  };
+
+  // Fungsi untuk menghandle tombol Enter atau Escape di input
+  const handleKeyDown = (event) => {
+      if (event.key === 'Enter') {
+          finishHeaderEdit(); // Selesaikan edit jika Enter
+      } else if (event.key === 'Escape') {
+          thElement.textContent = thElement.dataset.originalText; // Batalkan, kembalikan teks asli
+          // Hapus listener
+          inputElement.removeEventListener('blur', finishHeaderEdit);
+          inputElement.removeEventListener('keydown', handleKeyDown);
+      }
+  };
+
+  // Tambahkan listener ke input yang baru dibuat
+  inputElement.addEventListener('blur', finishHeaderEdit); // Selesaikan saat klik di luar
+  inputElement.addEventListener('keydown', handleKeyDown); // Selesaikan/Batalkan dengan keyboard
+}
+
+  /**
    * Menghitung ulang persentase progres dan warna
    */
   function updateProgress(checkbox) {
       const dropdown = checkbox.closest('.dropdown');
       if (!dropdown) return;
+
       const allCheckboxes = dropdown.querySelectorAll('.progress-check');
       const totalTasks = allCheckboxes.length;
       const completedTasks = dropdown.querySelectorAll('.progress-check:checked').length;
       const percentage = (totalTasks === 0) ? 0 : (completedTasks / totalTasks) * 100;
+
       const progressText = dropdown.querySelector('.progress-text');
-      if (progressText) progressText.textContent = percentage.toFixed(0) + '%';
+      if (progressText) {
+          progressText.textContent = percentage.toFixed(0) + '%';
+      }
+
       const progressButton = dropdown.querySelector('.dropdown-toggle');
       if (!progressButton) return;
+
       progressButton.classList.remove('status-red', 'status-yellow', 'status-green');
-      if (percentage === 0) progressButton.classList.add('status-red');
-      else if (percentage === 100) progressButton.classList.add('status-green');
-      else progressButton.classList.add('status-yellow');
+
+      if (percentage === 0) {
+          progressButton.classList.add('status-red');
+      } else if (percentage === 100) {
+          progressButton.classList.add('status-green');
+      } else {
+          progressButton.classList.add('status-yellow');
+      }
   }
 
   /**
@@ -465,9 +497,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const newStatus = clickedItem.dataset.status;
       const dropdown = clickedItem.closest('.dropdown');
       if (!dropdown) return;
+
       const statusButton = dropdown.querySelector('.dropdown-toggle');
       const statusTextSpan = dropdown.querySelector('.status-text');
-      if (statusTextSpan) statusTextSpan.textContent = newStatus;
+
+      if (statusTextSpan) {
+          statusTextSpan.textContent = newStatus;
+      }
+
       if (statusButton) {
           const newClass = 'status-' + newStatus.toLowerCase().replace(/\s+/g, '-');
           statusButton.classList.forEach(className => {
@@ -479,19 +516,23 @@ document.addEventListener("DOMContentLoaded", () => {
       }
   }
 
+
   /**
    * Membuka tab baru untuk print
    */
   function handlePrint(icon) {
     const row = icon.closest('tr');
     if (!row) return;
+
     const cells = row.querySelectorAll('td');
+
     const data = {
         noPo: cells[0].textContent.trim(),
         taskTitle: cells[1].textContent.trim(),
         jumlah: cells[2].textContent.trim(),
         mockupSrc: cells[7].querySelector('img').src,
     };
+
     const queryString = new URLSearchParams(data).toString();
     const printURL = '/print-po?' + queryString;
     window.open(printURL, '_blank');
@@ -501,10 +542,15 @@ document.addEventListener("DOMContentLoaded", () => {
    * Membuat inisial dari nama
    */
   function buatInisial(nama) {
-    if (!nama) return '??';
+    if (!nama) return '??'; 
+
     const words = nama.split(' ');
-    let initials = words[0].substring(0, 1);
-    if (words.length > 1) initials += words[1].substring(0, 1);
+    let initials = words[0].substring(0, 1); 
+
+    if (words.length > 1) {
+        initials += words[1].substring(0, 1);
+    }
+
     return initials.toUpperCase();
   }
 
@@ -514,14 +560,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================================================
 
   // Tombol "Add Task" utama
-  if (addBtn) addBtn.addEventListener("click", showPopup);
+  if (addBtn) {
+      addBtn.addEventListener("click", showPopup);
+  }
 
   // Inisialisasi warna progress bar saat halaman dimuat
   document.querySelectorAll('.dropdown-toggle.progress').forEach(progressButton => {
       const dropdownMenu = progressButton.nextElementSibling;
       if (dropdownMenu) {
           const firstCheck = dropdownMenu.querySelector('.progress-check');
-          if (firstCheck) updateProgress(firstCheck);
+          if (firstCheck) {
+              updateProgress(firstCheck);
+          }
       }
   });
 
@@ -536,38 +586,45 @@ document.addEventListener("DOMContentLoaded", () => {
   document.body.addEventListener('click', function(event) {
       const target = event.target;
 
-      // 1. Hapus line pekerjaan (.btn-remove-line di dalam popup)
+      // 1. Hapus baris tabel (.btn-remove ATAU .btn-remove-row)
+      if (target.classList.contains('btn-remove') || target.classList.contains('btn-remove-row')) {
+        event.preventDefault();
+        const row = target.closest('tr');
+        if (row) {
+            // Periksa apakah ini tabel size atau tabel line
+            const sizeTable = row.closest('#sizeTable');
+            if (sizeTable) {
+                deleteJenisRow(sizeTable, row);
+            } else {
+                // Logika hapus baris tabel utama (jika ada)
+                row.remove();
+            }
+        }
+      }
+
+      // 2. Hapus line pekerjaan (.btn-remove-line di dalam popup)
       if (target.classList.contains('btn-remove-line')) {
           event.preventDefault();
           target.closest('.border.p-3.mb-3.rounded')?.remove();
       }
 
-      // 2. Tambah checklist (.addChecklist di dalam popup)
+      // 3. Tambah checklist (.addChecklist di dalam popup)
       if (target.classList.contains('addChecklist')) {
           event.preventDefault();
           addChecklist(target);
       }
 
-      // 3. Ubah status (.dropdown-item dengan data-status)
+      // 4. Ubah status (.dropdown-item dengan data-status)
       const statusItem = target.closest('.dropdown-item[data-status]');
       if (statusItem) {
           event.preventDefault();
           handleStatusChange(statusItem);
       }
 
-      // 4. Download PO (.icon-download)
+      // 5. Download PO (.icon-download)
       if (target.classList.contains('icon-download')) {
         event.preventDefault();
-        handlePrint(target);
-      }
-
-      // 5. Hapus Task Utama (.icon-trash)
-      if (target.classList.contains('icon-trash')) {
-          event.preventDefault();
-          if (confirm('Apakah Anda yakin ingin menghapus task ini?')) {
-              target.closest('tr')?.remove();
-              showNotif('Task telah dihapus.');
-          }
+        handlePrint(target); 
       }
   });
 

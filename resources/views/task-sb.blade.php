@@ -232,9 +232,8 @@
                         <label>Urgensi</label>
                         <select id="urgensi" class="form-select">
                             <option value="">Pilih</option>
-                            <option value="Tinggi">Tinggi</option>
-                            <option value="Sedang">Sedang</option>
-                            <option value="Rendah">Rendah</option>
+                            <option value="Urgent">Urgent</option>
+                            <option value="Normal">Normal</option>
                         </select>
                     </div>
                 </div>
@@ -247,24 +246,22 @@
 
                 <hr>
 
-                <h6>Jenis & Size</h6>
+                <h6>Size</h6>
 <p class="small text-muted">Klik kanan pada tabel untuk menambah/menghapus baris atau kolom.</p>
 <div class="table-responsive">
     <table class="table table-bordered text-center align-middle" id="sizeTable">
         <thead class="table-danger">
             <tr>
-                <th>Jenis</th>
-                <th>Size S</th>
-                <th>Size M</th>
-                <th>Size L</th>
+                <th>Size</th>
+                <th>Tambahkan</th>
+        
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td><input type="text" class="form-control"></td>
+                <td><input type="text" class="form-control"  placeholder="Jenis"></td>
                 <td><input type="text" class="form-control" placeholder="Jumlah"></td>
-                <td><input type="text" class="form-control" placeholder="Jumlah"></td>
-                <td><input type="text" class="form-control" placeholder="Jumlah"></td>
+
             </tr>
             </tbody>
     </table>
@@ -272,10 +269,11 @@
 
 <div id="customContextMenu" class="context-menu shadow-lg">
     <div class="context-menu-item" data-action="insert-row-after">Tambah Baris di Bawah</div>
-    <div class="context-menu-item text-danger" data-action="delete-row">Hapus Baris Ini</div>
     <hr>
     <div class="context-menu-item" data-action="insert-col-left">Sisipkan Kolom Kiri</div>
     <div class="context-menu-item" data-action="insert-col-right">Sisipkan Kolom Kanan</div>
+    <div class="context-menu-item text-danger" data-action="delete-row">Hapus Baris Ini</div>
+
     <div class="context-menu-item text-danger" data-action="delete-col">Hapus Kolom Ini</div>
 </div>
                 

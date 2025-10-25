@@ -356,22 +356,25 @@ th {
 /* CSS Tambahan untuk Tabel */
 #sizeTable thead th,
 #sizeTable tbody td {
-    min-width: 120px; /* Agar kolom tidak terlalu sempit */
+min-width: 120px;
 }
+
+
 #sizeTable thead th:first-child, /* Kolom "Jenis" */
 #sizeTable tbody td:first-child {
-    min-width: 180px; 
+    /* min-width: 180px;  */
     /* Membuat kolom 'Jenis' menempel saat di-scroll (opsional) */
-    position: sticky;
+    /* position: sticky; */
     left: 0;
     background-color: white;
-    z-index: 10;
+    /* z-index: 10; */
 }
 #sizeTable thead.table-danger th {
     /* Memaksa warna latar agar sticky-nya terlihat bagus */
     background-color: #f8d7da; 
 }
 .table-responsive {
+    
     max-height: 300px;
     overflow: auto;
 }
@@ -382,9 +385,7 @@ th {
     background-color: transparent; /* Hapus latar belakang input */
     outline: none;             /* Hapus outline saat di-klik */
     box-shadow: none;          /* Hapus shadow (jika ada dari Bootstrap) */
-    width: 100%;               /* Buat input mengisi lebar sel */
-    height: 100%;              /* Buat input mengisi tinggi sel */
-    padding: 8px;              /* Beri sedikit padding (sesuaikan) */
+    font-size: 12px; /* Atur ukuran font lebih kecil (misal: 14px -> 12px) */
     text-align: center;        /* Paskan dengan text-align tabel */
 }
 
@@ -397,3 +398,24 @@ th {
 #sizeTable thead input.header-edit-input {
     font-weight: bold; /* Samakan dengan gaya header */
 }
+
+#sizeTable thead th input.form-control {
+    font-family: inherit; 
+    font-weight: bold; 
+    font-size: inherit; 
+    color: inherit; 
+    text-align: center;
+    border: none;
+    background-color: transparent;
+    outline: none;
+    box-shadow: none;
+    padding: 0;     
+    width: 100%; 
+    margin: 0;
+}
+
+/* (Opsional) Highlight saat fokus */
+#sizeTable thead th input.form-control:focus {
+    background-color: rgba(0, 0, 0, 0.05); 
+}
+
