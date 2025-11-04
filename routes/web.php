@@ -33,12 +33,16 @@ Route::get('/dashboard', function () {
 
 
 // Route Task
-Route::get('/task', function () {
-    return view('task-sb');
-})->name('task');
+Route::middleware(['auth'])->group(function() {
+Route::get('/task', [TaskController::class, 'index'])->name('task');
 Route::get('/print-po', [TaskController::class, 'showPrintPage'])->name('task.printPage');
+Route::post('/task/store', [TaskController::class, 'store'])->name('task.store');
+Route::post('/checklist/update/{id}', [TaskController::class, 'updateChecklistStatus'])
+       ->name('checklist.updateStatus');
+Route::post('/task/status/update/{id}', [TaskController::class, 'updateStatus'])->name('task.updateStatus');
+Route::delete('/task/delete/{id}', [TaskController::class, 'destroy'])->name('task.destroy');
 // END Route Task //
-
+});
 
 // Rute untuk pekerjaan
 Route::middleware('auth')->group(function () {

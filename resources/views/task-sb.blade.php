@@ -2,13 +2,44 @@
 
 @section('title', 'Task') 
 
+@php
+    use Illuminate\Support\Facades\Storage;
+    use Illuminate\Support\Str;
+    use Carbon\Carbon;
+    use Illuminate\Support\Facades\Auth;
+
+$user = Auth::user();
+$initials = '';
+
+if ($user && $user->name) {
+    $words = explode(' ', $user->name);
+    $initials = strtoupper(substr($words[0], 0, 1) . (isset($words[1]) ? substr($words[1], 0, 1) : ''));
+}
+
+// --- Logika Warna HSL BARU ---
+$firstLetter = strtoupper(substr($initials ?? 'A', 0, 1)); // Default 'A'
+$letterValue = ord($firstLetter) - ord('A'); // 0-25
+$hue = ($letterValue * 14) % 360; // Hitung Hue
+$bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
+// --
+@endphp
+
 @section('content')
 
-<div class="page" data-user-name="{{ Auth::user()->name }}">
-        <div class="title-page">
-        <h2>Task</h2>   
+<div class="page" data-user-name="{{ Auth::user()?->name }}">
+    <div class="title-page">
+    <div class="tp-1">
+        <h2>Task</h2> 
+        <div class="search-container mb-3">
+            <div class="input-with-icon">
+                <i class="bi bi-search search-icon"></i>
+            <input type="text" id="taskSearchInput" class="form-control" placeholder="Cari">
+        </div>
+    </div>
+        </div>
         <button class="btn-add" id="addBtn"><i class="bi bi-plus-lg"></i> Add new</button>
     </div>
+  
     <div class="task">
     <table>
         <thead>
@@ -27,177 +58,122 @@
             </tr>
         </thead>
         <tbody class="table-bg">
-            <tr>
-                <td>FKN/024/051</td>
-                <td>DTF Ulang tahun</td>
-                <td>12</td>
-                <td><button class="line-btn">DTF</button></td>
-                <td>Urgent</td>
-                <td>
-                    <div class="dropdown">
-                        <button class="status-btn status-needs-work dropdown-toggle" type="button" id="statusDropdown1" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="status-text">Needs Work</span>
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="statusDropdown1">
-                            <a class="dropdown-item" href="#" data-status="Done and Ready">Done and Ready</a>
-                            <a class="dropdown-item" href="#" data-status="In Progress">In Progress</a>
-                            <a class="dropdown-item" href="#" data-status="Hold">Hold</a>
-                            <a class="dropdown-item" href="#" data-status="Needs Work">Needs Work</a>
-                        </div>
-                    </div>
-                </td>
-                <td>5 hari lagi</td>
-                <td><img src="assets/img/saim_jrsy.png"class="mockup"></td>
-                <td><div class="pic">AKT</div></td>
-                <td>
-                    <div class="dropdown">
-                        <button class="progress dropdown-toggle" type="button" id="progressDropdown1" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="progress-text">0%</span>
-                        </button>
-                        <div class="dropdown-menu p-3" aria-labelledby="progressDropdown1" style="width: 200px;">
-                            <form class="progress-form">
-                                <div class="form-check">
-                                    <input class="form-check-input progress-check" type="checkbox" id="check1">
-                                    <label class="form-check-label" for="check1">Design</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input progress-check" type="checkbox" id="check2">
-                                    <label class="form-check-label" for="check2">Production</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input progress-check" type="checkbox" id="check3">
-                                    <label class="form-check-label" for="check3">Quality Check</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input progress-check" type="checkbox" id="check5">
-                                    <label class="form-check-label" for="check5">Packaging</label>
-                                </div>
-                                <button type="button" class="btn btn-primary mt-3 done-btn" data-bs-toggle="dropdown">Done</button>
-                            </form>
-                        </div>
-                    </div>
-                </td>
-                <td class="icon-cell">
-                    <i class="bi bi-pencil-square icon-edit"></i>
-                    <i class="bi bi-cloud-download-fill icon-download"></i>
-                    <i class="bi bi-trash3-fill icon-trash"></i>
-                </td>                
-            </tr>
-            <tr>
-                <td>FKN/024/051</td>
-                <td>DTF Ulang tahun</td>
-                <td>12</td>
-                <td><button class="line-btn">DTF</button></td>
-                <td>Urgent</td>
-                <td>
-                    <div class="dropdown">
-                        <button class="status-btn status-needs-work dropdown-toggle" type="button" id="statusDropdown1" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="status-text">Needs Work</span>
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="statusDropdown1">
-                            <a class="dropdown-item" href="#" data-status="Done and Ready">Done and Ready</a>
-                            <a class="dropdown-item" href="#" data-status="In Progress">In Progress</a>
-                            <a class="dropdown-item" href="#" data-status="Hold">Hold</a>
-                            <a class="dropdown-item" href="#" data-status="Needs Work">Needs Work</a>
-                        </div>
-                    </div>
-                </td>
-                <td>5 hari lagi</td>
-                <td><img src="assets/img/saim_jrsy.png"class="mockup"></td>
-                <td><div class="pic">AKT</div></td>
 
-                <td>
-                    <div class="dropdown">
-                        <button class="progress dropdown-toggle" type="button" id="progressDropdown1" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="progress-text">0%</span>
-                        </button>
-                        <div class="dropdown-menu p-3" aria-labelledby="progressDropdown1" style="width: 200px;">
-                            <form class="progress-form">
-                                <div class="form-check">
-                                    <input class="form-check-input progress-check" type="checkbox" id="check1">
-                                    <label class="form-check-label" for="check1">Design</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input progress-check" type="checkbox" id="check2">
-                                    <label class="form-check-label" for="check2">Production</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input progress-check" type="checkbox" id="check3">
-                                    <label class="form-check-label" for="check3">Quality Check</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input progress-check" type="checkbox" id="check5">
-                                    <label class="form-check-label" for="check5">Packaging</label>
-                                </div>
-                                <button type="button" class="btn btn-primary mt-3 done-btn" data-bs-toggle="dropdown">Done</button>
-                            </form>
-                        </div>
-                    </div>
-                </td>
-                <td class="icon-cell">
-                    <i class="bi bi-pencil-square icon-edit"></i>
-                    <i class="bi bi-cloud-download-fill icon-download"></i>
-                    <i class="bi bi-trash3-fill icon-trash"></i>
-                </td>                
-            </tr>
+
+            @foreach($tasks as $task)
+            @php
+                $linePekerjaan = $task->taskPekerjaans->first();
+            @endphp
             <tr>
-                <td>FKN/024/051</td>
-                <td>DTF Ulang tahun</td>
-                <td>12</td>
-                <td><button class="line-btn">DTF</button></td>
-                <td>Urgent</td>
+                <td>{{ $task->no_invoice }}</td>
+                <td>{{ $task->judul }}</td>
+                <td>{{ $task->total_jumlah }}</td>
+    
+                <td>
+                    <button class="line-btn" style="background-color: #3498db; color: #ffff;">
+                        {{ $linePekerjaan ? $linePekerjaan->nama_pekerjaan : 'N/A' }}
+                    </button>
+                </td>
+    
+                <td>{{ $task->urgensi }}</td>
+                
                 <td>
                     <div class="dropdown">
-                        <button class="status-btn status-needs-work dropdown-toggle" type="button" id="statusDropdown1" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="status-text">Needs Work</span>
+                        <button class="status-btn status-{{ Str::slug($task->status->name) }} dropdown-toggle" type="button" id="statusDropdown{{ $task->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="status-text">{{ $task->status->name }}</span>
                         </button>
-                        <div class="dropdown-menu" aria-labelledby="statusDropdown1">
-                            <a class="dropdown-item" href="#" data-status="Done and Ready">Done and Ready</a>
-                            <a class="dropdown-item" href="#" data-status="In Progress">In Progress</a>
-                            <a class="dropdown-item" href="#" data-status="Hold">Hold</a>
-                            <a class="dropdown-item" href="#" data-status="Needs Work">Needs Work</a>
+                        <div class="dropdown-menu" aria-labelledby="statusDropdown{{ $task->id }}">
+                            @if($task->status->name == 'Hold')
+                                <a class="dropdown-item" href="#" data-status="Resume Progress"><i class="bi bi-play-circle"></i> Resume Progress</a>
+                            @else
+                                <a class="dropdown-item" href="#" data-status="Hold"><i class="bi bi-pause-circle"></i> Set to Hold</a>
+                            @endif
                         </div>
                     </div>
                 </td>
-                <td>5 hari lagi</td>
-                <td><img src="assets/img/saim_jrsy.png"class="mockup"></td>
-                <td><div class="pic">AKT</div></td>
+    
                 <td>
+                    {{ $linePekerjaan && $linePekerjaan->deadline ? \Carbon\Carbon::parse($linePekerjaan->deadline)->diffForHumans() : '-' }}
+                </td>
+    
+                <td class="icon-cell">
+                    <div class="mockup-wrapper">
+                        @foreach($task->mockups as $mockup)
+                            <img src="{{ Storage::url($mockup->file_path) }}" class="mockup-image-data">
+                        @endforeach
+                        <img src="{{ $task->mockups->first() ? Storage::url($task->mockups->first()->file_path) : asset('assets/img/default.png') }}" class="mockup-display">
+                        <i class="bi bi-stack gallery-indicator {{ $task->mockups->count() > 1 ? 'visible' : '' }}"></i>
+                    </div>
+                </td>
+                
+                <td>
+                    @php
+                        $picName = $task->user->name ?? 'A'; // Default ke 'A' jika null
+                        $initials = \App\Http\Controllers\TaskController::buatInisial($picName);
+                        
+                        // --- Logika Warna HSL BARU ---
+                        // 1. Ambil huruf pertama (A-Z)
+                        $firstLetter = strtoupper(substr($initials, 0, 1));
+                        
+                        // 2. Ubah huruf menjadi angka 0-25 (A=0, B=1, ...)
+                        // (ord('P') - ord('A') = 15)
+                        $letterValue = ord($firstLetter) - ord('A'); 
+                        
+                        // 3. Hitung Hue (0-360). Kita kalikan ~13.8 (360/26)
+                        // Menggunakan 14 akan memberikan sebaran warna yang bagus
+                        $hue = ($letterValue * 14) % 360;
+    
+                        // 4. Atur Saturation (65%) dan Lightness (40%) agar warna solid
+                        $bgColor = "hsl({$hue}, 65%, 40%)";
+                        // --- Akhir Logika Baru ---
+                    @endphp
+                    
+                    <div class="pic" style="background-color: {{ $bgColor }};">
+                        {{ $initials }}
+                    </div>
+                </td>
+                
+                <td>
+                    @php
+                        // Ambil checklist HANYA dari line pekerjaan ini
+                        $allChecklists = $linePekerjaan ? $linePekerjaan->checklists : collect();
+                        $completed = $allChecklists->where('is_completed', true)->count();
+                        $total = $allChecklists->count();
+                        $percentage = ($total > 0) ? round(($completed / $total) * 100) : 0;
+                    @endphp
                     <div class="dropdown">
-                        <button class="progress dropdown-toggle" type="button" id="progressDropdown1" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="progress-text">0%</span>
+                        <button class="progress dropdown-toggle" type="button" id="progressDropdown{{ $task->id }}" data-task-id="{{ $task->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="progress-text">{{ $percentage }}%</span>
                         </button>
-                        <div class="dropdown-menu p-3" aria-labelledby="progressDropdown1" style="width: 200px;">
+                        <div class="dropdown-menu p-3" aria-labelledby="progressDropdown{{ $task->id }}" style="width: 250px;">
                             <form class="progress-form">
-                                <div class="form-check">
-                                    <input class="form-check-input progress-check" type="checkbox" id="check1">
-                                    <label class="form-check-label" for="check1">Design</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input progress-check" type="checkbox" id="check2">
-                                    <label class="form-check-label" for="check2">Production</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input progress-check" type="checkbox" id="check3">
-                                    <label class="form-check-label" for="check3">Quality Check</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input progress-check" type="checkbox" id="check5">
-                                    <label class="form-check-label" for="check5">Packaging</label>
-                                </div>
-                                <button type="button" class="btn btn-primary mt-3 done-btn" data-bs-toggle="dropdown">Done</button>
+                                @forelse($allChecklists as $checklist)
+                                    <div class="form-check">
+                                        <input class="form-check-input progress-check" type="checkbox" 
+                                               id="check-{{ $checklist->id }}" 
+                                               data-id="{{ $checklist->id }}" 
+                                               {{ $checklist->is_completed ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="check-{{ $checklist->id }}">
+                                            {{ $checklist->nama_checklist }}
+                                        </label>
+                                    </div>
+                                @empty
+                                    <p class="text-muted small">Belum ada checklist.</p>
+                                @endforelse
                             </form>
                         </div>
                     </div>
                 </td>
+                
                 <td class="icon-cell">
                     <i class="bi bi-pencil-square icon-edit"></i>
-                    <i class="bi bi-cloud-download-fill icon-download"></i>
-                    <i class="bi bi-trash3-fill icon-trash"></i>
-                </td>                
+                    <i class="bi bi-cloud-download-fill icon-download" data-id="{{ $task->id }}"></i>
+                    <i class="bi bi-trash3-fill icon-trash" data-id="{{ $task->id }}"></i>
+                </td>
             </tr>
-        </tbody>
-    </table>
+        @endforeach
+</tbody>
+</table>
 </div>
    </div>
 
@@ -245,27 +221,36 @@
                 <div id="lineContainer"></div>
 
                 <hr>
-
-                <h6>Size</h6>
-<p class="small text-muted">Klik kanan pada tabel untuk menambah/menghapus baris atau kolom.</p>
-<div class="table-responsive">
-    <table class="table table-bordered text-center align-middle" id="sizeTable">
-        <thead class="table-danger">
-            <tr>
-                <th>Size</th>
-                <th>Tambahkan</th>
-        
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><input type="text" class="form-control"  placeholder="Jenis"></td>
-                <td><input type="text" class="form-control" placeholder="Jumlah"></td>
-
-            </tr>
-            </tbody>
-    </table>
-</div>
+                <h6>Jenis & Size</h6>
+                <p class="small text-muted">Klik kanan pada tabel untuk menambah/menghapus baris atau kolom.</p>
+                <div class="table-responsive">
+                    <table class="table table-bordered text-center align-middle" id="sizeTable">
+                        <thead class="table-danger">
+                            <tr>
+                                <th>Jenis</th> <th>Size S</th> <th>Size M</th> <th>Jumlah</th> </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="text" class="form-control" placeholder="Baju Anak"></td>
+                                <td><input type="text" class="form-control quantity-input" placeholder="0"></td>
+                                <td><input type="text" class="form-control quantity-input" placeholder="0"></td>
+                                <td class="row-total">0</td> </tr>
+                            </tbody>
+                        <tfoot>
+                            <tr class="table-secondary fw-bold">
+                                <td>Total</td>
+                                <td class="column-total">0</td> <td class="column-total">0</td> <td class="grand-total">0</td> </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <div id="customContextMenu" class="context-menu shadow-lg">
+                    <div class="context-menu-item" data-action="insert-row-after">Tambah Baris di Bawah</div>
+                    <div class="context-menu-item text-danger" data-action="delete-row">Hapus Baris Ini</div>
+                    <hr>
+                    <div class="context-menu-item" data-action="insert-col-right">Sisipkan Kolom Kanan</div>
+                    <div class="context-menu-item text-danger" data-action="delete-col">Hapus Kolom Ini</div>
+                </div>
 
 <div id="customContextMenu" class="context-menu shadow-lg">
     <div class="context-menu-item" data-action="insert-row-after">Tambah Baris di Bawah</div>
@@ -286,10 +271,6 @@
                     <div class="context-menu-item text-danger" data-action="delete-col">Hapus Kolom Ini</div>
                 </div>
 
-                <div class="mb-2">
-                    <label>Jumlah</label>
-                    <input type="text" id="jumlah" class="form-control">
-                </div>
 
                 <div class="row mb-2">
                     <div class="col-md-6">
@@ -308,8 +289,12 @@
                 </div>
 
                 <div class="mb-3">
-                    <label>Mockup</label>
-                    <input type="file" id="mockup" class="form-control">
+                    <label for="mockups" class="form-label">Mockup</label>
+                    
+                    <input type="file" id="mockups" class="form-control" name="mockups[]" multiple>
+                    
+                    <div id="mockup-preview-area" class="mt-2" style="font-size: 14px;">
+                        </div>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2">
@@ -322,6 +307,17 @@
     </div>
     {{-- end pop up --}}
     
+
+    {{-- mockup modal --}}
+    <div class="image-modal" id="imageCarouselModal" style="display: none;">
+        <span class="modal-close" id="modalCloseBtn">&times;</span>
+        <button class="modal-nav prev" id="modalPrevBtn">&#10094;</button>
+        <button class="modal-nav next" id="modalNextBtn">&#10095;</button>
+        <div class="modal-content">
+            <img src="" id="modalImage" alt="Mockup Carousel">
+        </div>
+    </div>
+    {{-- end pop up --}}
 @endsection
 
 @push('styles')
