@@ -2,60 +2,55 @@
 
 @section('title', 'Home Page')
 
+@php
+    use Illuminate\Support\Str;
+    use Carbon\Carbon;
+    // Definisikan $colors untuk PIC
+    $colors = ['#2ecc71', '#3498db', '#9b59b6', '#e67e22', '#e74c3c'];
+@endphp
 @section('content')
-  <!-- Konten utama -->
   <div class="page">
     <div class="dashboard">
+
       <div class="task-category">
-        <div class="task-name">
-          TO DO
-        </div>
+        <div class="task-name">TO DO</div>
         <div class="task-clr" style="background-color:#3498db;">
           <div class="total-task">
-            26
+            {{ $countToDo }}
           </div>
         </div>
       </div>
 
       <div class="task-category">
-        <div class="task-name">
-         ON PROGRESS
-        </div>
+        <div class="task-name">ON PROGRESS</div>
         <div class="task-clr" style="background-color:#FD9F01;">
           <div class="total-task">
-            26
+            {{ $countInProgress }}
           </div>
         </div>
       </div>
 
       <div class="task-category">
-        <div class="task-name">
-        COMPLETE
-        </div>
+        <div class="task-name">COMPLETE</div>
         <div class="task-clr"  style="background-color:#076225;">
           <div class="total-task">
-            26
+            {{ $countComplete }}
           </div>
         </div>
       </div>
 
-      <div class="task-category">
+ <div class="task-category">
         <div class="task-name">
-         TRASHED
-        </div>
-        <div class="task-clr"  style="background-color:#CF221B;">
-          <div class="total-task">
-            26
-          </div>
+         HOLD </div>
+        <div class="task-clr"  style="background-color:#CF221B;"> <div class="total-task">
+            {{ $countHold }} </div>
         </div>
       </div>
-      <!-- pd -->
     </div>
 
-    <!-- Task Hari ini -->
     <div class="task-indash">
       <table class="data-table">
-       <p class="table-tittle">Task Hari Ini</p>
+       <p class="table-tittle">Task Terbaru</p>
         <thead>
           <tr>
             <th>Task Tittle</th>
@@ -65,78 +60,74 @@
           </tr>
         </thead>
         <tbody>
-
-          <tr>
-            <td>Kaos SD SAIM</td>
-            <td>To Do</td>
-            <td>3 Hari lagi</td>
-            <td class="center-text">DTF</td>
-          </tr>
-          <tr>
-            <td>Kaos SD SAIM</td>
-            <td>To Do</td>
-            <td>3 Hari lagi</td>
-            <td class="center-text">DTF</td>
-          </tr>
+          @forelse($latestTasks as $task)
+            @php
+                $linePekerjaan = $task->taskPekerjaans->first();
+                $deadline = $linePekerjaan ? $linePekerjaan->deadline : null;
+            @endphp
             <tr>
-            <td>Kaos SD SAIM</td>
-            <td>To Do</td>
-            <td>3 Hari lagi</td>
-            <td class="center-text">DTF</td>
-          </tr>
-
+                <td>{{ $task->judul }}</td>
+                <td>
+                    <span class="status-badge-sm status-{{ Str::slug($task->status->name) }}">
+                        {{ $task->status->name }}
+                    </span>
+                </td>
+                <td>
+                    {{ $deadline ? Carbon::parse($deadline)->diffForHumans() : '-' }}
+                </td>
+                <td class="center-text">
+                    {{ $linePekerjaan ? $linePekerjaan->nama_pekerjaan : 'N/A' }}
+                </td>
+            </tr>
+          @empty
+            <tr>
+                <td colspan="4" class="text-center">Belum ada task baru.</td>
+            </tr>
+          @endforelse
         </tbody>
       </table>
     </div>
 
-      <!-- deadline -->
-  <div class="deadline">
-    <table class="dldata-table">
-      <p class="dltable-tittle">Deadline</p>
-       <thead>
-         <tr>
-           <th>Task Tittle</th>
-           <th>Due Date</th>
-           <th>Time left</th>
-           <th>PIC</th>
-         </tr>
-       </thead>
-       <tbody>
+    <div class="deadline">
+      <table class="dldata-table">
+        <p class="dltable-tittle">Deadline Terdekat</p>
+         <thead>
+           <tr>
+             <th>Task Tittle</th>
+             <th>Due Date</th>
+             <th>Time left</th>
+             <th>PIC</th>
+           </tr>
+         </thead>
+         <tbody>
+           @forelse($upcomingDeadlines as $task)
+             @php
+                // (Kita perlu ambil line pekerjaan lagi karena ini task yang berbeda)
+                $linePekerjaan = $task->taskPekerjaans->firstWhere('deadline', '>=', now());
+                $deadline = $linePekerjaan ? $linePekerjaan->deadline : null;
 
-         <tr>
-           <td>Kaos SD SAIM</td>
-           <td>9-Dec-2025</td>
-           <td>2 Hari Lagi</td>
-            <td class="pic-task"><div class="pic-profile">RW</div></td>
-         </tr>
-         <tr>
-          <td>Kaos SD SAIM</td>
-          <td>9-Dec-2025</td>
-          <td>2 Hari Lagi</td>
-           <td class="pic-task"><div class="pic-profile">RW</div></td>
-        </tr>
-        <tr>
-          <td>Kaos SD SAIM</td>
-          <td>9-Dec-2025</td>
-          <td>2 Hari Lagi</td>
-           <td class="pic-task"><div class="pic-profile">RW</div></td>
-        </tr>
-        <tr>
-          <td>Kaos SD SAIM</td>
-          <td>9-Dec-2025</td>
-          <td>2 Hari Lagi</td>
-           <td class="pic-task"><div class="pic-profile">RW</div></td>
-        </tr>
-       </tbody>
-     </table>
+                // Logika Inisial & Warna PIC
+                $picName = $task->user->name ?? 'A';
+                $initials = \App\Http\Controllers\TaskController::buatInisial($picName);
+                $bgColor = $colors[ord(strtoupper(substr($initials, 0, 1))) % count($colors)];
+             @endphp
+             <tr>
+                 <td>{{ $task->judul }}</td>
+                 <td>{{ $deadline ? Carbon::parse($deadline)->format('j-M-Y') : '-' }}</td>
+                 <td>{{ $deadline ? Carbon::parse($deadline)->diffForHumans() : '-' }}</td>
+                 <td class="pic-task">
+                     <div class="pic-profile" style="background-color: {{ $bgColor }};">
+                         {{ $initials }}
+                     </div>
+                 </td>
+             </tr>
+           @empty
+             <tr>
+                 <td colspan="4" class="text-center">Tidak ada deadline terdekat.</td>
+             </tr>
+           @endforelse
+         </tbody>
+       </table>
+    </div>
   </div>
-
-
-
-  <!-- page main end -->
-  </div>
-  <!-- next -->
-
-  @endsection
-
-
+@endsection

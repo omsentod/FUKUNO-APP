@@ -4,19 +4,20 @@
 
 @section('content')
 <div class="page">
-  <div class="header-content">
-    <h2>Line Pekerjaan</h2>
-    <button type="button" class="btn-add">
-      <i class="bi bi-plus-lg"></i> Add new
-    </button>
-  </div>
+
 
   <div class="line-pekerjaan">
+    <div class="header-content">
+      <h2>Line Pekerjaan</h2>
+      <button type="button" class="btn-add">
+        <i class="bi bi-plus-lg"></i> Add new
+      </button>
+    </div>
     <table class="table-line">
       <thead>
         <tr>
           <th>ID</th>
-          <th>Nama Line Pekerjaan</th>
+          <th>Line Pekerjaan</th>
           <th>Action</th>
         </tr>
       </thead>

@@ -36,13 +36,12 @@ body{
     display: flex;
     flex-direction: column;
     padding: 20px;
-    width: 135vh;
+    width: 130vh;
     height: min-content;
     top: 130px;
-    margin-left: 330px;
+    left: 350px;
     padding: 20px;
     z-index: -2;
-    /* background-color: var(--main-color); */
   }
 
 /* === Checklist Container (TAMBAHAN) === */
@@ -51,7 +50,6 @@ body{
     padding: 20px;
     border-radius: 10px;
     box-shadow: 2px 4px 6px rgba(0,0,0,0.1);
-    width: calc(100% - 40px);
     margin-bottom:40px ;
   }
   
@@ -74,6 +72,7 @@ body{
     border-radius: 8px;
     cursor: pointer;
     font-weight: var(--font-semibold);
+    margin-right: 5vh;
   }
   .btn-add:hover {
     background-color: #a91a15;
@@ -91,6 +90,7 @@ body{
   }
   
   .table-checklist th {
+    background-color: #f5f5f5;
     font-weight: var(--font-semibold);
   }
   

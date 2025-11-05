@@ -8,11 +8,12 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 <div class="page">
-    <div class="header-content">
+   
+    <div class="status-container">
+      <div class="header-content">
         <h2>Status</h2>
         <button class="btn-add" id="addBtn"><i class="bi bi-plus-lg"></i> Add new</button>
       </div>
-    <div class="status-container">
         <table class="table-status">
         <thead>
           <tr>

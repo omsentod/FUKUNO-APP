@@ -9,4 +9,9 @@ class Checklist extends Model
 {
     use HasFactory;
     protected $fillable = ['name'];
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
 }

@@ -12,6 +12,9 @@
   @stack('styles')
 </head>
 <body>
+    <div id="page-preloader">
+        <div class="spinner"></div>
+    </div>
   @php
   use Illuminate\Support\Facades\Auth;
 
@@ -37,10 +40,43 @@
   <!-- Navbarkanan -->
   <div class="navbarkanan">
       <!-- Notifikasi -->
-      <i class="bi bi-bell-fill icon-kanan" id="bell-icon"></i>
-      <div class="notification" id="notification">  <!-- Hapus duplikasi, gunakan satu div -->
-          <p>No notification yet!</p>  <!-- Atau gunakan konten dinamis, misalnya dari database -->
-      </div>
+      <i class="bi bi-bell-fill icon-kanan {{ $unreadNotificationsCount > 0 ? 'is-ringing' : '' }}" 
+        id="bell-icon" 
+        style="position: relative;">
+          
+           @if($unreadNotificationsCount > 0)
+               <span class="notification-badge">
+                   {{ $unreadNotificationsCount }}
+               </span>
+           @endif
+     </i>
+     
+     <div class="notification" id="notification">
+         @forelse($recentNotifications as $notification)
+           <a href="#" class="notification-item">
+               <div class="pic pic-sm" 
+                    style="background-color: {{ $notification->data['creator_color'] ?? '#ccc' }};">
+                    {{ $notification->data['creator_initials'] ?? '??' }}
+               </div>
+               
+               <div class="notification-content">
+                   <p>
+                       @if(isset($notification->data['creator_name']))
+                           <strong>{{ $notification->data['creator_name'] }}</strong> 
+                           telah membuat task: {{ Str::limit($notification->data['task_title'], 25) }}
+                       @else
+                           {{ $notification->data['message'] }}
+                       @endif
+                   </p>
+                   <small>{{ $notification->created_at->diffForHumans() }}</small>
+               </div>
+           </a>
+         @empty
+           <div class="notification-empty">
+               <p>No notification yet!</p>
+           </div>
+         @endforelse
+     </div>
 
       <!-- Profile Dropdown -->
       <div class="dropdown">
@@ -97,6 +133,7 @@
       </div>
       <div class="sidebar-item {{ request()->routeIs('user') ? 'active' : '' }}">
           <a class="sidebar-cell" href="{{ route('user') }}">
+            
               <i class="bi bi-people-fill" style="margin-right: 8px;"></i>
               User
           </a>
@@ -118,6 +155,10 @@
       </div>
   </div>
 </div>
+</div> <div class="sidebar-toggle" id="sidebar-toggle-btn">
+    <i class="bi bi-chevron-left"></i>
+</div>
+
 
  <!-- The Content -->
  <main>

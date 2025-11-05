@@ -38,10 +38,10 @@ body{
     display: flex;
     flex-direction: column;
     padding: 20px;
-    width: 78%;
+    width: 135vh;
     height: 100%;
     top: 130px;
-    margin-left: 320px;
+    left: 320px;
     padding: 20px;
     z-index: -2;
     /* background-color: var(--main-color); */
@@ -101,6 +101,7 @@ body{
   }
   
   .trash-table th {
+    background-color: #f5f5f5;
     font-weight: var(--font-semibold);
   }
   

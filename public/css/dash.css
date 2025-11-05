@@ -75,15 +75,16 @@ body{
       .notification {
         position: absolute;
         top: 60px;
-        right: 10px;
+        right: 10vh;
         background-color: var(--ctn-color);
         color: var(--txt-color);
         padding: 10px;
         border-radius: 5px;
         display: none;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
+        z-index: 1;
         opacity: 0;
+        width: 50vh;
         transition: opacity 0.3s ease;
       }
             .notification.show {
@@ -91,6 +92,118 @@ body{
         opacity: 1;
       }
 
+      #bell-icon {
+        position: relative; /* Agar 'dot' bisa diposisikan */
+    }
+
+    .notification-item {
+      display: flex;
+      align-items: center;
+      gap: 10px; /* Jarak antara PIC dan teks */
+      padding: 10px 15px;
+      border-bottom: 1px solid #eee;
+      text-decoration: none; /* Hapus garis bawah dari <a> */
+    
+    }
+    .notification-item:hover {
+      background-color: #f8f9fa;
+    }
+  .notification-item:last-child {
+      border-bottom: none;
+  }
+  .notification-item p {
+      margin-bottom: 2px;
+      font-size: 14px;
+  }
+  .notification-item small {
+      color: #888;
+      font-size: 12px;
+  }
+    
+  .notification-dot {
+        position: absolute;
+        top: 0px;
+        right: -5px;
+        width: 10px;
+        height: 10px;
+        background-color: var(--main-color, #CF221B);
+        border-radius: 50%;
+        border: 2px solid var(--ctn-color); /* Sesuaikan dengan warna bg navbar */
+    }
+    /* Ukuran PIC kecil khusus untuk notifikasi */
+  .notification-item .pic.pic-sm {
+  width: 35px;
+  height: 35px;
+  font-size: 14px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: var(--ctn-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+  .notification-content p {
+  margin-bottom: 2px;
+  font-size: 14px;
+  color: #333; /* Warna teks normal */
+}
+  .notification-content p strong {
+  color: #000; /* Warna nama lebih gelap */
+}
+  .notification-content small {
+  color: #888;
+  font-size: 12px;
+}
+
+/* Style untuk "No notification yet!" */
+  .notification-empty {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+}
+/* Class untuk memicu animasi */
+.is-ringing {
+  /* Terapkan animasi 'bell-shake' */
+  animation: bell-shake 1.2s ease-in-out infinite;
+  
+  /* Atur titik tumpu ayunan di TENGAH ATAS */
+  transform-origin: top center; 
+}
+
+/* Definisi animasi 'bell-shake' */
+@keyframes bell-shake {
+0% { transform: rotate(0); }
+10% { transform: rotate(14deg); }
+20% { transform: rotate(-10deg); }
+30% { transform: rotate(8deg); }
+40% { transform: rotate(-6deg); }
+50% { transform: rotate(4deg); }
+60% { transform: rotate(-2deg); }
+70% { transform: rotate(0); }
+/* (Sisa 30% adalah jeda sebelum berulang) */
+100% { transform: rotate(0); }
+}
+.notification-badge {
+  position: absolute;
+  top: -5px;  /* Posisikan di atas ikon */
+  right: -8px; /* Posisikan di kanan ikon */
+  
+  background-color: var(--main-color, #CF221B); /* Warna merah */
+  color: white;
+  font-family: 'Poppins', sans-serif; /* Pastikan font konsisten */
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 1; /* Pastikan angka pas di tengah */
+  
+  border-radius: 50%; /* Membuatnya bulat */
+  padding: 3px 5px;   /* Jarak di dalam lingkaran */
+  min-width: 18px;    /* Lebar minimum agar "1" tetap bulat */
+  text-align: center;
+  
+  /* Border agar terlihat "terpisah" dari ikon */
+  border: 2px solid var(--ctn-color); /* Ganti var(--ctn-color) dengan warna BG navbar Anda */
+}
 
       .profile {
         display: flex;
@@ -124,6 +237,7 @@ body{
         width: 300px;
         background-color: var(--ctn-color);
         padding-top: 20px;
+        transition: transform 0.3s ease-in-out;
       }
       .sidebar-menu{
         position: absolute;
@@ -180,18 +294,71 @@ body{
         color: black;  
       }
 
+        /* -- 2. Style untuk Tombol Panah Baru -- */
+.sidebar-toggle {
+    position: fixed; /* Tetap di tempat saat scroll */
+    top: 50%;        /* Posisi vertikal di tengah layar */
+    
+    /* PENTING: Sesuaikan 'left: 250px;' ini 
+      agar pas dengan lebar sidebar Anda.
+    */
+    left: 300px; 
+    
+    /* Geser ke atas 50% dari tingginya sendiri agar pas di tengah */
+    transform: translateY(-50%);
+
+    /* Styling Tombol */
+    width: 30px;  /* Lebar tombol */
+    height: 50px; /* Tinggi tombol */
+    background-color: var(--main-color, #CF221B); /* Samakan dengan warna tema */
+    color: white;
+    border: none;
+    border-radius: 0 8px 8px 0; /* Bulat di sisi kanan */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 999; /* Di atas konten main, di bawah navbar */
+    
+    /* Transisi untuk animasi geser tombol */
+    transition: left 0.3s ease-in-out;
+}
+
+.sidebar-toggle i {
+    font-size: 1.2rem;
+    /* Transisi untuk animasi panah berputar */
+    transition: transform 0.3s ease-in-out;
+}
+
+/* -- 3. Style untuk Kondisi Tertutup -- */
+body.sidebar-closed .page {
+  left: 130px;
+  width: 135vh;   /* Isi lebar penuh */
+}
+
+/* (Pastikan aturan ini masih ada) */
+body.sidebar-closed .sidebar {
+  transform: translateX(-100%);
+}
+body.sidebar-closed .sidebar-toggle {
+  left: 0;
+}
+body.sidebar-closed .sidebar-toggle i {
+  transform: rotate(180deg);
+}
+
       /* Style untuk konten utama di samping sidebar */
       .page {
         position: absolute;
         display: flex;
         flex-direction: row;
-        padding: 20px;
-        width: 135vh;
-        height: 100%;
+        height: auto;
         top: 130px;
-        margin-left: 330px;
         padding: 20px;
-        z-index: -2;
+        z-index: 1;
+        left: 40vh;
+        width: 135vh;
+        transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
         /* background-color: var(--main-color); */
       }
 
@@ -256,8 +423,7 @@ body{
         margin: 100px 0 0 10px;
         height: min-content;
         width: 520px;
-        background-color: var(--ctn-color);
-        outline: 2px solid rgb(88, 88, 88) ;
+        background-color: #3498db;
         border-radius: 10px;
       }
 
@@ -272,11 +438,11 @@ body{
         font-weight: var(--font-regular);
         margin-top: 10px; /* Jarak antara judul dan tabel */
         text-align: center; /* Menyelaraskan judul ke tengah */
-        color: var(--txt-color); /* Warna judul */
+        color: var(--ctn-color); /* Warna judul */
       }
 
       .data-table th {
-        color: var(--txt-color);
+        color: var(--ctn-color);
         padding: 0 10px 10px 10px;
         text-align: left;
         font-weight: var(--font-semibold);
@@ -284,12 +450,13 @@ body{
       }
 
       .data-table tr {
-        border-bottom: 1px solid var(--txt-color); /* Menambahkan garis bawah di setiap baris */
+        border-bottom: 1px solid var(--ctn-color); /* Menambahkan garis bawah di setiap baris */
       }
 
       .data-table td {
         padding: 10px;
         font-size: small;
+        color: var(--ctn-color);
       }
 
       .center-text{
@@ -297,16 +464,12 @@ body{
       }
 
       .data-table tr:hover td {
-        background-color: var(--main-color);
         background-color: rgba(226, 226, 226, 0.803);
         cursor: pointer;
         color: var(--txt-color);
       }
 
-      .data-table th:hover{
-        cursor: pointer;
-        color: var(--main-color);
-      }
+
 
       .data-table th, .data-table td {
         text-align: left;
@@ -330,8 +493,8 @@ body{
         margin: 100px 0 0 40px;
         height: min-content;
         width: 450px;
-        background-color: #CF221B;
-        outline: 2px solid rgb(88, 88, 88) ;
+        background-color: #c73636;
+        /* outline: 2px solid rgb(88, 88, 88) ; */
         border-radius: 10px;
       }
 
@@ -374,13 +537,47 @@ body{
         cursor: pointer;
       }
 
-      .dldata-table th:hover{
-        cursor: pointer;
-        color:var(--txt-color);
-      }
 
 
       .dldata-table th, .data-table td {
         text-align: left;
       }
 
+ /* Style untuk Preloader Halaman */
+#page-preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #717070cb; /* Warna latar halaman Anda */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; /* Paling atas */
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.5s, visibility 0.5s; /* Animasi fade-out */
+}
+
+/* Sembunyikan preloader saat sudah selesai */
+#page-preloader.loaded {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Spinner sederhana */
+#page-preloader .spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #dee2e6;
+  border-top-color: var(--main-color, #CF221B); /* Warna tema Anda */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+      transform: rotate(360deg);
+  }
+}

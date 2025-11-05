@@ -227,11 +227,11 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
                     <table class="table table-bordered text-center align-middle" id="sizeTable">
                         <thead class="table-danger">
                             <tr>
-                                <th>Jenis</th> <th>Size S</th> <th>Size M</th> <th>Jumlah</th> </tr>
+                                <th>Size</th> <th>Panjang</th> <th>Pendek</th> <th>Jumlah</th> </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td><input type="text" class="form-control" placeholder="Baju Anak"></td>
+                                <td><input type="text" class="form-control" placeholder="Input size"></td>
                                 <td><input type="text" class="form-control quantity-input" placeholder="0"></td>
                                 <td><input type="text" class="form-control quantity-input" placeholder="0"></td>
                                 <td class="row-total">0</td> </tr>

@@ -1007,24 +1007,18 @@ if (lineContainerArea) {
   /**
    * Membuka tab baru untuk print
    */
-  function handlePrint(icon) {
-    const row = icon.closest('tr');
-    if (!row) return;
-    const cells = row.querySelectorAll('td');
-    
-    // Ambil data dari sel. Hati-hati index bisa berubah
-    const data = {
-        noPo: cells[0]?.textContent.trim() || '',
-        taskTitle: cells[1]?.textContent.trim() || '',
-        jumlah: cells[2]?.textContent.trim() || '',
-        // Ambil src dari gambar pertama di wrapper
-        mockupSrc: cells[7].querySelector('img').src, 
-    };
 
-    const queryString = new URLSearchParams(data).toString();
-    const printURL = '/print-po?' + queryString;
+ function handlePrint(icon) {
+    const taskId = icon.dataset.id; // Ambil ID Task dari data-id
+    if (!taskId) {
+        alert("Task ID tidak ditemukan!");
+        return;
+    }
+
+    const printURL = `/print-po/${taskId}`; 
+    
     window.open(printURL, '_blank');
-  }
+}
 
   /**
    * Membuat inisial dari nama
@@ -1089,13 +1083,14 @@ document.querySelectorAll('.task table tbody tr').forEach(row => {
     initGalleryIndicator(row);
 });
 
-// ▼▼▼ GANTI BLOK 'change' LAMA ANDA DENGAN INI ▼▼▼
+
+
 
   // Listener untuk PERUBAHAN (change) - Khusus Checkbox
   document.body.addEventListener('change', function(event) {
     if (event.target.classList.contains('progress-check')) {
         
-        // JANGAN PANGGIL updateProgress() DI SINI
+        // JANGAN panggil updateProgress() di sini
 
         // 1. Ambil data dari checkbox yang diklik
         const checklistId = event.target.dataset.id;
@@ -1145,6 +1140,7 @@ document.querySelectorAll('.task table tbody tr').forEach(row => {
         });
     }
 });
+// ▲▲▲ AKHIR PENGGANTIAN ▲▲▲
 
 
 const searchInput = document.getElementById("taskSearchInput");

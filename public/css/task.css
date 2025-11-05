@@ -35,7 +35,11 @@ body{
     background-color: var(--bg-color);
 }
 
-
+/* -- Style untuk Kondisi Tertutup -- */
+body.sidebar-closed .page {
+    left: 30px;
+    width: 170vh;  /* Isi lebar penuh */
+  }
 
 .page {
     position: absolute;

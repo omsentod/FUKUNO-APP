@@ -5,6 +5,7 @@ use App\Http\Controllers\PekerjaansController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -27,15 +28,13 @@ Route::get('/register', function () {
 })->name('regis');
 
 // Rute untuk dashboard dengan middleware auth
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware('auth')->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 
 // Route Task
 Route::middleware(['auth'])->group(function() {
 Route::get('/task', [TaskController::class, 'index'])->name('task');
-Route::get('/print-po', [TaskController::class, 'showPrintPage'])->name('task.printPage');
+Route::get('/print-po/{id}', [TaskController::class, 'showPrintPage'])->name('task.printPage');
 Route::post('/task/store', [TaskController::class, 'store'])->name('task.store');
 Route::post('/checklist/update/{id}', [TaskController::class, 'updateChecklistStatus'])
        ->name('checklist.updateStatus');
@@ -93,3 +92,6 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 
 // Rute untuk proses login (POST)
 Route::post('/', [AuthController::class, 'login'])->name('login.submit');
+
+// Rute untuk menandai semua notifikasi sebagai "telah dibaca"
+Route::post('/notifications/mark-as-read', [TaskController::class, 'markNotificationsAsRead'])->name('notifications.markAsRead');
