@@ -29,18 +29,26 @@ Route::get('/register', function () {
 
 // Rute untuk dashboard dengan middleware auth
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
+Route::get('task-detail',function () {
+    return view('task-detail');
+})->name('task-detail');
 
 // Route Task
 Route::middleware(['auth'])->group(function() {
 Route::get('/task', [TaskController::class, 'index'])->name('task');
 Route::get('/print-po/{id}', [TaskController::class, 'showPrintPage'])->name('task.printPage');
 Route::post('/task/store', [TaskController::class, 'store'])->name('task.store');
-Route::post('/checklist/update/{id}', [TaskController::class, 'updateChecklistStatus'])
-       ->name('checklist.updateStatus');
+Route::post('/task/update/{id}', [TaskController::class, 'update'])->name('task.update');
+Route::post('/checklist/update/{id}', [TaskController::class, 'updateChecklistStatus'])->name('checklist.updateStatus');
 Route::post('/task/status/update/{id}', [TaskController::class, 'updateStatus'])->name('task.updateStatus');
+Route::get('/task/edit/{id}', [TaskController::class, 'edit'])->name('task.edit');
 Route::delete('/task/delete/{id}', [TaskController::class, 'destroy'])->name('task.destroy');
-// END Route Task //
+Route::get('/task/detail/{id}', [TaskController::class, 'show']) ->name('task.show'); 
+Route::post('/task/comment/{task_id}', [TaskController::class, 'storeComment'])->name('task.storeComment');
+
+
+// Rute untuk menandai semua notifikasi sebagai "telah dibaca"
+Route::post('/notifications/mark-as-read', [TaskController::class, 'markAllAsRead'])->name('notifications.markAsRead');
 });
 
 // Rute untuk pekerjaan
@@ -93,5 +101,3 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 // Rute untuk proses login (POST)
 Route::post('/', [AuthController::class, 'login'])->name('login.submit');
 
-// Rute untuk menandai semua notifikasi sebagai "telah dibaca"
-Route::post('/notifications/mark-as-read', [TaskController::class, 'markNotificationsAsRead'])->name('notifications.markAsRead');

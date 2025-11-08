@@ -33,9 +33,9 @@
 
 <!-- Navbar -->
 <nav class="navbar">
-  <div class="header-logo">
-      <img src="assets/img/web-logo.png" alt="header logo">
-  </div>
+    <div class="header-logo">
+        <img src="{{ asset('assets/img/web-logo.png') }}" alt="header logo">
+    </div>
 
   <!-- Navbarkanan -->
   <div class="navbarkanan">
@@ -52,34 +52,56 @@
      </i>
      
      <div class="notification" id="notification">
-         @forelse($recentNotifications as $notification)
-           <a href="#" class="notification-item">
-               <div class="pic pic-sm" 
-                    style="background-color: {{ $notification->data['creator_color'] ?? '#ccc' }};">
-                    {{ $notification->data['creator_initials'] ?? '??' }}
-               </div>
-               
-               <div class="notification-content">
-                   <p>
-                       @if(isset($notification->data['creator_name']))
-                           <strong>{{ $notification->data['creator_name'] }}</strong> 
-                           telah membuat task: {{ Str::limit($notification->data['task_title'], 25) }}
-                       @else
-                           {{ $notification->data['message'] }}
-                       @endif
-                   </p>
-                   <small>{{ $notification->created_at->diffForHumans() }}</small>
-               </div>
-           </a>
-         @empty
-           <div class="notification-empty">
-               <p>No notification yet!</p>
-           </div>
-         @endforelse
-     </div>
+          
+        @forelse($groupedNotifications as $groupName => $notifications)
+            
+            <div class="notification-group-header">
+                {{ $groupName }}
+            </div>
+            
+            @foreach($notifications as $notification)
+              <a href="{{ $notification->data['url'] ?? '#' }}" class="notification-item">
+                  
+                  <div class="pic pic-sm" 
+                       style="background-color: {{ $notification->data['creator_color'] ?? '#ccc' }};">
+                       {{ $notification->data['creator_initials'] ?? '??' }}
+                  </div>
+                  
+                  <div class="notification-content">
+                      <p>
+                          @if(isset($notification->data['creator_name']))
+                              <strong>{{ $notification->data['creator_name'] }}</strong> 
+                              @if(isset($notification->data['comment_body']))
+                                  mengomentari <strong>{{ Str::limit($notification->data['task_title'], 20) }}</strong>: 
+                                  "{{ Str::limit($notification->data['comment_body'], 20) }}"
+                              @else
+                                  telah membuat task: <strong>{{ Str::limit($notification->data['task_title'], 25) }}</strong>
+                              @endif
+                          @else
+                              {{ $notification->data['message'] }}
+                          @endif
+                      </p>
+                      <small>{{ $notification->created_at->diffForHumans() }}</small>
+                  </div>
+
+                  @if(isset($notification->data['first_mockup_url']) && $notification->data['first_mockup_url'])
+                      <img src="{{ $notification->data['first_mockup_url'] }}" class="notification-mockup">
+                  @else
+                      <div class="notification-mockup placeholder"></div>
+                  @endif
+
+              </a>
+            @endforeach
+
+        @empty
+          <div class="notification-empty">
+              <p>No notification yet!</p>
+          </div>
+        @endforelse
+    </div>
 
       <!-- Profile Dropdown -->
-      <div class="dropdown">
+      <div class="profile-dropdown">
           <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="profileDropdown"
              data-bs-toggle="dropdown" aria-expanded="false" style="gap: 8px;">
               <div class="profile-inisial" style="background-color: {{ $bgColor }};">
@@ -107,12 +129,17 @@
               Dashboard
           </a>
       </div>
-      <div class="sidebar-item {{ request()->routeIs('task') ? 'active' : '' }}">
-          <a class="sidebar-cell" href="{{ route('task') }}">
-              <i class="bi bi-list-task" style="margin-right: 8px;"></i>
-              Task
-          </a>
-      </div>
+
+      <div class="sidebar-item {{ request()->routeIs('task*') ? 'active' : '' }}">
+        <a class="sidebar-cell" href="{{ route('task') }}">
+            <i class="bi bi-list-task" style="margin-right: 8px;"></i>
+            Task
+        </a>
+    </div>
+      
+
+
+
       <div class="sidebar-item {{ request()->routeIs('workline') ? 'active' : '' }}">
           <a class="sidebar-cell" href="{{ route('workline') }}">
               <i class="bi bi-wrench-adjustable" style="margin-right: 8px;"></i>

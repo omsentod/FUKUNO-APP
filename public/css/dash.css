@@ -86,6 +86,9 @@ body{
         opacity: 0;
         width: 50vh;
         transition: opacity 0.3s ease;
+
+        max-height: 93vh; 
+        overflow-y: auto;
       }
             .notification.show {
         display: block;
@@ -142,7 +145,10 @@ body{
   align-items: center;
   justify-content: center;
 }
+.notification-content {
+  flex-grow: 1; 
 
+}
   .notification-content p {
   margin-bottom: 2px;
   font-size: 14px;
@@ -171,6 +177,15 @@ body{
   transform-origin: top center; 
 }
 
+.notification-group-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6c757d;
+  padding: 10px 15px 5px 15px;
+  background-color: #f8f9fa; 
+  border-bottom: 1px solid #eee;
+}
+
 /* Definisi animasi 'bell-shake' */
 @keyframes bell-shake {
 0% { transform: rotate(0); }
@@ -186,8 +201,8 @@ body{
 }
 .notification-badge {
   position: absolute;
-  top: -5px;  /* Posisikan di atas ikon */
-  right: -8px; /* Posisikan di kanan ikon */
+  top: 0;  /* Posisikan di atas ikon */
+  right: 0; /* Posisikan di kanan ikon */
   
   background-color: var(--main-color, #CF221B); /* Warna merah */
   color: white;
@@ -203,6 +218,23 @@ body{
   
   /* Border agar terlihat "terpisah" dari ikon */
   border: 2px solid var(--ctn-color); /* Ganti var(--ctn-color) dengan warna BG navbar Anda */
+}
+
+.notification-mockup {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  flex-shrink: 0; /* Mencegah gambar menyusut */
+}
+/* Style jika tidak ada gambar */
+.notification-mockup.placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  background-color: #f0f0f0;
+  border: 1px solid #eee;
 }
 
       .profile {

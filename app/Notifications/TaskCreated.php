@@ -39,15 +39,19 @@ class TaskCreated extends Notification
      */
     public function toArray(object $notifiable): array
     {
+        $firstMockup = $this->task->mockups()->first();
+        $mockupUrl = $firstMockup ? Storage::url($firstMockup->file_path) : null;
+
         return [
             'task_id' => $this->task->id,
             'task_title' => $this->task->judul,
-            'user_name' => auth()->user()->name, // User yang MEMBUAT task
-            'message' => auth()->user()->name . ' telah membuat task baru: ' . $this->task->judul,
-
+            'message' => $this->creator->name . ' telah membuat task: ' . $this->task->judul,
             'creator_name' => $this->creator->name,
-            'creator_initials' => $this->creator->initials, // Panggil accessor
-            'creator_color' => $this->creator->avatar_color, // Panggil accessor
+            'creator_initials' => $this->creator->initials,
+            'creator_color' => $this->creator->avatar_color,
+            
+            'url' => route('task', ['highlight' => $this->task->id]),
+            'first_mockup_url' => $mockupUrl
         ];
     }
 }

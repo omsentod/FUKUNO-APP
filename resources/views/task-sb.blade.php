@@ -64,7 +64,10 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
             @php
                 $linePekerjaan = $task->taskPekerjaans->first();
             @endphp
-            <tr>
+                <tr class="clickable-row" 
+                data-url="{{ route('task.show', $task->id) }}"
+                {{-- 1. Tambahkan ID "highlight-task" HANYA jika ID-nya cocok --}}
+                {!! ($highlightId ?? null) == $task->id ? 'id="highlight-task"' : '' !!} >
                 <td>{{ $task->no_invoice }}</td>
                 <td>{{ $task->judul }}</td>
                 <td>{{ $task->total_jumlah }}</td>
@@ -166,7 +169,7 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
                 </td>
                 
                 <td class="icon-cell">
-                    <i class="bi bi-pencil-square icon-edit"></i>
+                    <i class="bi bi-pencil-square icon-edit" data-id="{{ $task->id }}"></i>
                     <i class="bi bi-cloud-download-fill icon-download" data-id="{{ $task->id }}"></i>
                     <i class="bi bi-trash3-fill icon-trash" data-id="{{ $task->id }}"></i>
                 </td>

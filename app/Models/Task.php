@@ -69,4 +69,9 @@ class Task extends Model
     {
         return $this->hasMany(TaskMockup::class);
     }
+
+    public function comments(): HasMany
+{
+    return $this->hasMany(Comment::class);
+}
 }
