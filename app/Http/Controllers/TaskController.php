@@ -480,7 +480,7 @@ public function updateChecklistStatus(Request $request, $id)
         try {
             DB::beginTransaction();
     
-            // --- A. PERSIAPAN FILE MOCKUP (Sama seperti sebelumnya) ---
+            // --- A. PERSIAPAN FILE MOCKUP ---
             
             // 1. Upload Mockup Baru
             $newMockupPaths = [];
@@ -499,7 +499,7 @@ public function updateChecklistStatus(Request $request, $id)
                 $existingMockupPaths[] = ['file_path' => $relativePath, 'order' => $index];
             }
             
-            // 3. Gabungkan (Ini daftar mockup final yang harus dimiliki setiap task)
+            // 3. Gabungkan Mockup (Ini daftar final untuk setiap task)
             $allMockupPaths = array_merge($existingMockupPaths, $newMockupPaths);
     
             // 4. Hapus File Fisik Mockup (yang DIHAPUS user)
@@ -518,13 +518,12 @@ public function updateChecklistStatus(Request $request, $id)
             $mainTask = Task::findOrFail($id);
             $noInvoice = $mainTask->no_invoice;
 
-            // 2. Ambil SEMUA Task yang ada di Database untuk PO ini (Urutkan agar konsisten)
+            // 2. Ambil SEMUA Task yang ada di Database untuk PO ini
             $existingTasks = Task::where('no_invoice', $noInvoice)->orderBy('id', 'asc')->get();
             
-            // 3. Siapkan Array untuk respons
             $updatedTasksCollection = []; 
 
-            // 4. Looping Data dari FORM (Line Pekerjaan)
+            // 3. Looping Data dari FORM (Line Pekerjaan)
             foreach ($lineData as $index => $line) {
                 
                 // Cek: Apakah ada task lama di urutan ini?
@@ -534,12 +533,12 @@ public function updateChecklistStatus(Request $request, $id)
                 } else {
                     // --- BUAT TASK BARU (Jika user menambah line) ---
                     $task = new Task();
-                    $task->user_id = auth()->id(); // Set owner hanya saat buat baru
+                    $task->user_id = auth()->id(); 
                     $task->status_id = 1; // Default status
                 }
 
                 // Isi/Update Data (Sama untuk Baru/Lama)
-                $task->no_invoice = $request->input('noInvoice'); // Update No Invoice (jika berubah)
+                $task->no_invoice = $request->input('noInvoice'); 
                 $task->nama_pelanggan = $request->input('namaPelanggan');
                 $task->judul = $request->input('judul');
                 $task->catatan = $request->input('catatan') ?? null;
@@ -548,29 +547,68 @@ public function updateChecklistStatus(Request $request, $id)
                 $task->warna = $request->input('warna') ?? null;
                 $task->model = $request->input('model') ?? null;
                 $task->bahan = $request->input('bahan') ?? null;
-                $task->save(); // Simpan perubahan ke DB
+                $task->save(); 
 
                 // --- UPDATE RELASI ---
 
-                // 1. Line Pekerjaan (Hapus lama, buat baru - paling aman untuk relasi 1-to-1 ini)
+                // 1. Line Pekerjaan (Hapus lama, buat baru)
                 $task->taskPekerjaans()->delete(); 
                 $taskLine = $task->taskPekerjaans()->create([ 
                     'nama_pekerjaan' => $line['nama'],
                     'deadline' => $line['deadline']
                 ]);
                 
-                // 2. Checklist (Hapus lama, buat baru - karena checklist nempel di Line yang baru dibuat)
-                // (Note: Jika ingin mempertahankan status checklist saat edit, logikanya akan jauh lebih rumit. 
-                //  Untuk sekarang, edit line = reset checklist line tersebut adalah standar yang aman).
+                // 2. Checklist (Hapus lama, buat baru - DENGAN STATUS)
+                $totalCheck = 0;
+                $totalCompleted = 0;
+
                 if (!empty($line['checklists'])) {
                     $checklists = [];
-                    foreach ($line['checklists'] as $checklistName) {
-                        $checklists[] = ['nama_checklist' => $checklistName];
+                    foreach ($line['checklists'] as $checkData) {
+                        // Deteksi format data (array objek atau string)
+                        if (is_array($checkData)) {
+                            $name = $checkData['name'];
+                            $isCompleted = $checkData['is_completed'] ?? 0;
+                        } else {
+                            $name = $checkData;
+                            $isCompleted = 0; // Default 0 jika format string
+                        }
+
+                        $checklists[] = [
+                            'nama_checklist' => $name,
+                            'is_completed' => $isCompleted
+                        ];
+
+                        $totalCheck++;
+                        if ($isCompleted) $totalCompleted++;
                     }
                     $taskLine->checklists()->createMany($checklists);
                 }
 
-                // 3. Size (Hapus lama, buat baru - paling aman untuk bulk data)
+                // 3. Hitung Ulang Status & Completed At (Otomatis)
+                if ($totalCheck > 0) {
+                    $percentage = round(($totalCompleted / $totalCheck) * 100);
+                    
+                    $newStatusName = 'Needs Work';
+                    $completedAt = null;
+
+                    if ($percentage === 100) {
+                        $newStatusName = 'Done and Ready';
+                        $completedAt = now();
+                    } else if ($percentage > 0) {
+                        $newStatusName = 'In Progress';
+                    }
+
+                    // Update status di DB
+                    $statusObj = Status::where('name', $newStatusName)->first();
+                    if ($statusObj) {
+                        $task->status_id = $statusObj->id;
+                        $task->completed_at = $completedAt;
+                        $task->save();
+                    }
+                }
+
+                // 4. Size (Hapus lama, buat baru)
                 $task->taskSizes()->delete();
                 if (!empty($sizeData) && !empty($sizeData['headers']) && !empty($sizeData['rows'])) {
                     $headers = $sizeData['headers'];
@@ -594,8 +632,7 @@ public function updateChecklistStatus(Request $request, $id)
                     TaskSize::insert($sizeEntries);
                 }
                 
-                // 4. Mockup (Sync)
-                // Kita hapus record DB lama untuk task ini, lalu pasang yang baru (File fisik AMAN)
+                // 5. Mockup (Sync)
                 $task->mockups()->delete(); 
                 if (!empty($allMockupPaths)) {
                     foreach ($allMockupPaths as $mockup) {
@@ -606,12 +643,10 @@ public function updateChecklistStatus(Request $request, $id)
                     }
                 }
                 
-                // Tambahkan ke koleksi untuk respons
                 $updatedTasksCollection[] = $task;
             }
 
             // 5. HAPUS SISA TASK (Jika user mengurangi line)
-            // Misal: DB punya 5 task, User submit 3 line -> Hapus task ke-4 dan ke-5
             if (count($existingTasks) > count($lineData)) {
                 $tasksToDelete = $existingTasks->slice(count($lineData));
                 foreach ($tasksToDelete as $taskToDelete) {
@@ -624,7 +659,7 @@ public function updateChecklistStatus(Request $request, $id)
             return response()->json([
                 'success' => true, 
                 'message' => 'Task berhasil diperbarui!',
-                'tasks' => $updatedTasksCollection // Kirim data terbaru
+                'tasks' => $updatedTasksCollection
             ]);
         
         } catch (\Exception $e) {

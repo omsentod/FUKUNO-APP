@@ -95,6 +95,8 @@ body{
   display: inline-block;
 }
 
+
+
 .add-btn {
   float: right;
   padding: 8px 15px;
@@ -110,6 +112,7 @@ body{
 .team-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: auto;
 }
 
 .team-table th, .team-table td {
@@ -176,26 +179,20 @@ body{
   font-weight: var(--font-semibold);
 }
 
-/* batasi juga container utama agar tidak bikin overflow */
-.team-container {
-  max-width: 100%;
-  overflow-x: hidden;
-}
 
-/* jika tabel yang bikin overflow, kecilkan kolom sedikit */
-.team-table {
+
+/* .team-table {
   table-layout: fixed;
   width: 100%;
   word-wrap: break-word;
 }
 
-/* cegah padding atau border keluar batas */
 .team-table th,
 .team-table td {
   white-space: normal;
   word-break: break-word;
   overflow-wrap: break-word;
-}
+} */
 
 
 /* === POPUP ADD USER === */

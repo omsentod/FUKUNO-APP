@@ -31,11 +31,25 @@
   <!-- Popup Add -->
   <div class="popup" id="addPopup">
     <div class="popup-content">
-      <h4>Tambah Checklist Baru</h4>
-      <input type="text" id="newChecklistInput" placeholder="Masukkan nama Checklist">
+      <h4>Tambah Group Checklist</h4>
+      <div class="mb-3">
+          <label>Judul Group (Misal: DTF)</label>
+          <input type="text" id="newChecklistInput" class="form-control" placeholder="Nama Group...">
+      </div>
+      
+      <div class="mb-3">
+          <label>List Item (Isi checklistnya)</label>
+          <div id="checklistItemsContainer">
+              <div class="d-flex gap-2 mb-2">
+                  <input type="text" class="form-control item-input" placeholder="Item 1 (misal: Layout)">
+              </div>
+          </div>
+          <button class="btn btn-sm btn-outline-primary" id="addItemInputBtn">+ Tambah Item</button>
+      </div>
+
       <div class="popup-footer">
-        <button class="close-popup">Batal</button>
-        <button id="saveChecklist">Simpan</button>
+        <button class="close-popup btn btn-secondary">Batal</button>
+        <button id="saveChecklist" class="btn btn-primary">Simpan</button>
       </div>
     </div>
   </div>

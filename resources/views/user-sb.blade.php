@@ -41,12 +41,12 @@
                         <a href="#" class="edit">Edit</a>
                         <a href="#" class="delete" data-id="{{ $user->id }}">Delete</a>
                     </td> 
-                    <td>
-                        {{-- <div class="password-cell">
+                    {{-- <td>
+                        <div class="password-cell">
                             <input type="password" class="password-field" value="{{ $user->password }}" readonly>
                             <i class="bi bi-eye-slash toggle-password"></i>
-                        </div> --}}
-                    </td>
+                        </div>
+                    </td> --}}
                     {{-- <td><span class="status active">Active</span></td> --}}
 
                 </tr>
