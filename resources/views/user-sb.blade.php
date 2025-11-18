@@ -1,148 +1,108 @@
 @extends('layouts.nav-side')
 
-@section('title', 'User') 
+@section('title', 'User')
 
 @section("content")
 
-
-
-{{-- content --}}
-
 <div class="page">
     <div class="title-page">
-        <h2>User</h2>   
-        <a class="add-new-btn" href="javascript:void(0);" onclick="showPopup()">
-          <p> + </p>
-          <p>Add New</p>
-      </a>
+        <h2>User</h2>
+        <a class="add-new-btn" href="javascript:void(0);" onclick="showPopup('create')">
+            <p> + </p>
+            <p>Add New</p>
+        </a>
     </div>
 
-    <!-- Konten utama Team Frame -->
     <div class="team-container">
-      <table class="team-table">
-        <thead>
-          <tr>
-            <th>Full Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Active</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <div class="member-info">
-                <div class="circle red">CA</div>
-                Codewave Asante
-              </div>
-            </td>
-            <td><a href="mailto:Admin@gmail.com">Admin@gmail.com</a></td>
-            <td>Admin</td>
-            <td><span class="status active">Active</span></td>
-            <td>
-              <a href="#" class="edit">Edit</a>
-              <a href="#" class="delete">Delete</a>
-            </td>
-          </tr>
+        <table class="team-table">
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    {{-- <th>Password</th>
+                    <th>Active</th> --}}
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                @foreach($users as $user)
+                <tr data-id="{{ $user->id }}" data-name="{{ $user->name }}" data-email="{{ $user->email }}" data-role="{{ $user->role }}">
+                    <td>
+                        <div class="member-info">
+                            <div class="circle red">{{ strtoupper(substr($user->name, 0, 2)) }}</div>
+                            {{ $user->name }}
+                        </div>
+                    </td>
 
-          <tr>
-            <td>
-              <div class="member-info">
-                <div class="circle orange">RW</div>
-                Rifqi Widyadana
-              </div>
-            </td>
-            <td><a href="mailto:rifqi@gmail.com">rifqi@gmail.com</a></td>
-            <td>Manager</td>
-            <td><span class="status active">Active</span></td>
-            <td>
-              <a href="#" class="edit">Edit</a>
-              <a href="#" class="delete">Delete</a>
-            </td>
-          </tr>
+                    <td><a href="mailto:{{ $user->email }}">{{ $user->email }}</a></td>
+                    <td>{{ ucfirst($user->role) }}</td>
+                    <td>
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete" data-id="{{ $user->id }}">Delete</a>
+                    </td> 
+                    <td>
+                        {{-- <div class="password-cell">
+                            <input type="password" class="password-field" value="{{ $user->password }}" readonly>
+                            <i class="bi bi-eye-slash toggle-password"></i>
+                        </div> --}}
+                    </td>
+                    {{-- <td><span class="status active">Active</span></td> --}}
 
-          <tr>
-            <td>
-              <div class="member-info">
-                <div class="circle yellow">RP</div>
-                Raka Purbayu
-              </div>
-            </td>
-            <td><a href="mailto:raka@gmail.com">raka@gmail.com</a></td>
-            <td>Developer</td>
-            <td><span class="status disabled">Disabled</span></td>
-            <td>
-              <a href="#" class="edit">Edit</a>
-              <a href="#" class="delete">Delete</a>
-            </td>
-          </tr>
-
-          <tr>
-            <td>
-              <div class="member-info">
-                <div class="circle red">RA</div>
-                Rafif Athalla
-              </div>
-            </td>
-            <td><a href="mailto:rafif@gmail.com">rafif@gmail.com</a></td>
-            <td>Designer</td>
-            <td><span class="status active">Active</span></td>
-            <td>
-              <a href="#" class="edit">Edit</a>
-              <a href="#" class="delete">Delete</a>
-            </td>
-          </tr>
-
-          <tr>
-            <td>
-              <div class="member-info">
-                <div class="circle blue">KA</div>
-                Kartika Azizah
-              </div>
-            </td>
-            <td><a href="mailto:kartika@gmail.com">kartika@gmail.com</a></td>
-            <td>Designer</td>
-            <td><span class="status active">Active</span></td>
-            <td>
-              <a href="#" class="edit">Edit</a>
-              <a href="#" class="delete">Delete</a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
-
-
 </div>
 
-<!-- Pop-up Modal -->
+<!-- Popup Modal -->
 <div id="addUserPopup" class="popup-overlay hidden">
-  <div class="popup-content">
-    <h4>Add New Member</h4>
-    <label>Full Name</label>
-    <input type="text" id="newName" class="form-control mb-2" placeholder="Enter full name" required>
+    <div class="popup-content">
+        <h4 id="popupTitle">Add New User</h4>
+        <form id="addUserForm">
+            @csrf
+            <input type="hidden" name="id" id="userId">
 
-    <label>Email</label>
-    <input type="email" id="newEmail" class="form-control mb-2" placeholder="Enter email" required>
+            <label>Full Name</label>
+            <input type="text" name="name" id="name" class="form-control mb-2" placeholder="Enter full name" required>
 
-    <label>Role</label>
-    <input type="text" id="newRole" class="form-control mb-3" placeholder="Enter role" required>
+            <label>Email</label>
+            <input type="email" name="email" id="email" class="form-control mb-2" placeholder="Enter email" required>
 
-    <div style="text-align:right;">
-      <button id="cancelAdd" class="btn btn-secondary btn-sm">Cancel</button>
-      <button id="saveAdd" class="btn btn-success btn-sm">Save</button>
+            <label>Role</label>
+            <select name="role" id="role" class="form-control mb-3" required>
+                <option value="">-- Select Role --</option>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+            </select>
+
+            <label>Password</label>
+            <div class="password-cell mb-3">
+                <input type="password" name="password" id="password" class="form-control password-field" placeholder="Enter password">
+                <i class="bi bi-eye-slash toggle-password"></i>
+            </div>
+
+            <label>Confirm Password</label>
+            <div class="password-cell mb-3">
+                <input type="password" name="password_confirmation" id="password_confirmation" class="form-control password-field" placeholder="Confirm password">
+                <i class="bi bi-eye-slash toggle-password"></i>
+            </div>
+
+            <div style="text-align:right;">
+                <button type="button" id="cancelAdd" class="btn btn-secondary btn-sm">Cancel</button>
+                <button type="submit" class="btn btn-success btn-sm" id="saveAdd">Save</button>
+            </div>
+        </form>
     </div>
-  </div>
 </div>
-
 
 @endsection
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/user.css') }}">
+<link rel="stylesheet" href="{{ asset('css/user.css') }}">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('js/user.js') }}"></script>
+<script src="{{ asset('js/user.js') }}"></script>
 @endpush

@@ -5,6 +5,7 @@ use App\Http\Controllers\PekerjaansController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -69,6 +70,10 @@ Route::delete('/checklist/delete/{id}', [ChecklistController::class, 'destroy'])
 Route::get('/user', function () {
     return view('user-sb');
 })->name('user');
+Route::get('/user', [UserController::class, 'index'])->name('user');
+Route::post('/user/store', [UserController::class, 'store'])->name('user.store');
+Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.delete');
+Route::post('/user/update/{id}', [UserController::class, 'update'])->name('user.update');
 
 Route::get('/archive', function () {
     return view('archive-sb');
