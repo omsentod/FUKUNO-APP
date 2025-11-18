@@ -19,11 +19,11 @@
 
 /* Font Weight */
 
---font-light: 300;   
---font-regular: 500; 
---font-semibold: 600; 
---font-bold: 700;    
---font-extrabold: 900; 
+--font-light: 300;
+--font-regular: 500;
+--font-semibold: 600;
+--font-bold: 700;
+--font-extrabold: 900;
 
 }
 
@@ -79,7 +79,7 @@ body{
   padding: 3px 10px ;
 }
 
-      
+
 
 /* === Team Frame === */
 .team-container {
@@ -190,7 +190,7 @@ body{
 }
 
 /* cegah padding atau border keluar batas */
-.team-table th, 
+.team-table th,
 .team-table td {
   white-space: normal;
   word-break: break-word;
@@ -222,4 +222,20 @@ body{
 .hidden {
   display: none;
 }
- 
+
+.password-cell {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .password-field {
+    width: 100px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+  }
+  .toggle-password {
+    cursor: pointer;
+    font-size: 16px;
+    color: #555;
+  }
