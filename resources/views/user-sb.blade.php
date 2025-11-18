@@ -40,7 +40,7 @@
                     <td>
                         <a href="#" class="edit">Edit</a>
                         <a href="#" class="delete" data-id="{{ $user->id }}">Delete</a>
-                    </td> 
+                    </td>
                     {{-- <td>
                         <div class="password-cell">
                             <input type="password" class="password-field" value="{{ $user->password }}" readonly>
@@ -56,7 +56,7 @@
     </div>
 </div>
 
-<!-- Popup Modal -->
+<!-- Popup Modal aaaaaaaaaaaaaaaaaaaaaaaaa-->
 <div id="addUserPopup" class="popup-overlay hidden">
     <div class="popup-content">
         <h4 id="popupTitle">Add New User</h4>
