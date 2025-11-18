@@ -1,4 +1,3 @@
-// GANTI SELURUH ISI FILE JS ANDA DENGAN INI
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -450,7 +449,8 @@ document.addEventListener("DOMContentLoaded", () => {
         
         } else if (newStatusName === 'Hold') {
             // --- LOGIKA JIKA HOLD ---
-            timeLeftSpan.className = ''; // Hapus kelas warna (merah/hijau)
+            timeLeftSpan.className = 'text-muted'; 
+            timeLeftSpan.textContent = 'Paused';
             // (Biarkan teksnya apa adanya)
         
         } else {
@@ -483,7 +483,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     }
-    // ▲▲▲ AKHIR LOGIKA BARU ▲▲▲
 
     // 5. Kirim Update ke Server (Kode Anda yang sudah ada)
     fetch(`/task/status/update/${taskId}`, {
@@ -1366,10 +1365,8 @@ function updateProgress(checkbox) {
     const allCheckboxes = dropdown.querySelectorAll('.progress-check');
     const completedTasks = dropdown.querySelectorAll('.progress-check:checked').length;
     
-    // ▼▼▼ PERBAIKAN DI SINI ▼▼▼
-    // Hitung persentase dan LANGSUNG bulatkan
+
     const percentage = (allCheckboxes.length === 0) ? 0 : Math.round((completedTasks / allCheckboxes.length) * 100);
-    // ▲▲▲ ▲▲▲ ▲▲▲
 
     const progressText = progressButton.querySelector('.progress-text');
     if (progressText) {
@@ -1836,9 +1833,4 @@ const searchInput = document.getElementById("taskSearchInput");
 
 
 
-
-  
-
-
-
-}); // <-- Penutup DOMContentLoaded
+});

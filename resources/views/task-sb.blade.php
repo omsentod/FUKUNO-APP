@@ -168,7 +168,7 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
                 
                 <td>
                     <div class="dropdown">
-                        <button class="status-btn status-{{ Str::slug($task->status->name) }} dropdown-toggle" type="button" id="statusDropdown{{ $task->id }}"  data -task-id="{{ $task->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="status-btn status-{{ Str::slug($task->status->name) }} dropdown-toggle" type="button" id="statusDropdown{{ $task->id }}"  data-task-id="{{ $task->id }}" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="status-text">{{ $task->status->name }}</span>
                         </button>
                         <div class="dropdown-menu" aria-labelledby="statusDropdown{{ $task->id }}">

@@ -378,7 +378,7 @@ public function updateChecklistStatus(Request $request, $id)
     
     public function updateStatus(Request $request, $id)
     {
-        // Validasi input
+        // 1. Validasi input
         $request->validate(['status_name' => 'required|string']);
     
         $task = Task::find($id);
@@ -386,13 +386,17 @@ public function updateChecklistStatus(Request $request, $id)
             return response()->json(['success' => false, 'message' => 'Task not found.'], 404);
         }
     
-        $newStatusName = $request->status_name; // Ambil nama dari request
+        // ▼▼▼ PERBAIKAN: Definisikan variabel ini dulu ▼▼▼
+        $newStatusName = $request->status_name; 
+        // ▲▲▲ ▲▲▲ ▲▲▲
     
+        // 2. Cari ID status baru
         $newStatus = Status::where('name', $newStatusName)->first();
         if (!$newStatus) {
             return response()->json(['success' => false, 'message' => 'Status name not found.'], 404);
         }
     
+        // 3. Update status_id
         $task->status_id = $newStatus->id;
     
         if ($newStatusName == 'Done and Ready') {
@@ -400,6 +404,7 @@ public function updateChecklistStatus(Request $request, $id)
         } else if ($newStatusName != 'Hold') { 
             $task->completed_at = null; 
         }
+        
         $task->save();
     
         return response()->json(['success' => true, 'message' => 'Status updated.']);
