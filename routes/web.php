@@ -92,18 +92,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/pekerjaan/search', [PekerjaansController::class, 'search'])->name('pekerjaan.search');
 });
 
-Route::get('/user', function () {
-    return view('user-sb');
-})->name('user');
-Route::get('/user', [UserController::class, 'index'])->name('user');
-Route::post('/user/store', [UserController::class, 'store'])->name('user.store');
-Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.delete');
-Route::post('/user/update/{id}', [UserController::class, 'update'])->name('user.update');
-
-
-Route::get('/user', function () {
-    return view('user-sb');
-})->name('user');
+// USER MANAGEMENT
+Route::middleware('auth')->group(function () {
+    Route::get('/user', [UserController::class, 'index'])->name('user'); // Halaman user
+    Route::get('/user/list', [UserController::class, 'list'])->name('user.list'); // Data JSON untuk tabel
+    Route::post('/user/store', [UserController::class, 'store'])->name('user.store'); // Tambah user
+    Route::put('/user/update/{id}', [UserController::class, 'update'])->name('user.update'); // Update user
+    Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.delete'); // Hapus user
+});
 
 
 
