@@ -10,7 +10,7 @@ class ChecklistController extends Controller
     public function index()
     {
         // Kembalikan semua data status dalam bentuk JSON
-        return response()->json(Checklist::all());
+        return response()->json(Checklist::with('items')->get());
     }
 
 // App/Http/Controllers/ChecklistController.php
@@ -55,19 +55,37 @@ public function search(Request $request)
     return response()->json($checklists);
 }
 
-    public function update(Request $request, $id)
-    {
-        $request->validate(['name' => 'required|string|max:255']);
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'items' => 'nullable|array',
+        'items.*' => 'string|max:255'
+    ]);
 
-        $checklist = Checklist::findOrFail($id);
-        $checklist->update(['name' => $request->name]);
+    $checklist = Checklist::findOrFail($id);
+    
+    // 1. Update Nama Group
+    $checklist->update(['name' => $request->name]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Checklist updated successfully',
-            'data' => $checklist
-        ]);
+    // 2. Update Items (Hapus Semua Lama -> Buat Baru)
+    // Ini cara termudah untuk menangani tambah/hapus/edit sekaligus
+    $checklist->items()->delete();
+
+    if ($request->has('items')) {
+        foreach ($request->items as $itemName) {
+            if (!empty($itemName)) {
+                $checklist->items()->create(['name' => $itemName]);
+            }
+        }
     }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Checklist updated successfully',
+        'data' => $checklist->load('items') // Kirim balik data terbaru
+    ]);
+}
 
     public function destroy($id)
     {

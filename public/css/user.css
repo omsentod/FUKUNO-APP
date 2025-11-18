@@ -49,7 +49,6 @@ body{
 .title-page{
   width: 130vh;
   display: flex;
-  margin-bottom: 20px;
   justify-content: space-between;
   /* background-color: magenta; */
 }
@@ -97,16 +96,21 @@ body{
 
 
 
-.add-btn {
-  float: right;
-  padding: 8px 15px;
-  background: var(--main-color);
+.btn-add {
+  background-color: var(--main-color);
   color: white;
   border: none;
+  padding: 8px 15px;
   border-radius: 8px;
-  font-weight: var(--font-semibold);
   cursor: pointer;
-  margin-bottom: 15px;
+  font-weight: var(--font-semibold);
+  margin-right: 5vh;
+  height: 40px;
+}
+
+.btn-add a{
+  text-decoration: none;
+  color: var(--ctn-color);
 }
 
 .team-table {

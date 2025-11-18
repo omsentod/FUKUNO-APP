@@ -49,7 +49,8 @@ body.sidebar-closed .page {
     height: min-content;
     top: 130px;
     left: 320px;
-    width: calc(100% - 330px);
+    min-width: calc(100% - 330px);
+    width: fit-content;
     transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
     background-color: var(--ctn-color);
   }
@@ -141,10 +142,10 @@ table {
 td {
     border-bottom: 1px solid #ddd;
     height: 35px;   
-    width: 70px;
+    width: min-content;
     font-size: 12px;
     text-align: center;
-    padding: 10px;
+    padding: 20px 0;
 }
 
 
@@ -724,7 +725,7 @@ thead th a i.bi {
     background-color: #6c757d; /* Abu-abu */
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 20px;
     font-weight: 600;
     transition: background-color 0.2s;
 }

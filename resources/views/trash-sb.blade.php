@@ -11,7 +11,8 @@
         <h3>Trashed Tasks</h3>
 
         <div class="trash-header-actions">
-          <button class="select-toggle">Pilih</button>
+          <button class="select-toggle">
+            <i class="bi bi-check-square"></i> Pilih</button>
           <div class="trash-actions">
             <button class="restore-all">
               <i class="bi bi-arrow-clockwise"></i> Restored All
@@ -74,7 +75,13 @@
           </tr>
           @empty
           <tr>
-            <td colspan="9" class="text-center">Tidak ada task di dalam sampah.</td>
+            
+            <td colspan="9" class="text-center">
+              <i class="bi bi-trash display-6 d-block mb-2"></i>
+
+              Tidak ada task di dalam sampah.
+
+            </td>
           </tr>
           @endforelse
         </tbody>

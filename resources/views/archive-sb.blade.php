@@ -11,7 +11,8 @@
         <h3>Archive</h3>
 
         <div class="archive-header-actions">
-          <button class="select-toggle">Pilih</button>
+          <button class="select-toggle">
+            <i class="bi bi-check-square"></i> Pilih</button>
           <div class="archive-actions">
             <button class="restore-all">
               <i class="bi bi-arrow-clockwise"></i> Restored All
@@ -28,7 +29,7 @@
         <table class="archive-table" id="archiveTable">
           <thead>
             <tr>
-              <th class="select-col"><input type="checkbox" id="selectAll" style="display:none;"></th>
+              <th class="select-col"><input type="checkbox" id="selectAll"></th>
               <th>No. PO</th>
               <th>Tasks Title</th>
               <th>Jumlah</th>
@@ -71,7 +72,10 @@
         </tr>
         @empty
         <tr>
-          <td colspan="9" class="text-center">Belum ada task yang diarsipkan.</td>
+          <td colspan="9" class="text-center">
+            <i class="bi bi-archive-fill display-6 d-block mb-2"></i>
+            Belum ada task yang diarsipkan.
+          </td>
         </tr>
         @endforelse
       </tbody>

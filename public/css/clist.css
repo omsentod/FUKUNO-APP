@@ -72,8 +72,8 @@ body{
     border-radius: 8px;
     cursor: pointer;
     font-weight: var(--font-semibold);
-    margin-right: 5vh;
   }
+
   .btn-add:hover {
     background-color: #a91a15;
   }
@@ -175,3 +175,38 @@ body{
     z-index: 99999;
   }
   
+
+/* Style untuk tombol Hapus Item di Popup */
+.remove-item-btn {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background-color: #fff;
+  border: 1px solid #dc3545; 
+  color: #dc3545; 
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.remove-item-btn:hover {
+  background-color: #dc3545; 
+  color: #fff; 
+  transform: scale(1.1); 
+  box-shadow: 0 2px 5px rgba(220, 53, 69, 0.3);
+}
+
+.remove-item-btn:active {
+  transform: scale(0.95); 
+}
+
+.popup-content h4{
+ font-weight: var(--font-semibold);
+ margin-bottom: 30px;
+}

@@ -134,132 +134,131 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
             </tr>
         </thead>
         <tbody class="table-bg">
-
-
-            @foreach($tasks as $task)
-            @php
-                $linePekerjaan = $task->taskPekerjaans->first();
-                
-                        // Ambil checklist HANYA dari line pekerjaan ini
-                        $allChecklists = $linePekerjaan ? $linePekerjaan->checklists : collect();
-                        $completed = $allChecklists->where('is_completed', true)->count();
-                        $total = $allChecklists->count();
-                        $percentage = ($total > 0) ? round(($completed / $total) * 100) : 0;
-
-                        $isDone = ($task->status->name == 'Done and Ready' || $percentage == 100);
-            @endphp
-                <tr class="clickable-row" 
-                data-url="{{ route('task.show', $task->id) }}"
-                {!! ($highlightId ?? null) == $task->id ? 'id="highlight-task"' : '' !!} >
-                <td class="select-col">
-                    <input type="checkbox" class="row-checkbox" data-id="{{ $task->id }}">
-                </td>
-                <td>{{ $task->no_invoice }}</td>
-                <td>{{ $task->judul }}</td>
-                <td>{{ $task->total_jumlah }}</td>
-    
-                <td>
-                    <button class="line-btn" style="background-color: #3498db; color: #ffff;">
-                        {{ $linePekerjaan ? $linePekerjaan->nama_pekerjaan : 'N/A' }}
-                    </button>
-                </td>
-    
-                <td>{{ $task->urgensi }}</td>
-                
-                <td>
-                    <div class="dropdown">
-                        <button class="status-btn status-{{ Str::slug($task->status->name) }} dropdown-toggle" type="button" id="statusDropdown{{ $task->id }}"  data-task-id="{{ $task->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="status-text">{{ $task->status->name }}</span>
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="statusDropdown{{ $task->id }}">
-                            @if($task->status->name == 'Hold')
-                                <a class="dropdown-item" href="#" data-status="Resume Progress"><i class="bi bi-play-circle"></i> Resume Progress</a>
-                            @else
-                                <a class="dropdown-item" href="#" data-status="Hold"><i class="bi bi-pause-circle"></i> Set to Hold</a>
-                            @endif
-                        </div>
-                    </div>
-                </td>
-    
-                <td>
-                    @php
-                        // (Asumsi $linePekerjaan dan $isDone sudah dihitung di atas <tr>)
-                        $timeLeftString = '-';
-                        $timeClass = ''; 
-                        $deadlineISO = $linePekerjaan && $linePekerjaan->deadline ? \Carbon\Carbon::parse($linePekerjaan->deadline)->toIso8601String() : '';
-    
-                        if ($isDone) {
-                            // --- LOGIKA KEMBALI KE SEDERHANA ---
-                            $timeLeftString = 'Selesai';
-                            $timeClass = 'time-completed'; // Hijau
-                        
-                        } elseif ($linePekerjaan && $linePekerjaan->deadline) {
-                            // --- LOGIKA JIKA BELUM SELESAI (HITUNG MUNDUR) ---
-                            $deadline = \Carbon\Carbon::parse($linePekerjaan->deadline);
-                            $rawTimeLeft = $deadline->diffForHumans();
-                            $timeLeftString = str_replace(['dari sekarang', 'sebelumnya'], ['lagi', 'lalu'], $rawTimeLeft);
-    
-                            if ($deadline->isPast()) {
-                                // 1. Jika sudah lewat: KUNING
-                                $timeClass = 'time-late'; 
-                            } 
-                            elseif ($deadline->lte(now()->addDays(2))) {
-                                // 2. Jika kurang dari 2 hari lagi: MERAH
-                                $timeClass = 'time-mustdo'; 
-                            }
-                        }
-                    @endphp
+            @forelse($tasks as $task)
+                @php
+                    $linePekerjaan = $task->taskPekerjaans->first();
                     
-                    <span id="time-left-{{ $task->id }}" class="{{ $timeClass }}" data-deadline="{{ $deadlineISO }}">
-                        {{ $timeLeftString }}
-                    </span>
-                </td>
-                <td class="icon-cell">
-                    <div class="mockup-wrapper">
-                        @foreach($task->mockups as $mockup)
-                            <img src="{{ Storage::url($mockup->file_path) }}" class="mockup-image-data">
-                        @endforeach
-                        <img src="{{ $task->mockups->first() ? Storage::url($task->mockups->first()->file_path) : asset('assets/img/default.png') }}" class="mockup-display">
-                        <i class="bi bi-stack gallery-indicator {{ $task->mockups->count() > 1 ? 'visible' : '' }}"></i>
-                    </div>
-                </td>
-                
-                <td>{{ $task->nama_pelanggan }}</td>
-                
-                <td>
-              
-                    <div class="dropdown">
-                        <button class="progress dropdown-toggle" type="button" id="progressDropdown{{ $task->id }}" data-task-id="{{ $task->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="progress-text">{{ $percentage }}%</span>
+                    $allChecklists = $linePekerjaan ? $linePekerjaan->checklists : collect();
+                    $completed = $allChecklists->where('is_completed', true)->count();
+                    $total = $allChecklists->count();
+                    $percentage = ($total > 0) ? round(($completed / $total) * 100) : 0;
+
+                    $isDone = ($task->status->name == 'Done and Ready' || $percentage == 100);
+                @endphp
+
+                <tr class="clickable-row" 
+                    data-url="{{ route('task.show', $task->id) }}"
+                    {!! ($highlightId ?? null) == $task->id ? 'id="highlight-task"' : '' !!} >
+                    
+                    <td class="select-col">
+                        <input type="checkbox" class="row-checkbox" data-id="{{ $task->id }}">
+                    </td>
+                    <td>{{ $task->no_invoice }}</td>
+                    <td>{{ $task->judul }}</td>
+                    <td>{{ $task->total_jumlah }}</td>
+        
+                    <td>
+                        <button class="line-btn" style="background-color: #3498db; color: #ffff;">
+                            {{ $linePekerjaan ? $linePekerjaan->nama_pekerjaan : 'N/A' }}
                         </button>
-                        <div class="dropdown-menu p-3" aria-labelledby="progressDropdown{{ $task->id }}" style="width: 250px;">
-                            <form class="progress-form">
-                                @forelse($allChecklists as $checklist)
-                                    <div class="form-check">
-                                        <input class="form-check-input progress-check" type="checkbox" 
-                                               id="check-{{ $checklist->id }}" 
-                                               data-id="{{ $checklist->id }}" 
-                                               {{ $checklist->is_completed ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="check-{{ $checklist->id }}">
-                                            {{ $checklist->nama_checklist }}
-                                        </label>
-                                    </div>
-                                @empty
-                                    <p class="text-muted small">Belum ada checklist.</p>
-                                @endforelse
-                            </form>
+                    </td>
+        
+                    <td>{{ $task->urgensi }}</td>
+                    
+                    <td>
+                        <div class="dropdown">
+                            <button class="status-btn status-{{ Str::slug($task->status->name) }} dropdown-toggle" type="button" id="statusDropdown{{ $task->id }}" data-task-id="{{ $task->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="status-text">{{ $task->status->name }}</span>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="statusDropdown{{ $task->id }}">
+                                @if($task->status->name == 'Hold')
+                                    <a class="dropdown-item" href="#" data-status="Resume Progress"><i class="bi bi-play-circle"></i> Resume Progress</a>
+                                @else
+                                    <a class="dropdown-item" href="#" data-status="Hold"><i class="bi bi-pause-circle"></i> Set to Hold</a>
+                                @endif
+                            </div>
                         </div>
-                    </div>
-                </td>
-                
-                <td class="icon-cell">
-                    <i class="bi bi-pencil-square icon-edit" data-id="{{ $task->id }}"></i>
-                    <i class="bi bi-cloud-download-fill icon-download" data-id="{{ $task->id }}"></i>
-                    <i class="bi bi-trash3-fill icon-trash" data-id="{{ $task->id }}"></i>
-                </td>
-            </tr>
-        @endforeach
-</tbody>
+                    </td>
+        
+                    <td>
+                        @php
+                            $timeLeftString = '-';
+                            $timeClass = ''; 
+                            $deadlineISO = $linePekerjaan && $linePekerjaan->deadline ? \Carbon\Carbon::parse($linePekerjaan->deadline)->toIso8601String() : '';
+        
+                            if ($isDone) {
+                                $timeLeftString = 'Selesai';
+                                $timeClass = 'time-completed'; 
+                            } elseif ($linePekerjaan && $linePekerjaan->deadline) {
+                                $deadline = \Carbon\Carbon::parse($linePekerjaan->deadline);
+                                $rawTimeLeft = $deadline->diffForHumans();
+                                $timeLeftString = str_replace(['dari sekarang', 'sebelumnya'], ['lagi', 'lalu'], $rawTimeLeft);
+        
+                                if ($deadline->isPast()) {
+                                    $timeClass = 'time-late'; 
+                                } elseif ($deadline->lte(now()->addDays(2))) {
+                                    $timeClass = 'time-mustdo'; 
+                                }
+                            }
+                        @endphp
+                        <span id="time-left-{{ $task->id }}" class="{{ $timeClass }}" data-deadline="{{ $deadlineISO }}">
+                            {{ $timeLeftString }}
+                        </span>
+                    </td>
+        
+                    <td class="icon-cell">
+                        <div class="mockup-wrapper">
+                            @foreach($task->mockups as $mockup)
+                                <img src="{{ Storage::url($mockup->file_path) }}" class="mockup-image-data">
+                            @endforeach
+                            <img src="{{ $task->mockups->first() ? Storage::url($task->mockups->first()->file_path) : asset('assets/img/default.png') }}" class="mockup-display">
+                            <i class="bi bi-stack gallery-indicator {{ $task->mockups->count() > 1 ? 'visible' : '' }}"></i>
+                        </div>
+                    </td>
+                    
+                    <td>{{ $task->nama_pelanggan }}</td>
+                    
+                    <td>
+                        <div class="dropdown">
+                            <button class="progress dropdown-toggle" type="button" id="progressDropdown{{ $task->id }}" data-task-id="{{ $task->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="progress-text">{{ $percentage }}%</span>
+                            </button>
+                            <div class="dropdown-menu p-3" aria-labelledby="progressDropdown{{ $task->id }}" style="width: 250px;">
+                                <form class="progress-form">
+                                    @forelse($allChecklists as $checklist)
+                                        <div class="form-check">
+                                            <input class="form-check-input progress-check" type="checkbox" 
+                                                   id="check-{{ $checklist->id }}" 
+                                                   data-id="{{ $checklist->id }}" 
+                                                   {{ $checklist->is_completed ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="check-{{ $checklist->id }}">
+                                                {{ $checklist->nama_checklist }}
+                                            </label>
+                                        </div>
+                                    @empty
+                                        <p class="text-muted small">Belum ada checklist.</p>
+                                    @endforelse
+                                </form>
+                            </div>
+                        </div>
+                    </td>
+                    
+                    <td class="icon-cell">
+                        <i class="bi bi-pencil-square icon-edit" data-id="{{ $task->id }}"></i>
+                        <i class="bi bi-cloud-download-fill icon-download" data-id="{{ $task->id }}"></i>
+                        <i class="bi bi-trash3-fill icon-trash" data-id="{{ $task->id }}"></i>
+                    </td>
+                </tr>
+
+            @empty
+                <tr>
+                    <td colspan="12" class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox display-6 d-block mb-2"></i>
+                        Belum ada task yang tersedia.
+                    </td>
+                </tr>
+                @endforelse
+        </tbody>
 </table>
 </div>
    </div>

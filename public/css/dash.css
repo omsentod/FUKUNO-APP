@@ -425,9 +425,9 @@ body.sidebar-closed .sidebar-toggle i {
         background-color: var(--ctn-color);
         height: 100px;
         margin-left: 25px ;
-        outline: 0.5px solid rgb(88, 88, 88) ;
+        /* outline: 0.5px solid rgb(88, 88, 88) ; */
         border-radius: 10px;
-        box-shadow: 2px 5px;
+        box-shadow: 2px 4px 6px rgba(0,0,0,0.1);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
       }
 
@@ -465,6 +465,7 @@ body.sidebar-closed .sidebar-toggle i {
         margin: 100px 0 0 10px;
         height: min-content;
         width: 520px;
+        box-shadow: 2px 4px 6px rgba(0,0,0,0.1);
         background-color: #3498db;
         border-radius: 10px;
       }
@@ -535,6 +536,8 @@ body.sidebar-closed .sidebar-toggle i {
         margin: 100px 0 0 40px;
         height: min-content;
         width: 450px;
+        box-shadow: 2px 4px 6px rgba(0,0,0,0.1);
+
         background-color: #c73636;
         /* outline: 2px solid rgb(88, 88, 88) ; */
         border-radius: 10px;

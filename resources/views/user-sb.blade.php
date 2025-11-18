@@ -4,16 +4,21 @@
 
 @section("content")
 
+
+
 <div class="page">
-    <div class="title-page">
-        <h2>User</h2>
-        <a class="add-new-btn" href="javascript:void(0);" onclick="showPopup('create')">
-            <p> + </p>
-            <p>Add New</p>
-        </a>
-    </div>
+
 
     <div class="team-container">
+        <div class="title-page">
+            <h2>User</h2>
+            <button class="btn-add" id="addBtn">      
+            <a href="javascript:void(0);" onclick="showPopup('create')">
+            <i class="bi bi-plus-lg"> </i>Add New
+            </a>
+            </button>
+        
+        </div>
         <table class="team-table">
             <thead>
                 <tr>
@@ -27,10 +32,31 @@
             </thead>
             <tbody id="userTableBody">
                 @foreach($users as $user)
+        @php
+        // Dapatkan nama user
+        $fullName = $user->name ?? '';
+        
+        // 1. Pecah nama menjadi kata-kata
+        $words = explode(' ', trim($fullName));
+        
+        // 2. Ambil huruf pertama dari kata pertama dan kata kedua (jika ada)
+        $initials = strtoupper(substr($words[0], 0, 1) . 
+                               (isset($words[1]) ? substr($words[1], 0, 1) : ''));
+        
+        // --- Logika Warna HSL BARU (menggunakan $initials yang benar) ---
+        $picName = $initials ?: 'A'; // Gunakan inisial baru untuk warna
+        $firstLetter = strtoupper(substr($picName, 0, 1)); 
+        $letterValue = ord($firstLetter) - ord('A'); 
+        $hue = ($letterValue * 14) % 360;
+        $bgColor = "hsl({$hue}, 65%, 40%)";
+        @endphp
+
                 <tr data-id="{{ $user->id }}" data-name="{{ $user->name }}" data-email="{{ $user->email }}" data-role="{{ $user->role }}">
                     <td>
                         <div class="member-info">
-                            <div class="circle red">{{ strtoupper(substr($user->name, 0, 2)) }}</div>
+                            <div class="circle" style="background-color: {{ $bgColor }};">
+                                {{ $initials }}
+                            </div>
                             {{ $user->name }}
                         </div>
                     </td>
@@ -40,15 +66,7 @@
                     <td>
                         <a href="#" class="edit">Edit</a>
                         <a href="#" class="delete" data-id="{{ $user->id }}">Delete</a>
-                    </td>
-                    {{-- <td>
-                        <div class="password-cell">
-                            <input type="password" class="password-field" value="{{ $user->password }}" readonly>
-                            <i class="bi bi-eye-slash toggle-password"></i>
-                        </div>
-                    </td> --}}
-                    {{-- <td><span class="status active">Active</span></td> --}}
-
+                    </td> 
                 </tr>
                 @endforeach
             </tbody>

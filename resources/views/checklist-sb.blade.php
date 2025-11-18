@@ -33,15 +33,15 @@
     <div class="popup-content">
       <h4>Tambah Group Checklist</h4>
       <div class="mb-3">
-          <label>Judul Group (Misal: DTF)</label>
-          <input type="text" id="newChecklistInput" class="form-control" placeholder="Nama Group...">
+          <label>Nama Checklist</label>
+          <input type="text" id="newChecklistInput" class="form-control">
       </div>
       
       <div class="mb-3">
-          <label>List Item (Isi checklistnya)</label>
+          <label>List Item </label>
           <div id="checklistItemsContainer">
               <div class="d-flex gap-2 mb-2">
-                  <input type="text" class="form-control item-input" placeholder="Item 1 (misal: Layout)">
+                  <input type="text" class="form-control item-input" placeholder="Item 1">
               </div>
           </div>
           <button class="btn btn-sm btn-outline-primary" id="addItemInputBtn">+ Tambah Item</button>
@@ -57,10 +57,24 @@
   <!-- Popup Edit -->
   <div class="popup" id="editPopup">
     <div class="popup-content">
-      <h4>Edit Nama Checklist</h4>
-      <input type="text" id="editChecklistInput">
-      <button id="updateChecklist">Perbarui</button>
-      <button class="close-popup">Batal</button>
+      <h4>Edit Group Checklist</h4>
+      
+      <div class="mb-3">
+          <label>Judul Group</label>
+          <input type="text" id="editChecklistInput" class="form-control">
+      </div>
+
+      <div class="mb-3">
+          <label>List Item</label>
+          <div id="editItemsContainer" style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;">
+              </div>
+          <button type="button" class="btn btn-sm btn-outline-primary" id="addEditItemBtn">+ Tambah Item</button>
+      </div>
+
+      <div class="popup-footer">
+        <button class="close-popup btn btn-secondary">Batal</button>
+        <button id="updateChecklist" class="btn btn-primary">Perbarui</button>
+      </div>
     </div>
   </div>
 
