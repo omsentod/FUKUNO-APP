@@ -490,11 +490,11 @@ body.sidebar-closed .sidebar-toggle i {
         text-align: left;
         font-weight: var(--font-semibold);
         font-size: small;
+        border-bottom: 1px solid var(--ctn-color); 
+
       }
 
-      .data-table tr {
-        border-bottom: 1px solid var(--ctn-color); /* Menambahkan garis bawah di setiap baris */
-      }
+  
 
       .data-table td {
         padding: 10px;
@@ -542,6 +542,7 @@ body.sidebar-closed .sidebar-toggle i {
         /* outline: 2px solid rgb(88, 88, 88) ; */
         border-radius: 10px;
       }
+
 
       .status-btn.dropdown-toggle {
         border: none;
@@ -591,16 +592,16 @@ body.sidebar-closed .sidebar-toggle i {
       }
 
       .dldata-table th {
-        color: var(--ctn-color);
-        padding: 0 10px 10px 10px;
-        text-align: left;
+        padding: 10px;
+        text-align: center;
         font-weight: var(--font-semibold);
         font-size: small;
+        border-bottom: 1px solid var(--ctn-color); 
       }
 
       .dldata-table tr {
         color: var(--ctn-color);
-        border-bottom: 1px solid var(--ctn-color); /* Menambahkan garis bawah di setiap baris */
+        /* border-bottom: 1px solid var(--ctn-color);  */
       }
 
       .dldata-table td {

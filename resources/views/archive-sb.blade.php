@@ -36,7 +36,7 @@
               <th>Line Pekerjaan</th>
               <th>Status</th>
               <th>Finished Date</th>
-              <th>PIC</th>
+              <th>Klien</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -58,11 +58,7 @@
           <td>{{ $linePekerjaan ? $linePekerjaan->nama_pekerjaan : 'N/A' }}</td>
           <td><span class="status status-{{ Str::slug($task->status->name) }}">{{ $task->status->name }}</span></td>
           <td>{{ $task->updated_at->format('j M Y') }}</td>
-          <td>
-              <div class="pic-circle">
-                  {{ \App\Http\Controllers\TaskController::buatInisial($task->user->name) }}
-              </div>
-          </td>
+          <td>{{ $task->nama_pelanggan }}</td>
           <td> 
             <div class="action-icons"> <i class="bi bi-arrow-counterclockwise" title="Restore" data-id="{{ $task->id }}"></i>
             <i class="bi bi-file-earmark-text" title="Detail" data-id="{{ $task->id }}"></i>

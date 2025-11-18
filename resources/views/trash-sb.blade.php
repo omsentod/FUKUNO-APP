@@ -35,7 +35,7 @@
               <th>Line Pekerjaan</th>
               <th>Status</th>
               <th>Deleted At</th>
-              <th>PIC</th>
+              <th>Klien</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -55,19 +55,15 @@
             </td>
             <td>{{ $task->no_invoice }}</td>
             <td>
-                <span class="dot yellow"></span> {{ $task->judul }}
+                 {{ $task->judul }}
             </td>
             <td>{{ $task->total_jumlah }}</td>
             
             <td>{{ $linePekerjaan ? $linePekerjaan->nama_pekerjaan : 'N/A' }}</td>
+            <td><span class="status status-{{ Str::slug($task->status->name) }}">{{ $task->status->name }}</span></td>
             
-            <td>{{ $task->status->name }}</td>
             <td>{{ $task->deleted_at->format('j M Y') }}</td>
-            <td>
-                <div class="pic-circle">
-                    {{ \App\Http\Controllers\TaskController::buatInisial($task->user->name) }}
-                </div>
-            </td>
+            <td>{{ $task->nama_pelanggan }}</td>
             <td class="actions">
               <i class="bi bi-arrow-clockwise restore-icon" data-id="{{ $task->id }}"></i>
               <i class="bi bi-trash-fill delete-icon" data-id="{{ $task->id }}"></i>
@@ -78,7 +74,6 @@
             
             <td colspan="9" class="text-center">
               <i class="bi bi-trash display-6 d-block mb-2"></i>
-
               Tidak ada task di dalam sampah.
 
             </td>

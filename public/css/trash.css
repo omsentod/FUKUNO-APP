@@ -235,3 +235,10 @@ body{
       font-size: 12px;
     }
     
+    .status {
+      padding: 5px 15px;
+      border-radius: 30px;
+      color: white;
+      font-size: 13px;
+      text-align: center;
+    }
