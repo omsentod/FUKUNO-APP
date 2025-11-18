@@ -40,7 +40,7 @@ body{
   width: 135vh;
   height: min-content;
   top: 130px;
-  margin-left: 330px;
+  left: 330px;
   padding: 20px;
   z-index: -2;
   /* background-color: var(--main-color); */
@@ -120,6 +120,7 @@ body{
 }
 
 .team-table th {
+  background-color: #f5f5f5;
   font-weight: var(--font-semibold);
 }
 

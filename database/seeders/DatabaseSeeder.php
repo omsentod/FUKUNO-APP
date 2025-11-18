@@ -19,5 +19,13 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        // ▼▼▼ TAMBAHKAN PEMANGGILAN INI ▼▼▼
+        // Ini akan menjalankan StatusSeeder Anda dan mengisi tabel 'statuses'
+        $this->call([
+            StatusSeeder::class,
+            // (Anda juga bisa menambahkan PekerjaanSeeder, ChecklistSeeder, dll. di sini)
+        ]);
+        // ▲▲▲ AKHIR TAMBAHAN ▲▲▲
     }
 }

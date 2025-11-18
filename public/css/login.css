@@ -36,6 +36,41 @@ body{
 
 /* head contaner */
 
+.header-logo {
+    transform-origin: top center;
+    animation: fallAndDangle 2s ease-out 0.5s forwards;
+    opacity: 0;
+}
+
+@keyframes fallAndDangle {
+    0% {
+        transform: translateY(-200px) rotateZ(0); 
+        opacity: 0;
+    }
+    40% {
+        transform: translateY(0) rotateZ(0);     
+        opacity: 1; /* <-- Logo muncul di sini */
+    }
+
+    50% {
+        transform: translateY(0) rotateZ(15deg); 
+    }
+    65% {
+        transform: translateY(0) rotateZ(-10deg);
+    }
+    80% {
+        transform: translateY(0) rotateZ(5deg); 
+    }
+    90% {
+        transform: translateY(0) rotateZ(-2deg); 
+    }
+    
+    100% {
+        transform: translateY(0) rotateZ(0);
+        opacity: 1; 
+    }
+}
+
 .head-container{
     position: relative;
     display: flex;
@@ -65,6 +100,11 @@ body{
     color: var(--main-color);
     font-weight: var(--font-bold);
 }
+.regis-whisp button:hover{
+    background-color: #CF221B;
+    color: var(--ctn-color);
+}
+
 
 .container{
     position: fixed;
@@ -113,7 +153,8 @@ body{
 }
 
 .btn{
-    width: 100%;
+    display: block; 
+    width: 55vh;
     height: 57px;
     font-size: 30px;
     background-color: var(--main-color);
@@ -122,7 +163,10 @@ body{
     color: var(--ctn-color);
     font-weight:600;
     cursor: pointer;
+    margin-left: auto;
+    margin-right: auto;
 }
+
 
 .footer-image {
     position: fixed;
@@ -135,4 +179,88 @@ body{
 .footer-image img {
     width: 100%;
     height: 100%; 
+}
+
+
+
+/* 3. Buat 'Tirai' (Overlay) */
+.footer-image::before {
+    content: ""; /* Wajib untuk pseudo-element */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    background-color: #ffffff; 
+    
+    animation: wipe-reveal-right 2s ease-out forwards;
+}
+
+/* 5. Definisikan Animasinya (Keyframes) */
+@keyframes wipe-reveal-right {
+    0% {
+        /* Awal: Posisi 0% (Menutupi gambar) */
+        transform: translateX(0%);
+    }
+    100% {
+        /* Akhir: Bergeser 100% ke kanan (Menampilkan gambar) */
+        transform: translateX(100%);
+    }
+}
+
+.flash-message-custom {
+    position: fixed; /* Tetap di atas layar */
+    top: 20px;       /* Jarak 20px dari atas */
+    left: 50%;       /* Mulai dari tengah layar */
+    transform: translateX(-50%); /* Posisikan persis di tengah */
+    
+    background-color: var(--main-color); /* Warna hijau sukses */
+    color: white;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 9999; /* Pastikan di atas segalanya */
+    
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    /* Terapkan animasi "slideDown" */
+    animation: slideDown 0.5s ease-out forwards;
+}
+
+/* Animasi untuk keluar (diterapkan oleh JS) */
+.flash-message-custom.fade-out {
+    /* Terapkan animasi 'fadeOut' baru, durasi 1 detik */
+    animation: fadeOut 1s ease-out forwards;
+}
+
+.flash-message-custom.is-error {
+    background-color: #e74c3c; /* Warna merah (error) */
+}
+
+
+/* Keyframes untuk animasi masuk (slide dari atas) */
+@keyframes slideDown {
+    from {
+        top: -100px; /* Mulai dari luar layar (atas) */
+        opacity: 0;
+    }
+    to {
+        top: 20px; /* Selesai di 20px dari atas */
+        opacity: 1;
+    }
+}
+
+/* Keyframes untuk animasi keluar (fade dan slide ke atas) */
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
 }

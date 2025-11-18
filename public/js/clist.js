@@ -16,11 +16,14 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(res => res.json())
     .then(data => {
       checklistTable.innerHTML = "";
-      data.forEach(item => {
+      data.forEach((item, index) => { // <-- [PERUBAHAN 1] Tambahkan 'index'
         const row = document.createElement("tr");
+        
+        // [PERUBAHAN 2] Simpan ID asli di 'data-id'
+        row.dataset.id = item.id; 
+        
         row.innerHTML = `
-          <td>${item.id}</td>
-          <td>${item.name}</td>
+          <td>${index + 1}</td> <td>${item.name}</td>
           <td class="action-icons">
             <i class="bi bi-pencil-square text-warning edit-btn"></i>
             <i class="bi bi-trash-fill text-danger delete-btn"></i>
@@ -50,11 +53,18 @@ document.addEventListener("DOMContentLoaded", () => {
       body: JSON.stringify({ name: newChecklist })
     })
     .then(res => res.json())
-    .then(data => {
+    .then(result => { 
+      const newChecklist = result.data; 
       const newRow = document.createElement("tr");
+      
+      // [PERUBAHAN 4] Simpan ID asli di 'data-id'
+      newRow.dataset.id = newChecklist.id; 
+      
+      // [PERUBAHAN 5] Hitung nomor urut baru
+      const newRowNumber = checklistTable.rows.length + 1;
+
       newRow.innerHTML = `
-        <td>${data.id}</td>
-        <td>${data.name}</td>
+        <td>${newRowNumber}</td> <td>${newChecklist.name}</td> 
         <td class="action-icons">
           <i class="bi bi-pencil-square text-warning edit-btn"></i>
           <i class="bi bi-trash-fill text-danger delete-btn"></i>
@@ -62,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
       checklistTable.appendChild(newRow);
       addRowListeners(newRow);
-      showNotif("Checklist berhasil ditambahkan!");
+      showNotif(result.message || "Checklist berhasil ditambahkan!");
     })
     .catch(() => alert("Gagal menambah Checklist!"));
 
@@ -84,7 +94,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const id = currentRow.cells[0].textContent;
+    // [PERUBAHAN 6] Ambil ID dari 'data-id', bukan dari sel
+    const id = currentRow.dataset.id; 
 
     fetch(`/checklist/update/${id}`, {
       method: "PUT",
@@ -95,9 +106,9 @@ document.addEventListener("DOMContentLoaded", () => {
       body: JSON.stringify({ name: updatedName })
     })
     .then(res => res.json())
-    .then(() => {
-      currentRow.cells[1].textContent = updatedName;
-      showNotif("Checklist berhasil diperbarui!");
+    .then(result => {
+      currentRow.cells[1].textContent = result.data.name; 
+      showNotif(result.message || "Checklist berhasil diperbarui!");
     })
     .catch(() => alert("Gagal memperbarui Checklist!"));
 
@@ -112,7 +123,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("confirmDelete").addEventListener("click", () => {
     if (deleteRow) {
-      const id = deleteRow.cells[0].textContent;
+      // [PERUBAHAN 7] Ambil ID dari 'data-id', bukan dari sel
+      const id = deleteRow.dataset.id; 
 
       fetch(`/checklist/delete/${id}`, {
         method: "DELETE",
@@ -120,9 +132,15 @@ document.addEventListener("DOMContentLoaded", () => {
           "X-CSRF-TOKEN": csrfToken
         }
       })
-      .then(() => {
+      .then(res => {
+        // [PERUBAHAN 8] Periksa respons server sebelum menghapus
+        if (!res.ok) {
+            throw new Error('Gagal menghapus di server');
+        }
         deleteRow.remove();
         showNotif("Checklist berhasil dihapus!");
+        // (Kita perlu update penomoran, tapi refresh adalah cara termudah)
+        // location.reload(); // <-- Opsional: Muat ulang agar penomoran rapi
       })
       .catch(() => alert("Gagal menghapus Checklist!"));
     }

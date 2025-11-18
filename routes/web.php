@@ -46,6 +46,7 @@ Route::post('/task/status/update/{id}', [TaskController::class, 'updateStatus'])
 Route::get('/task/edit/{id}', [TaskController::class, 'edit'])->name('task.edit');
 Route::delete('/task/delete/{id}', [TaskController::class, 'destroy'])->name('task.destroy');
 Route::get('/task/detail/{id}', [TaskController::class, 'show']) ->name('task.show');
+Route::get('/task/detail/{id}', [TaskController::class, 'show']) ->name('task.show');
 Route::post('/task/comment/{task_id}', [TaskController::class, 'storeComment'])->name('task.storeComment');
 Route::get('/archive', [TaskController::class, 'showArchive'])->name('archive');
 Route::get('/trash', [TaskController::class, 'showTrash'])->name('trash');
@@ -117,3 +118,4 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 
 // Rute untuk proses login (POST)
 Route::post('/', [AuthController::class, 'login'])->name('login.submit');
+

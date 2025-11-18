@@ -25,7 +25,7 @@
       </div>
   
       <div class="archive-table-container">
-        <table class="archive-table">
+        <table class="archive-table" id="archiveTable">
           <thead>
             <tr>
               <th class="select-col"><input type="checkbox" id="selectAll" style="display:none;"></th>
@@ -39,38 +39,42 @@
               <th>Action</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td class="select-col"><input type="checkbox" class="row-select" style="display:none;"></td>
-              <td>FKN/1024/051</td>
-              <td>DTF Ulang Tahun</td>
-              <td>12</td>
-              <td>DTF</td>
-              <td><span class="status cancel">Cancel</span></td>
-              <td>10 Sep 2025</td>
-              <td><div class="pic-circle">AK</div></td>
-              <td class="action-icons">
-                <i class="bi bi-arrow-counterclockwise" title="Restore"></i>
-                <i class="bi bi-file-earmark-text" title="Detail"></i>
-                <i class="bi bi-trash-fill" title="Delete"></i>
-              </td>
-            </tr>
-            <tr>
-              <td class="select-col"><input type="checkbox" class="row-select" style="display:none;"></td>
-              <td>FKN/1024/051</td>
-              <td>DTF Ulang Tahun</td>
-              <td>12</td>
-              <td>Konveksi</td>
-              <td><span class="status selesai">Selesai</span></td>
-              <td>10 Sep 2025</td>
-              <td><div class="pic-circle">AK</div></td>
-              <td class="action-icons">
-                <i class="bi bi-arrow-counterclockwise" title="Restore"></i>
-                <i class="bi bi-file-earmark-text" title="Detail"></i>
-                <i class="bi bi-trash-fill" title="Delete"></i>
-              </td>
-            </tr>
-          </tbody>
+          @php
+          use Illuminate\Support\Str;
+          use Carbon\Carbon;
+      @endphp
+
+      <tbody>
+        @forelse($tasks as $task)
+        @php
+            $linePekerjaan = $task->taskPekerjaans->first();
+        @endphp
+        <tr>
+          <td class="select-col"><input type="checkbox" class="row-select" data-id="{{ $task->id }}"></td>
+          <td>{{ $task->no_invoice }}</td>
+          <td>{{ $task->judul }}</td>
+          <td>{{ $task->total_jumlah }}</td>
+          <td>{{ $linePekerjaan ? $linePekerjaan->nama_pekerjaan : 'N/A' }}</td>
+          <td><span class="status status-{{ Str::slug($task->status->name) }}">{{ $task->status->name }}</span></td>
+          <td>{{ $task->updated_at->format('j M Y') }}</td>
+          <td>
+              <div class="pic-circle">
+                  {{ \App\Http\Controllers\TaskController::buatInisial($task->user->name) }}
+              </div>
+          </td>
+          <td> 
+            <div class="action-icons"> <i class="bi bi-arrow-counterclockwise" title="Restore" data-id="{{ $task->id }}"></i>
+            <i class="bi bi-file-earmark-text" title="Detail" data-id="{{ $task->id }}"></i>
+            <i class="bi bi-trash-fill" title="Delete" data-id="{{ $task->id }}"></i>
+          </div>
+          </td>
+        </tr>
+        @empty
+        <tr>
+          <td colspan="9" class="text-center">Belum ada task yang diarsipkan.</td>
+        </tr>
+        @endforelse
+      </tbody>
         </table>
       </div>
     </div>

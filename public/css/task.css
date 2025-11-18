@@ -35,27 +35,64 @@ body{
     background-color: var(--bg-color);
 }
 
+/* -- Style untuk Kondisi Tertutup -- */
+body.sidebar-closed .page {
+    left: 30px;
+    width: 170vh;  /* Isi lebar penuh */
+  }
+
 .page {
     position: absolute;
     display: flex;
     flex-direction: column;
     padding: 20px;
-    width: 135vh;
     height: min-content;
     top: 130px;
-    margin-left: 330px;
-    padding: 20px;
-    z-index: -2;
-    /* background-color: var(--main-color); */
+    left: 320px;
+    width: calc(100% - 330px);
+    transition: left 0.3s ease-in-out, width 0.3s ease-in-out;
+    background-color: var(--ctn-color);
   }
 
+  
   .title-page{
-    width: 130vh;
+    width: 100%;
     display: flex;
     justify-content: space-between;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
     /* background-color: magenta; */
   }
+
+  .tp-1{
+    display: flex;
+    flex-direction: row;
+    width:35vh;
+    gap: 30px;
+  }
+
+  .search-container{
+  color: #000;
+  width: 400px;
+  }
+
+  /* 1. Wrapper untuk input dan ikon */
+.input-with-icon {
+    position: relative; 
+}
+
+/* 2. Style untuk ikon "loop" (search) */
+.search-icon {
+    position: absolute; 
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d; 
+    z-index: 2;
+}
+
+#taskSearchInput {
+    padding-left: 40px !important; /* Beri ruang ekstra di kiri untuk ikon */
+}
 
   .title-page h2 {
     font-weight: var(--font-bold);
@@ -85,6 +122,16 @@ table {
  .table-bg{
     background-color: var(--ctn-color);
  }
+
+ .table-bg tr:hover{
+    background-color:#fbefbc;
+    color: var(--txt-color);
+    cursor: pointer;
+    transform: scale(1.02);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    position: relative;
+    z-index: 3;
+ }
 /* th, td {
     border: 1px solid #ddd;
     text-align: center;
@@ -102,10 +149,10 @@ td {
 
 
 th {
-        border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
     padding: 10px;
     text-align: center;
-    background-color: var(--ctn-color);
+    background-color: #f5f5f5;
     font-size: 12px;
 
 }
@@ -127,8 +174,7 @@ th {
     border-radius: 5px;
 }
 
-.status-btn {
-    background-color: #2ecc71;
+.status-btn.dropdown-toggle {
     border: none;
     color: var(--ctn-color);
     padding: 5px 10px;
@@ -144,10 +190,29 @@ th {
 .dropdown-item {
     padding: 8px 16px;
 }
+.status-needs-work {
+    background-color: #3498db !important;
+    color: var(--ctn-color) !important;
+}
 
-.status-hold {background-color: var(--main-color);}
-.status-in-progress { background-color: #f1c40f; }
-.status-needs-work { background-color: #3498db !important;  }
+/* Status: In Progress (Kuning) */
+.status-in-progress {
+    background-color: #f1c40f !important;
+    color:var(--ctn-color) !important;
+}
+
+/* Status: Done and Ready (Hijau) */
+.status-done-and-ready {
+    background-color: #2ecc71 !important;
+    color: var(--ctn-color) !important;
+}
+
+/* Status: Hold (Abu-abu/Biru Muda) */
+.status-hold {
+    background-color: var(--main-color) !important;
+    color: var(--ctn-color) !important;
+}
+
 
 /* Anda bisa menyesuaikan warnanya sesuai selera */
 
@@ -176,28 +241,156 @@ th {
 
 
 
-/* CSS .mockup asli Anda */
-.mockup {
+/* -- 1. Wrapper untuk Gambar di dalam Sel Tabel -- */
+.mockup-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 30px; /* Lebar dari .mockup Anda */
+    height: 30px; /* Tinggi dari .mockup Anda */
+}
+
+/* Gambar utama yang terlihat (menggantikan .mockup lama) */
+.mockup-display {
     display: inline-block;
     width: 30px;
     height: 30px;
-    border-radius: 50%;
+    border-radius: 5px;
     object-fit: cover;
     cursor: pointer;    
     transition: all 0.2s ease-in-out;
-    z-index: 10;
 }
-
-/* Efek hover untuk memperbesar */
-.mockup:hover {
-    transform: scale(8); 
+/* Efek hover (sama seperti .mockup:hover Anda) */
+.mockup-display:hover {
+    transform: scale(2); 
     width: 50%;
     height: auto;
     z-index: 100;        
     border-radius: 1px; 
-    /* box-shadow: 1px 1px  rgb(0, 0, 0); */
 }
 
+/* Gambar-gambar lain yang tersembunyi (hanya untuk data) */
+.mockup-image-data {
+    display: none; 
+}
+
+#mockup-preview-area ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+#mockup-preview-area li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 8px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+.remove-mockup-btn {
+    font-size: 16px;
+    font-weight: bold;
+    color: #dc3545; /* Merah */
+    cursor: pointer;
+    padding: 0 5px;
+}
+.remove-mockup-btn:hover {
+    color: #ae2a36;
+}
+
+.mockup-preview-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #495057;
+}
+.mockup-thumbnail {
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+/* Indikator "gallery" (seperti icon Instagram) */
+.gallery-indicator {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 10px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.4);
+    padding: 2px;
+    border-radius: 2px;
+    display: none; /* Sembunyi secara default */
+    pointer-events: none; /* Agar tidak mengganggu hover */
+}
+/* Tampilkan jika punya kelas .visible */
+.gallery-indicator.visible {
+    display: block;
+}
+
+/* -- 2. Style untuk Modal Carousel -- */
+.image-modal {
+    display: none; 
+    position: fixed;
+    z-index: 200; /* Di atas popup-overlay */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    margin: auto;
+    display: block;
+    max-width: 80vw;
+    max-height: 90vh;
+}
+
+.modal-content img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Tombol Close (X) */
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Tombol Navigasi (Prev/Next) */
+.modal-nav {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 16px;
+    color: white;
+    font-weight: bold;
+    font-size: 30px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: none;
+    user-select: none;
+}
+.modal-nav.prev { left: 10px; border-radius: 0 3px 3px 0; }
+.modal-nav.next { right: 10px; border-radius: 3px 0 0 3px; }
+.modal-nav:hover { background-color: rgba(0, 0, 0, 0.6); }
+.modal-nav:disabled { opacity: 0.2; cursor: default; }
+
+#sizeTable tfoot .grand-total {
+    background-color: var(--main-color); 
+    color: var(--ctn-color);         
+}
 
 .pic {
     width: 30px;
@@ -271,7 +464,7 @@ th {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);  /* Semi-transparent background */
-    z-index: 9999;  /* Agar pop-up berada di atas elemen lainnya */
+    z-index: 50;  /* Agar pop-up berada di atas elemen lainnya */
     justify-content: center;  /* Center secara horizontal */
     align-items: center;  /* Center secara vertikal */
     padding: 20px;
@@ -317,6 +510,8 @@ th {
     color: black;
   }
 
+  
+
   /* CSS untuk Menu Klik Kanan */
 .context-menu {
     display: none; /* Sembunyi secara default */
@@ -324,7 +519,7 @@ th {
     border: 1px solid #ddd;
     border-radius: 6px;
     padding: 5px 0;
-    z-index: 1050; /* Harus di atas overlay popup */
+    z-index: 70; /* Harus di atas overlay popup */
     width: 180px;
     font-size: 14px;
 }
@@ -417,5 +612,153 @@ min-width: 120px;
 /* (Opsional) Highlight saat fokus */
 #sizeTable thead th input.form-control:focus {
     background-color: rgba(0, 0, 0, 0.05); 
+}
+
+/* Style sort */
+
+
+thead th a {
+    text-decoration: none;
+    color: inherit; /* Ambil warna dari <th> */
+    display: block;
+}
+
+thead th a:hover {
+    color: var(--main-color, #CF221B); /* Warna saat di-hover */
+}
+
+thead th a i.bi {
+    font-size: 0.8rem;
+    margin-left: 5px;
+}
+
+.btn-remove-checklist {
+    background-color: rgb(147, 146, 146);
+    color: var(--ctn-color);
+    border: none;
+    cursor: pointer;
+    padding: 2px 5px;
+    border-radius: 30%;
+    margin-bottom: 20px;
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    font-weight: var(--font-bold);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+}
+
+.btn-remove-checklist:hover {
+    transform: translateY(-5px);
+    background-color: var(--main-color);
+    color: var(--ctn-color); 
+}
+
+.checklist-item{
+    padding: 10px;
+    height: auto;
+    width: 10px;
+}
+
+
+
+/* CSS untuk hasil Autocomplete Checklist */
+.autocomplete-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: calc(100% - 30px); 
+    background-color: #fff;
+    border-radius: 0 0 5px 5px;
+    z-index: 1000;
+    font-weight: var(--font-semibold);
+    max-height: 100px;
+    overflow-y: auto;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+
+}
+
+.autocomplete-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    z-index: 203;
+    
+    
+
+}
+
+.autocomplete-item:hover {
+    background-color: #f0f0f0;
+}
+
+
+.time-overdue,
+.time-completed {
+    transition: opacity 0.2s ease-in-out;
+}
+
+.time-mustdo{
+    color: var(--main-color);
+    font-weight: var(--font-semibold);
+}
+
+.time-late {
+    color: #f1c40f; /* Kuning / Emas */
+    font-weight: 600;
+}
+
+.time-completed {
+    color: #159758; 
+    font-weight: var(--font-semibold);
+}
+
+/* (Opsional) Tata letak tombol "Pilih" dan "Add New" */
+.title-page-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.btn-select {
+    padding: 8px 15px;
+    background-color: #6c757d; /* Abu-abu */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+/* Warna saat mode "Batal" aktif */
+.btn-select.active {
+    background-color: var(--main-color, #CF221B); /* Merah */
+}
+
+/* === LOGIKA TOGGLE Checkbox=== */
+
+#taskTable .select-col {
+    display: none;
+}
+
+#taskTable.selection-mode .select-col {
+    display: table-cell;
+}
+
+.bulk-action-bar{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+
+/* CSS untuk highlight task baru */
+@keyframes highlight-flash {
+    0% { background-color: transparent; }
+    30% { background-color: #fbefbc;
+    color: var(--txt-color); }
+    100% { background-color: transparent; }
+}
+
+#highlight-task {
+    animation: highlight-flash 2.5s 1;
 }
 
