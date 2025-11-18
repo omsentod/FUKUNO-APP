@@ -55,10 +55,29 @@ document.addEventListener('DOMContentLoaded', function () {
   // --- 2. Logika Toggle Sidebar ---
   const toggleBtn = document.getElementById("sidebar-toggle-btn");
   const body = document.body;
+    
+  // Tombol Panah (Desktop)
+  const desktopToggleBtn = document.getElementById("sidebar-toggle-btn");
+  if (desktopToggleBtn) {
+      desktopToggleBtn.addEventListener("click", () => {
+          // Ini untuk desktop
+          body.classList.toggle("sidebar-closed"); 
+      });
+  }
 
-  if (toggleBtn) {
-      toggleBtn.addEventListener("click", () => {
-          body.classList.toggle("sidebar-closed");
+  // Tombol Hamburger (Mobile/Tablet) - HANYA MEMBUKA
+  const hamburgerBtn = document.getElementById("navbar-hamburger-btn");
+  if (hamburgerBtn) {
+      hamburgerBtn.addEventListener("click", () => {
+          body.classList.add("sidebar-open-mobile"); 
+      });
+  }
+
+  // Tombol Close 'X' (Di dalam sidebar) - HANYA MENUTUP
+  const sidebarCloseBtn = document.getElementById("sidebar-close-btn");
+  if (sidebarCloseBtn) {
+      sidebarCloseBtn.addEventListener("click", () => {
+          body.classList.remove("sidebar-open-mobile"); 
       });
   }
 });

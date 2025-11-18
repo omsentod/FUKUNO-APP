@@ -389,8 +389,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 // ▼▼▼  FUNGSI UPDATE TASK▼▼▼
 /**
-/**
- * Meng-update status (front-end & back-end) untuk sebuah Task.
  * @param {string} taskId - ID dari task yang akan diupdate.
  * @param {string} newStatusName - Nama status baru (e.g., "In Progress").
  */
@@ -402,9 +400,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const statusTextSpan = statusButton.querySelector('.status-text');
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    // 2. Update Tampilan Tombol (Kode Anda yang sudah ada)
+    // 2. Update Tampilan Tombol Status (Kode Anda yang sudah ada)
     statusTextSpan.textContent = newStatusName;
-    
     statusButton.classList.forEach(className => {
         if (className.startsWith('status-') && className !== 'status-btn') {
             statusButton.classList.remove(className);
@@ -413,29 +410,82 @@ document.addEventListener("DOMContentLoaded", () => {
     const newClass = 'status-' + newStatusName.toLowerCase().replace(/\s+/g, '-');
     statusButton.classList.add(newClass);
 
-    // ▼▼▼ 3. TAMBAHAN: UPDATE TAMPILAN DROPDOWN MENU ▼▼▼
-    const dropdownMenu = statusButton.nextElementSibling; // Dapatkan .dropdown-menu
+    // 3. Update Tampilan Dropdown Menu (Kode Anda yang sudah ada)
+    const dropdownMenu = statusButton.nextElementSibling;
     if (dropdownMenu) {
         let newMenuHTML = '';
         if (newStatusName === 'Hold') {
-            // Jika status BARU adalah 'Hold', menu harus menampilkan "Resume"
-            newMenuHTML = `
-                <a class="dropdown-item" href="#" data-status="Resume Progress">
-                    <i class="bi bi-play-circle"></i> Resume Progress
-                </a>`;
+            newMenuHTML = `<a class="dropdown-item" href="#" data-status="Resume Progress"><i class="bi bi-play-circle"></i> Resume Progress</a>`;
         } else {
-            // Jika status BARU adalah "In Progress", "Done", dll., menu harus menampilkan "Hold"
-            newMenuHTML = `
-                <a class="dropdown-item" href="#" data-status="Hold">
-                    <i class="bi bi-pause-circle"></i> Set to Hold
-                </a>`;
+            newMenuHTML = `<a class="dropdown-item" href="#" data-status="Hold"><i class="bi bi-pause-circle"></i> Set to Hold</a>`;
         }
-        // Ganti isi HTML dari menu
         dropdownMenu.innerHTML = newMenuHTML;
     }
-    // ▲▲▲ AKHIR TAMBAHAN ▲▲▲
 
-    // 4. Kirim Update ke Server (Kode Anda yang sudah ada)
+    // ▼▼▼ 4. [TAMBAHKAN BLOK INI] LOGIKA BARU: UPDATE TIME LEFT LIVE ▼▼▼
+    const timeLeftSpan = document.querySelector(`#time-left-${taskId}`);
+    if (timeLeftSpan) {
+        
+        const isDone = (newStatusName === 'Done and Ready');
+        
+        if (isDone) {
+            // --- LOGIKA JIKA SELESAI (LIVE) ---
+            const deadlineString = timeLeftSpan.dataset.deadline; // Ambil data ISO
+            
+            if (deadlineString) {
+                const deadline = new Date(deadlineString); // Waktu deadline
+                const now = new Date(); // Waktu selesai (sekarang)
+
+                if (now < deadline) {
+                    timeLeftSpan.textContent = "Selesai (Lebih Awal)";
+                    timeLeftSpan.className = 'time-completed'; // Hijau
+                } else {
+                    timeLeftSpan.textContent = "Selesai (Terlambat)";
+                    timeLeftSpan.className = 'time-overdue'; // Merah
+                }
+            } else {
+                timeLeftSpan.textContent = "Selesai"; // Fallback
+                timeLeftSpan.className = 'time-completed';
+            }
+        
+        } else if (newStatusName === 'Hold') {
+            // --- LOGIKA JIKA HOLD ---
+            timeLeftSpan.className = ''; // Hapus kelas warna (merah/hijau)
+            // (Biarkan teksnya apa adanya)
+        
+        } else {
+            // --- LOGIKA JIKA "RESUME" (Needs Work / In Progress) ---
+            // Hitung ulang dari data-deadline
+            const deadlineString = timeLeftSpan.dataset.deadline;
+            
+            if (deadlineString) {
+                const deadline = new Date(deadlineString);
+                const now = new Date();
+                deadline.setHours(0, 0, 0, 0);
+                now.setHours(0, 0, 0, 0);
+
+                const diffTime = deadline.getTime() - now.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays > 0) {
+                    timeLeftSpan.textContent = `${diffDays} hari lagi`;
+                    timeLeftSpan.className = '';
+                } else if (diffDays === 0) {
+                    timeLeftSpan.textContent = 'Hari ini';
+                    timeLeftSpan.className = '';
+                } else {
+                    timeLeftSpan.textContent = `Lewat ${Math.abs(diffDays)} hari`;
+                    timeLeftSpan.className = 'time-overdue'; // Merah
+                }
+            } else {
+                timeLeftSpan.textContent = '-';
+                timeLeftSpan.className = '';
+            }
+        }
+    }
+    // ▲▲▲ AKHIR LOGIKA BARU ▲▲▲
+
+    // 5. Kirim Update ke Server (Kode Anda yang sudah ada)
     fetch(`/task/status/update/${taskId}`, {
         method: 'POST',
         headers: {
@@ -458,7 +508,6 @@ document.addEventListener("DOMContentLoaded", () => {
     .catch(error => console.error('Error:', error));
 }
 
-// ▼▼▼ TAMBAHKAN DUA FUNGSI BARU INI (di Bagian 2) ▼▼▼
 
 /**
  * Mengambil data task dan membuka popup untuk mode Edit.
@@ -932,28 +981,128 @@ function showPopup() {
         };
     }
 
-    // Listener untuk Hapus Line & Tambah Checklist - Gunakan .onclick
-    const lineContainerArea = popup.querySelector("#lineContainer");
-    if (lineContainerArea) {
-        lineContainerArea.onclick = (event) => {
-            const target = event.target;
-            const removeLineBtn = target.closest('.btn-remove-line');
-            if (removeLineBtn) {
-                event.preventDefault();
-                removeLineBtn.closest('.border.p-3.mb-3.rounded')?.remove();
+// Listener untuk Hapus Line, Tambah Checklist, Hapus Checklist, DAN Autocomplete
+const lineContainerArea = popup.querySelector("#lineContainer");
+if (lineContainerArea) {
+    
+    // --- 1. LISTENER UNTUK KLIK (Event Delegation) ---
+    // (Ini sudah benar dari kode Anda)
+    lineContainerArea.onclick = (event) => {
+        const target = event.target;
+
+        // A. Hapus line pekerjaan
+        const removeLineBtn = target.closest('.btn-remove-line');
+        if (removeLineBtn) {
+            event.preventDefault();
+            removeLineBtn.closest('.border.p-3.mb-3.rounded')?.remove();
+        }
+
+        // B. Tambah checklist (membuat widget baru)
+        const addChecklistLink = target.closest('.addChecklist');
+        if (addChecklistLink) {
+            event.preventDefault();
+            addChecklist(addChecklistLink);
+        }
+
+        // C. Hapus checklist (menghapus widget)
+        const removeChecklistBtn = target.closest('.btn-remove-checklist'); 
+        if (removeChecklistBtn) {
+            event.preventDefault();
+            removeChecklistBtn.closest('.d-flex.gap-2.mb-2')?.remove(); 
+        }
+
+        // D. Klik pada item hasil autocomplete
+        const resultItem = target.closest('.autocomplete-item');
+        if (resultItem) {
+            // Ambil elemen input TERDEKAT (bisa .checklist-item ATAU .line-nama)
+            const inputField = resultItem.closest('.position-relative, .d-flex').querySelector('input');
+            if (inputField) {
+                inputField.value = resultItem.textContent; // Set nilai input
             }
-            const addChecklistLink = target.closest('.addChecklist');
-            if (addChecklistLink) {
-                event.preventDefault();
-                addChecklist(addChecklistLink);
+            // Sembunyikan hasil
+            resultItem.parentElement.innerHTML = '';
+        }
+    };
+
+    // --- 2. (BARU) LISTENER UNTUK KEYBOARD (Autocomplete Fetch) ---
+    lineContainerArea.onkeyup = async (event) => {
+        const input = event.target;
+        
+        if (input.classList.contains('checklist-item')) {
+            const query = input.value.trim();
+            // Temukan results container yang TEPAT (saudara kandung input)
+            const resultsContainer = input.parentElement.querySelector('.autocomplete-results');
+            if (!resultsContainer) return; // Pengaman
+            if (event.key === 'Escape') {
+                resultsContainer.innerHTML = ''; // Sembunyikan hasil
+                input.blur(); // (Opsional) Hapus fokus dari input
+                return;
             }
-            const removeChecklistBtn = target.closest('.btn-remove-checklist'); 
-            if (removeChecklistBtn) {
-                event.preventDefault();
-                removeChecklistBtn.closest('.d-flex.gap-2.mb-2')?.remove(); 
+            if (query.length < 2) { 
+                resultsContainer.innerHTML = '';
+                return;
             }
-        };
-    }
+
+            try {
+                const response = await fetch(`/checklists/search?query=${query}`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                const checklists = await response.json();
+
+                // Tampilkan hasil
+                let html = '';
+                checklists.forEach(check => {
+                    html += `<div class="autocomplete-item">${check.name}</div>`;
+                });
+                resultsContainer.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Pencarian checklist gagal:', error);
+            }
+        }
+        else if (input.classList.contains('line-nama')) {
+            // --- Logika BARU untuk Nama Pekerjaan ---
+            const query = input.value.trim();
+            // (Input ini ada di dalam .col-md-6.position-relative)
+            const resultsContainer = input.parentElement.querySelector('.autocomplete-results');
+            if (!resultsContainer) return;
+
+            if (query.length < 2) { 
+                resultsContainer.innerHTML = '';
+                return;
+            }
+            try {
+                // Panggil Rute BARU
+                const response = await fetch(`/pekerjaan/search?query=${query}`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                const pekerjaan = await response.json(); // Data dari PekerjaansController
+                
+                let html = '';
+                pekerjaan.forEach(job => {
+                    html += `<div class="autocomplete-item">${job.nama_pekerjaan}</div>`;
+                });
+                resultsContainer.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Pencarian pekerjaan gagal:', error);
+            }
+        }
+    };
+
+    // --- 3. (BARU) LISTENER UNTUK FOKUS HILANG ---
+ lineContainerArea.onfocusout = (event) => {
+         // ▼▼▼ TAMBAHKAN || .line-nama ▼▼▼
+         if (event.target.classList.contains('checklist-item') || event.target.classList.contains('line-nama')) {
+             setTimeout(() => {
+                const resultsContainer = event.target.parentElement.querySelector('.autocomplete-results');
+                if(resultsContainer) resultsContainer.innerHTML = '';
+             }, 200); 
+         }
+    };
+}
 
     // Panggil kalkulasi & kosongkan history saat popup dibuka
     calculateTotals();
@@ -976,19 +1125,31 @@ function showPopup() {
       const lineDiv = document.createElement("div");
       lineDiv.classList.add("border", "p-3", "mb-3", "rounded");
       lineDiv.innerHTML = `
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <strong class="line-title">Line</strong>
-          <button type="button" class="btn btn-danger btn-sm btn-remove-line">Hapus</button>
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <strong class="line-title">Line</strong>
+        <button type="button" class="btn btn-danger btn-sm btn-remove-line">Hapus</button>
+      </div>
+      <div class="row mb-2">
+        
+        <div class="col-md-6"> 
+          <label>Nama Pekerjaan</label>
+          <div class="position-relative">
+            <input type="search" class="form-control line-nama" placeholder="Ketik nama pekerjaan..">
+            <div class="autocomplete-results"></div> </div>
         </div>
-        <div class="row mb-2">
-          <div class="col-md-6"><label>Nama Pekerjaan</label><input type="text" class="form-control line-nama" placeholder="Nama pekerjaan..."></div>
-          <div class="col-md-6"><label>Deadline</label><input type="datetime-local" class="form-control line-deadline"></div>
+        
+        <div class="col-md-6">
+          <label>Deadline</label>
+          <input type="datetime-local" class="form-control line-deadline">
         </div>
-        <div class="mb-2">
-          <label>Checklist</label><div class="checklist-container"></div>
-          <a href="#" class="text-primary small addChecklist">+ Tambah Checklist</a>
-        </div>
-      `;
+      </div>
+      
+      <div class="mb-2">
+        <label>Checklist</label>
+        <div class="checklist-container"></div>
+        <a href="#" class="text-primary small addChecklist">+ Tambah Checklist</a>
+      </div>
+    `;
       lineContainer.appendChild(lineDiv);
   }
 
@@ -1142,35 +1303,44 @@ function showPopup() {
  * Fungsi untuk menambah checklist di dalam line
  * (VERSI BARU dengan tombol Hapus "x" tanpa latar)
  */
+/**
+ * Fungsi untuk menambah 'widget' checklist baru
+ * (VERSI BARU dengan autocomplete)
+ */
  function addChecklist(button) {
     const checklistContainer = button.previousElementSibling; 
     if (!checklistContainer) return;
     
-    // 1. Buat wrapper 'div'
-    const checklistRow = document.createElement("div");
-    // Gunakan 'align-items-center' agar 'x' rata tengah
-    checklistRow.className = "d-flex gap-2 mb-2 align-items-center"; 
+    // 1. Buat wrapper 'div' untuk menampung input, hasil, dan tombol hapus
+    const checklistWidget = document.createElement("div");
+    // Gunakan 'position-relative' agar hasil pencarian bisa mengambang
+    checklistWidget.className = "d-flex gap-2 mb-2 align-items-center position-relative"; 
 
-    // 2. Buat Input Teks
+    // 2. Buat Input Teks (sekarang sebagai 'search')
     const checklistInput = document.createElement("input");
-    checklistInput.type = "text";
-    checklistInput.className = "form-control checklist-item";
-    checklistInput.placeholder = "Nama checklist...";
+    checklistInput.type = "search"; // Ubah 'text' menjadi 'search'
+    checklistInput.className = "form-control checklist-item"; // Tetap gunakan .checklist-item
+    checklistInput.placeholder = "Ketik untuk mencari checklist...";
     
-    // 3. Buat Tombol Hapus (sebagai <span>)
+    // 3. Buat Tombol Hapus (x)
     const deleteBtn = document.createElement("span"); 
     deleteBtn.className = "btn-remove-checklist"; 
+    deleteBtn.innerHTML = 'x';
     
-    // ▼▼▼ GANTI IKON MENJADI HURUF 'x' ▼▼▼
-    deleteBtn.innerHTML = 'x'; 
-    // ▲▲▲ ▲▲▲ ▲▲▲
+    // 4. Buat Area Hasil (awalnya tersembunyi)
+    const resultsContainer = document.createElement("div");
+    resultsContainer.className = "autocomplete-results";
     
-    // 4. Masukkan input dan tombol ke wrapper
-    checklistRow.appendChild(checklistInput);
-    checklistRow.appendChild(deleteBtn);
+    // 5. Masukkan semuanya ke wrapper
+    checklistWidget.appendChild(checklistInput);
+    checklistWidget.appendChild(deleteBtn);
+    checklistWidget.appendChild(resultsContainer); // Tambahkan area hasil
     
-    // 5. Masukkan wrapper ke container
-    checklistContainer.appendChild(checklistRow);
+    // 6. Masukkan wrapper ke container
+    checklistContainer.appendChild(checklistWidget);
+
+    // 7. Langsung fokus ke input baru
+    checklistInput.focus();
 }
   /**
    * Menampilkan notifikasi
@@ -1253,7 +1423,7 @@ function updateProgress(checkbox) {
     
     // Ambil ID Task dari tombol status
     const statusButton = dropdown.querySelector('.dropdown-toggle');
-    const taskId = statusButton.id.replace('statusDropdown', '');
+    const taskId = statusButton.dataset.taskId;
 
     if (newStatusName === 'Hold') {
         // --- Aksi: SET TO HOLD ---
@@ -1325,6 +1495,7 @@ function updateProgress(checkbox) {
   modalImg = document.getElementById("modalImage");
   modalPrevBtn = document.getElementById("modalPrevBtn");
   modalNextBtn = document.getElementById("modalNextBtn");
+
   
   if (modal) {
       document.getElementById("modalCloseBtn").addEventListener("click", () => {
@@ -1372,8 +1543,7 @@ document.querySelectorAll('.task table tbody tr').forEach(row => {
 
   // Listener untuk PERUBAHAN (change) - Khusus Checkbox
 document.body.addEventListener('change', function(event) {
-    // ▼▼▼ PERBAIKAN: Cek apakah ini checkbox checklist (dengan data-id) ▼▼▼
-    if (event.target.type === 'checkbox' && event.target.dataset.id) {
+    if (event.target.classList.contains('progress-check')){
         
         const checklistId = event.target.dataset.id;
         const isChecked = event.target.checked;
@@ -1456,7 +1626,137 @@ const searchInput = document.getElementById("taskSearchInput");
           block: 'center'
       });
   }
+  
+  // --- LOGIKA SELEKSI MASSAL (BULK ACTION) ---
+  const selectToggleBtn = document.getElementById('selectToggleBtn');
+  const taskTable = document.getElementById('taskTable');
+  const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+  const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+  const bulkActionBar = document.getElementById('bulkActionBar');
+  const bulkSelectCount = document.getElementById('bulkSelectCount');
+  const bulkArchiveBtn = document.getElementById('bulkArchiveBtn');
+  const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
 
+/**
+   * Helper untuk update tampilan bar aksi massal
+   */
+  function updateBulkActionBar() {
+      const selectedCount = document.querySelectorAll('.row-checkbox:checked').length;
+      
+      if (selectedCount > 0) {
+          if(bulkActionBar) bulkActionBar.style.display = 'flex';
+          if(bulkSelectCount) bulkSelectCount.textContent = `${selectedCount} Task terpilih`;
+      } else {
+          if(bulkActionBar) bulkActionBar.style.display = 'none';
+      }
+      
+      // Update checkbox "Select All"
+      if(selectAllCheckbox) {
+          selectAllCheckbox.checked = (selectedCount > 0 && selectedCount === rowCheckboxes.length);
+          selectAllCheckbox.indeterminate = (selectedCount > 0 && selectedCount < rowCheckboxes.length);
+      }
+  }
+
+  /**
+   * Helper untuk mengirim 'fetch' aksi massal
+   */
+  async function performBulkAction(action) {
+      const selectedIds = Array.from(document.querySelectorAll('.row-checkbox:checked'))
+                               .map(cb => cb.dataset.id);
+      
+      if (selectedIds.length === 0) {
+          alert('Tidak ada task yang dipilih.');
+          return;
+      }
+
+      const preloader = document.getElementById('page-preloader');
+      if (preloader) preloader.classList.remove('loaded');
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+      try {
+          const response = await fetch('/tasks/bulk-action', { // Rute yang kita buat
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRF-TOKEN': csrfToken,
+                  'Accept': 'application/json'
+              },
+              body: JSON.stringify({
+                  action: action, // 'archive' or 'delete'
+                  task_ids: selectedIds
+              })
+          });
+          
+          const result = await response.json();
+
+          if (result.success) {
+              showNotif(result.message);
+              location.reload(); // Muat ulang halaman
+          } else {
+              throw new Error(result.message || 'Aksi massal gagal.');
+          }
+      } catch (error) {
+          alert(error.message);
+          if (preloader) preloader.classList.add('loaded');
+      }
+  }
+
+  // Listener untuk Tombol "Pilih / Batal"
+  if (selectToggleBtn && taskTable) {
+      selectToggleBtn.addEventListener('click', () => {
+          taskTable.classList.toggle('selection-mode');
+          const isInSelectionMode = taskTable.classList.contains('selection-mode');
+
+          if (isInSelectionMode) {
+              selectToggleBtn.innerHTML = '<i class="bi bi-x-lg"></i> Batal';
+              selectToggleBtn.classList.add('active'); 
+          } else {
+              selectToggleBtn.innerHTML = '<i class="bi bi-check-square"></i> Pilih';
+              selectToggleBtn.classList.remove('active');
+              
+              if (bulkActionBar) bulkActionBar.style.display = 'none';
+              if (selectAllCheckbox) selectAllCheckbox.checked = false;
+              rowCheckboxes.forEach(cb => { cb.checked = false; });
+          }
+      });
+  }
+
+  // Listener untuk "Select All"
+  if (selectAllCheckbox) {
+      selectAllCheckbox.addEventListener('click', (e) => {
+          rowCheckboxes.forEach(cb => {
+              cb.checked = e.target.checked;
+          });
+          updateBulkActionBar();
+      });
+  }
+
+  // Listener untuk setiap checkbox baris
+  rowCheckboxes.forEach(cb => {
+      cb.addEventListener('click', (e) => {
+          // Mencegah klik baris (pindah halaman) saat klik checkbox
+          e.stopPropagation(); 
+          updateBulkActionBar();
+      });
+  });
+
+  // Listener untuk tombol "Arsipkan"
+  if (bulkArchiveBtn) {
+      bulkArchiveBtn.addEventListener('click', () => {
+          if (confirm('Apakah Anda yakin ingin mengarsipkan task yang dipilih?')) {
+              performBulkAction('archive');
+          }
+      });
+  }
+  
+  // Listener untuk tombol "Hapus (Trash)"
+  if (bulkDeleteBtn) {
+      bulkDeleteBtn.addEventListener('click', () => {
+          if (confirm('Apakah Anda yakin ingin memindahkan task ke sampah?')) {
+              performBulkAction('delete');
+          }
+      });
+  }
   
 
   // 3.Listener untuk KLIK (click) - GABUNGAN SEMUA DELEGASI
@@ -1533,52 +1833,11 @@ const searchInput = document.getElementById("taskSearchInput");
 
 });
 
-// --- LISTENER KHUSUS UNTUK HALAMAN DETAIL-TASK ---
-
-if (detailChecklistContainer) {
-    detailChecklistContainer.addEventListener('change', function(event) {
-        if (event.target.type === 'checkbox' && event.target.dataset.id) {
-            // Sama seperti listener utama
-            const checklistId = event.target.dataset.id;
-            const isChecked = event.target.checked;
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-            fetch(`/checklist/update/${checklistId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ is_completed: isChecked })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => { throw new Error(err.message || 'Server error'); });
-                }
-                return response.json();
-            })
-            .then(result => {
-                if (result.success) {
-                    console.log(`Checklist ${checklistId} updated (detail page)`);
-                    
-                    // JIKA ada progress bar di halaman detail, update juga
-                    // updateProgress(event.target); 
-                } else {
-                    alert('Gagal menyimpan: ' + result.message);
-                    event.target.checked = !isChecked;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Gagal menyimpan checklist.');
-                event.target.checked = !isChecked;
-            });
-        }
-    });
-}
 
 
+
+
+  
 
 
 

@@ -24,38 +24,60 @@
       </div>
 
       <div class="trash-table-container">
-        <table class="trash-table">
+        <table class="trash-table" id="trashTable">
           <thead>
             <tr>
+              <th class="select-col"><input type="checkbox" id="selectAllTrash"></th>
+              <th>No. PO</th>
               <th>Tasks Title</th>
-              <th>Priority</th>
-              <th>Stage</th>
-              <th>Modified On</th>
+              <th>Jumlah</th>
+              <th>Line Pekerjaan</th>
+              <th>Status</th>
+              <th>Deleted At</th>
+              <th>PIC</th>
               <th>Action</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td><span class="dot yellow"></span> Duplicate - Duplicate - Review</td>
-              <td>Urgent</td>
-              <td>In Progress</td>
-              <td>Fri Feb 09 2024</td>
-              <td class="actions">
-                <i class="bi bi-arrow-clockwise restore-icon"></i>
-                <i class="bi bi-trash-fill delete-icon"></i>
-              </td>
-            </tr>
-            <tr>
-              <td><span class="dot pink"></span> Test Task</td>
-              <td>Urgent</td>
-              <td>To Do</td>
-              <td>Fri Feb 09 2024</td>
-              <td class="actions">
-                <i class="bi bi-arrow-clockwise restore-icon"></i>
-                <i class="bi bi-trash-fill delete-icon"></i>
-              </td>
-            </tr>
-          </tbody>
+          @php
+              use Illuminate\Support\Str;
+              use Carbon\Carbon;
+          @endphp
+         <tbody>
+          @forelse($tasks as $task)
+          
+          @php
+              $linePekerjaan = $task->taskPekerjaans->first();
+          @endphp
+          <tr>
+            <td class="select-col">
+                <input type="checkbox" class="row-select-trash" data-id="{{ $task->id }}">
+            </td>
+            <td>{{ $task->no_invoice }}</td>
+            <td>
+                <span class="dot yellow"></span> {{ $task->judul }}
+            </td>
+            <td>{{ $task->total_jumlah }}</td>
+            
+            <td>{{ $linePekerjaan ? $linePekerjaan->nama_pekerjaan : 'N/A' }}</td>
+            
+            <td>{{ $task->status->name }}</td>
+            <td>{{ $task->deleted_at->format('j M Y') }}</td>
+            <td>
+                <div class="pic-circle">
+                    {{ \App\Http\Controllers\TaskController::buatInisial($task->user->name) }}
+                </div>
+            </td>
+            <td class="actions">
+              <i class="bi bi-arrow-clockwise restore-icon" data-id="{{ $task->id }}"></i>
+              <i class="bi bi-trash-fill delete-icon" data-id="{{ $task->id }}"></i>
+            </td>
+          </tr>
+          @empty
+          <tr>
+            <td colspan="9" class="text-center">Tidak ada task di dalam sampah.</td>
+          </tr>
+          @endforelse
+        </tbody>
         </table>
       </div>
     </div>

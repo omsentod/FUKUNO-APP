@@ -1,133 +1,186 @@
-document.addEventListener("DOMContentLoaded", function () {
-  // ==========================
-  // SIDEBAR NAVIGATION
-  // ==========================
-  const sidebarCells = document.querySelectorAll('.sidebar-cell');
+// ==========================================================
+// === FILE ARCHIVE.JS (VERSI FINAL & BERSIH)
+// ==========================================================
 
-  sidebarCells.forEach(cell => {
-    cell.addEventListener('click', function() {
-      // hapus kelas active dari semua item
-      sidebarCells.forEach(c => c.parentElement.classList.remove('active'));
-      // tambahkan active ke item yang diklik
-      this.parentElement.classList.add('active');
+document.addEventListener("DOMContentLoaded", () => {
+    
+  // === 1. PILIH ELEMEN UTAMA ===
+  const archiveTableBody = document.querySelector(".archive-table tbody");
+  const archiveTable = document.getElementById('archiveTable');
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+  
+  // Tombol Aksi Header
+  const selectToggleBtn = document.querySelector(".select-toggle");
+  const bulkActionBar = document.querySelector('.archive-actions'); 
+  const restoreAllBtn = document.querySelector(".restore-all");
+  const deleteAllBtn = document.querySelector(".delete-all");
+  const selectAllCheckbox = document.getElementById('selectAll');
 
-      // arahkan ke halaman sesuai href
-      const href = this.getAttribute('href');
-      if (href && href !== '#') {
-        window.location.href = href;
-      }
-    });
-  });
+  let selectMode = false;
 
-  // ==========================
-  // ARCHIVE PAGE INTERACTION
-  // ==========================
-  // Tombol Pilih
-  const selectBtn = document.querySelector('.select-toggle');
-  const selectAll = document.getElementById('selectAll');
-  const rowCheckboxes = document.querySelectorAll('.row-select');
-  let selectionMode = false;
+  // === 2. FUNGSI HELPER ===
 
-  if (selectBtn) {
-    selectBtn.addEventListener('click', () => {
-      selectionMode = !selectionMode;
-      selectAll.style.display = selectionMode ? 'inline-block' : 'none';
-      rowCheckboxes.forEach(cb => cb.style.display = selectionMode ? 'inline-block' : 'none');
-      selectBtn.textContent = selectionMode ? 'Batal' : 'Pilih';
-    });
-  }
+  /**
+   * Menampilkan/menyembunyikan checkbox di tabel
+   */
+  function toggleSelectMode() {
+      selectMode = !selectMode;
+      if (!archiveTable) return;
+      
+      archiveTable.classList.toggle("selection-mode", selectMode);
 
-  if (selectAll) {
-    selectAll.addEventListener('change', () => {
-      rowCheckboxes.forEach(cb => cb.checked = selectAll.checked);
-    });
-  }
+      const rows = archiveTable.querySelectorAll("tbody tr");
 
-  // ==========================
-  // ACTION ICONS (RESTORE / DELETE / DETAIL)
-  // ==========================
-  document.addEventListener('click', function(e) {
-    // Restore satu baris
-    if (e.target.classList.contains('bi-arrow-counterclockwise')) {
-      showNotification('Data berhasil direstore!', 'success');
-    }
-
-    // Delete satu baris
-    if (e.target.classList.contains('bi-trash-fill')) {
-      const confirmed = confirm('Yakin ingin menghapus data ini?');
-      if (confirmed) {
-        e.target.closest('tr').remove();
-        showNotification('Data berhasil dihapus!', 'delete');
-      }
-    }
-
-    // Detail satu baris
-    if (e.target.classList.contains('bi-file-earmark-text')) {
-      showNotification('Fitur detail belum aktif.', 'info');
-    }
-  });
-
-  // ==========================
-  // BULK ACTIONS (atas kanan)
-  // ==========================
-  const bulkRestore = document.querySelector('.restore-all');
-  const bulkDelete = document.querySelector('.delete-all');
-
-  if (bulkRestore) {
-    bulkRestore.addEventListener('click', () => {
-      const checked = document.querySelectorAll('.row-select:checked');
-      if (checked.length > 0) {
-        showNotification(`${checked.length} data berhasil direstore!`, 'success');
+      if (selectMode) {
+          selectToggleBtn.textContent = "Batal Pilih";
+          selectToggleBtn.classList.add("active"); // (Tambahkan class CSS merah jika ada)
+          // Tampilkan bar aksi massal (jika disembunyikan by default)
+          // bulkActionBar.style.display = 'flex'; 
       } else {
-        showNotification('Tidak ada data yang dipilih.', 'info');
+          selectToggleBtn.textContent = "Pilih";
+          selectToggleBtn.classList.remove("active");
+          // Uncheck semua saat batal
+          archiveTable.querySelectorAll("input[type='checkbox']").forEach(cb => cb.checked = false);
+          if (selectAllCheckbox) selectAllCheckbox.checked = false;
       }
-    });
   }
 
-  if (bulkDelete) {
-    bulkDelete.addEventListener('click', () => {
-      const checked = document.querySelectorAll('.row-select:checked');
-      if (checked.length > 0) {
-        const confirmed = confirm(`Hapus ${checked.length} data terpilih?`);
-        if (confirmed) {
-          checked.forEach(cb => cb.closest('tr').remove());
-          showNotification(`${checked.length} data berhasil dihapus!`, 'delete');
-        }
-      } else {
-        showNotification('Tidak ada data yang dipilih.', 'info');
-      }
-    });
-  }
-
-  // ==========================
-  // NOTIFICATION POPUP
-  // ==========================
+  /**
+   * Menampilkan notifikasi sederhana
+   */
   function showNotification(message, type = 'info') {
-    const notif = document.createElement('div');
-    notif.classList.add('notification');
-    notif.textContent = message;
+      // (Gunakan logika notifikasi yang sudah ada atau alert biasa)
+      alert(message); 
+      // Jika ingin reload otomatis agar data bersih:
+      location.reload();
+  }
 
-    if (type === 'success') notif.style.backgroundColor = '#2ecc71';
-    if (type === 'delete') notif.style.backgroundColor = '#e74c3c';
-    if (type === 'info') notif.style.backgroundColor = '#3498db';
+  /**
+   * Mengirim request fetch untuk aksi massal
+   */
+  async function performBulkAction(action) {
+      const selectedIds = Array.from(document.querySelectorAll(".row-select:checked"))
+                               .map(cb => cb.dataset.id);
 
-    notif.style.position = 'fixed';
-    notif.style.bottom = '20px';
-    notif.style.right = '20px';
-    notif.style.color = '#fff';
-    notif.style.padding = '12px 18px';
-    notif.style.borderRadius = '8px';
-    notif.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-    notif.style.fontSize = '14px';
-    notif.style.zIndex = '9999';
-    notif.style.opacity = '0';
-    notif.style.transition = 'opacity 0.3s ease';
+      if (selectedIds.length === 0) {
+          alert("Pilih minimal satu task!");
+          return;
+      }
 
-    document.body.appendChild(notif);
-    setTimeout(() => notif.style.opacity = '1', 50);
-    setTimeout(() => {
-      notif.style.opacity = '0';
-      setTimeout(() => notif.remove(), 300);
-    }, 2500);
+      
+      try {
+          const response = await fetch('/tasks/bulk-action', { 
+              method: 'POST',
+              headers: { 
+                  'Content-Type': 'application/json', 
+                  'X-CSRF-TOKEN': csrfToken,
+                  'Accept': 'application/json'
+              },
+              body: JSON.stringify({ 
+                  action: action, // 'unarchive_all' atau 'delete_permanent_all'
+                  task_ids: selectedIds 
+              })
+          });
+
+          const result = await response.json();
+          if (result.success) {
+              showNotification(result.message, 'success');
+          } else {
+              throw new Error(result.message);
+          }
+      } catch (error) {
+          alert('Gagal: ' + error.message);
+      }
+      
+     
+    //  alert("Fitur Bulk Action untuk Archive akan segera hadir (Butuh update Controller).");
+  }
+
+  // === 3. EVENT LISTENERS ===
+
+  // Listener Tombol Pilih
+  if (selectToggleBtn) {
+      selectToggleBtn.addEventListener("click", toggleSelectMode);
+  }
+
+  // Listener Select All Checkbox
+  if (selectAllCheckbox) {
+      selectAllCheckbox.addEventListener('change', (e) => {
+          const checkboxes = document.querySelectorAll('.row-select');
+          checkboxes.forEach(cb => cb.checked = e.target.checked);
+      });
+  }
+
+  // Listener Aksi Massal
+  if (restoreAllBtn) {
+      restoreAllBtn.addEventListener('click', () => {
+          if (!selectMode) return alert("Aktifkan mode pilih dulu!");
+          if (confirm("Pulihkan semua task yang dipilih?")) {
+              performBulkAction('unarchive_all');
+          }
+      });
+  }
+  if (deleteAllBtn) {
+      deleteAllBtn.addEventListener('click', () => {
+          if (!selectMode) return alert("Aktifkan mode pilih dulu!");
+          if (confirm("Hapus permanen semua task yang dipilih?")) {
+              performBulkAction('force_delete_all');
+          }
+      });
+  }
+
+  // Listener Klik Tabel (Aksi Satuan)
+  if (archiveTableBody) {
+      archiveTableBody.addEventListener('click', (e) => {
+          const target = e.target;
+          const row = target.closest('tr');
+          
+          // Abaikan jika klik di mode pilih (kecuali checkbox itu sendiri)
+          if (!row || (selectMode && target.type !== 'checkbox')) return; 
+
+          // Ambil ID dari atribut data-id (di icon atau checkbox)
+          // Kita cari elemen yang punya data-id di dalam baris ini
+          let id = target.dataset.id;
+          if (!id) {
+              // Coba cari di icon terdekat
+              const iconWithId = row.querySelector('.action-icons [data-id]');
+              if (iconWithId) id = iconWithId.dataset.id;
+          }
+
+          // 1. Aksi UN-ARCHIVE (Restore)
+          if (target.classList.contains('bi-arrow-counterclockwise') || target.parentElement.classList.contains('restore-icon')) { 
+              if (confirm('Keluarkan task ini dari arsip?')) {
+                  fetch(`/task/unarchive/${id}`, { 
+                      method: 'POST',
+                      headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+                  })
+                  .then(res => res.json())
+                  .then(result => {
+                      if (result.success) {
+                          alert('Task berhasil dipulihkan.');
+                          window.location.href = '/task';
+                      } else {
+                          alert('Gagal: ' + result.message);
+                      }
+                  })
+                  .catch(err => console.error(err));
+              }
+          }
+          
+          // 2. Aksi Detail (Pindah Halaman)
+          if (target.classList.contains('bi-file-earmark-text')) {
+              // Arahkan ke halaman detail
+              window.location.href = `/task/detail/${id}`;
+          }
+
+          // 3. Aksi Delete Permanent
+          if (target.classList.contains('bi-trash-fill')) {
+               if (confirm('Hapus permanen task ini? Data tidak bisa kembali.')) {
+                  // (Anda perlu Rute Force Delete untuk ini)
+                  // fetch(`/task/force-delete/${id}`, ...)
+                  alert("Fitur Hapus Permanen belum diimplementasikan di Controller.");
+               }
+          }
+      });
   }
 });

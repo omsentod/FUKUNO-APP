@@ -4,9 +4,11 @@ use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\PekerjaansController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StatusController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
+
 
 
 // Rute utama
@@ -45,10 +47,38 @@ Route::get('/task/edit/{id}', [TaskController::class, 'edit'])->name('task.edit'
 Route::delete('/task/delete/{id}', [TaskController::class, 'destroy'])->name('task.destroy');
 Route::get('/task/detail/{id}', [TaskController::class, 'show']) ->name('task.show'); 
 Route::post('/task/comment/{task_id}', [TaskController::class, 'storeComment'])->name('task.storeComment');
+Route::get('/archive', [TaskController::class, 'showArchive'])->name('archive');
+Route::get('/trash', [TaskController::class, 'showTrash'])->name('trash');
+Route::post('/tasks/bulk-action', [TaskController::class, 'bulkAction'])->name('task.bulkAction');
 
+// Restore
+Route::post('/task/restore/{id}', [TaskController::class, 'restore'])->name('task.restore');
+Route::post('/trash/bulk-action', [TaskController::class, 'trashBulkAction'])->name('trash.bulkAction');
+// Unarchive
+Route::post('/task/unarchive/{id}', [TaskController::class, 'unarchive'])->name('task.unarchive');
 
 // Rute untuk menandai semua notifikasi sebagai "telah dibaca"
 Route::post('/notifications/mark-as-read', [TaskController::class, 'markAllAsRead'])->name('notifications.markAsRead');
+
+
+//Status
+Route::get('/status', function () {
+    return view('status-sb');
+})->name('status');
+Route::get('/status/all', [StatusController::class, 'index'])->name('status.all');
+Route::post('/status/store', [StatusController::class, 'store'])->name('status.store');
+Route::put('/status/update/{id}', [StatusController::class, 'update'])->name('status.update');
+Route::delete('/status/delete/{id}', [StatusController::class, 'destroy'])->name('status.destroy');
+
+// Checklist
+Route::get('/checklist', function () {
+    return view('checklist-sb');
+})->name('checklist');
+Route::get('/checklist/all', [ChecklistController::class, 'index'])->name('checklist.all');
+Route::post('/checklist/store', [ChecklistController::class, 'store'])->name('checklist.store');
+Route::put('/checklist/update/{id}', [ChecklistController::class, 'update'])->name('checklist.update');
+Route::delete('/checklist/delete/{id}', [ChecklistController::class, 'destroy'])->name('checklist.destroy');
+Route::get('/checklists/search', [ChecklistController::class, 'search'])->name('checklist.search');
 });
 
 // Rute untuk pekerjaan
@@ -58,36 +88,23 @@ Route::middleware('auth')->group(function () {
     Route::get('/pekerjaan/edit/{id}', [PekerjaansController::class, 'edit'])->name('pekerjaan.edit');
     Route::put('/pekerjaan/{id}', [PekerjaansController::class, 'update'])->name('pekerjaan.update');
     Route::delete('/pekerjaan/{id}', [PekerjaansController::class, 'destroy'])->name('pekerjaan.destroy');
+    Route::get('/pekerjaan/search', [PekerjaansController::class, 'search'])->name('pekerjaan.search');
 });
-// END Rute untuk pekerjaan //
 
-Route::get('/status', function () {
-    return view('status-sb');
-})->name('status');
-Route::get('/status/all', [StatusController::class, 'index'])->name('status.all');
-Route::post('/status/store', [StatusController::class, 'store'])->name('status.store');
-Route::put('/status/update/{id}', [StatusController::class, 'update'])->name('status.update');
-Route::delete('/status/delete/{id}', [StatusController::class, 'destroy'])->name('status.destroy');
+Route::get('/user', function () {
+    return view('user-sb');
+})->name('user');
+Route::get('/user', [UserController::class, 'index'])->name('user');
+Route::post('/user/store', [UserController::class, 'store'])->name('user.store');
+Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.delete');
+Route::post('/user/update/{id}', [UserController::class, 'update'])->name('user.update');
 
-Route::get('/checklist', function () {
-    return view('checklist-sb');
-})->name('checklist');
-Route::get('/checklist/all', [ChecklistController::class, 'index'])->name('checklist.all');
-Route::post('/checklist/store', [ChecklistController::class, 'store'])->name('checklist.store');
-Route::put('/checklist/update/{id}', [ChecklistController::class, 'update'])->name('checklist.update');
-Route::delete('/checklist/delete/{id}', [ChecklistController::class, 'destroy'])->name('checklist.destroy');
 
 Route::get('/user', function () {
     return view('user-sb');
 })->name('user');
 
-Route::get('/archive', function () {
-    return view('archive-sb');
-})->name('archive');
 
-Route::get('/trash', function () {
-    return view('trash-sb');
-})->name('trash');
 
 // MIDDLEWARE
 Route::middleware('auth')->get('/user-name', [AuthController::class, 'getUserName']);

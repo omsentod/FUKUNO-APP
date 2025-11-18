@@ -37,22 +37,98 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
         </div>
     </div>
         </div>
-        <button class="btn-add" id="addBtn"><i class="bi bi-plus-lg"></i> Add new</button>
+        
+        <div class="title-page-actions">
+            <button class="btn-select" id="selectToggleBtn">
+                <i class="bi bi-check-square"></i> Pilih
+            </button>
+            <button class="btn-add" id="addBtn">
+                <i class="bi bi-plus-lg"></i> Add new
+            </button>
+        </div>
     </div>
-  
+
+    <div class="bulk-action-bar" id="bulkActionBar" style="display: none;">
+        <span id="bulkSelectCount">0 Task terpilih</span>
+        <button id="bulkArchiveBtn" class="btn btn-warning btn-sm">
+            <i class="bi bi-archive-fill"></i> Arsipkan
+        </button>
+        <button id="bulkDeleteBtn" class="btn btn-danger btn-sm">
+            <i class="bi bi-trash-fill"></i> Pindahkan ke Sampah
+        </button>
+    </div>
+
     <div class="task">
-    <table>
-        <thead>
+    <table id="taskTable">
+        <thead>            
             <tr>
-                <th>No. PO</th>
-                <th>Tasks Title</th>
-                <th>Jumlah</th>
-                <th>Line Pekerjaan</th>
-                <th>Urgent</th>
-                <th>Status</th>
-                <th>Time Left</th>
+                <th class="select-col" style="width: 10px;"><input type="checkbox" id="selectAllCheckbox"></th>
+                <th>
+                    @php $newOrder = ($currentSort == 'no_invoice' && $currentOrder == 'asc') ? 'desc' : 'asc'; @endphp
+                    <a href="{{ route('task', ['sort' => 'no_invoice', 'order' => $newOrder]) }}">
+                        No. PO
+                        @if($currentSort == 'no_invoice') <i class="bi {{ $currentOrder == 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill' }}"></i> @endif
+                    </a>
+                </th>
+                
+                <th>
+                    @php $newOrder = ($currentSort == 'judul' && $currentOrder == 'asc') ? 'desc' : 'asc'; @endphp
+                    <a href="{{ route('task', ['sort' => 'judul', 'order' => $newOrder]) }}">
+                        Tasks Title
+                        @if($currentSort == 'judul') <i class="bi {{ $currentOrder == 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill' }}"></i> @endif
+                    </a>
+                </th>
+
+                <th>
+                    @php $newOrder = ($currentSort == 'total_jumlah' && $currentOrder == 'asc') ? 'desc' : 'asc'; @endphp
+                    <a href="{{ route('task', ['sort' => 'total_jumlah', 'order' => $newOrder]) }}">
+                        Jumlah
+                        @if($currentSort == 'total_jumlah') <i class="bi {{ $currentOrder == 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill' }}"></i> @endif
+                    </a>
+                </th>
+                
+                <th>
+                    @php $newOrder = ($currentSort == 'line' && $currentOrder == 'asc') ? 'desc' : 'asc'; @endphp
+                    <a href="{{ route('task', ['sort' => 'line', 'order' => $newOrder]) }}">
+                        Line Pekerjaan
+                        @if($currentSort == 'line') <i class="bi {{ $currentOrder == 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill' }}"></i> @endif
+                    </a>
+                </th>
+
+                <th>
+                    @php $newOrder = ($currentSort == 'urgensi' && $currentOrder == 'asc') ? 'desc' : 'asc'; @endphp
+                    <a href="{{ route('task', ['sort' => 'urgensi', 'order' => $newOrder]) }}">
+                        Urgent
+                        @if($currentSort == 'urgensi') <i class="bi {{ $currentOrder == 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill' }}"></i> @endif
+                    </a>
+                </th>
+
+                <th>
+                    @php $newOrder = ($currentSort == 'status' && $currentOrder == 'asc') ? 'desc' : 'asc'; @endphp
+                    <a href="{{ route('task', ['sort' => 'status', 'order' => $newOrder]) }}">
+                        Status
+                        @if($currentSort == 'status') <i class="bi {{ $currentOrder == 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill' }}"></i> @endif
+                    </a>
+                </th>
+
+                <th>
+                    @php $newOrder = ($currentSort == 'deadline' && $currentOrder == 'asc') ? 'desc' : 'asc'; @endphp
+                    <a href="{{ route('task', ['sort' => 'deadline', 'order' => $newOrder]) }}">
+                        Time Left
+                        @if($currentSort == 'deadline') <i class="bi {{ $currentOrder == 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill' }}"></i> @endif
+                    </a>
+                </th>
+
                 <th>Mockup</th>
-                <th>PIC</th>
+
+                <th>
+                    @php $newOrder = ($currentSort == 'nama_pelanggan' && $currentOrder == 'asc') ? 'desc' : 'asc'; @endphp
+                    <a href="{{ route('task', ['sort' => 'nama_pelanggan', 'order' => $newOrder]) }}">
+                        Klien
+                        @if($currentSort == 'nama_pelanggan') <i class="bi {{ $currentOrder == 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill' }}"></i> @endif
+                    </a>
+                </th>
+                
                 <th>Progress</th>
                 <th>Action</th>
             </tr>
@@ -63,11 +139,21 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
             @foreach($tasks as $task)
             @php
                 $linePekerjaan = $task->taskPekerjaans->first();
+                
+                        // Ambil checklist HANYA dari line pekerjaan ini
+                        $allChecklists = $linePekerjaan ? $linePekerjaan->checklists : collect();
+                        $completed = $allChecklists->where('is_completed', true)->count();
+                        $total = $allChecklists->count();
+                        $percentage = ($total > 0) ? round(($completed / $total) * 100) : 0;
+
+                        $isDone = ($task->status->name == 'Done and Ready' || $percentage == 100);
             @endphp
                 <tr class="clickable-row" 
                 data-url="{{ route('task.show', $task->id) }}"
-                {{-- 1. Tambahkan ID "highlight-task" HANYA jika ID-nya cocok --}}
                 {!! ($highlightId ?? null) == $task->id ? 'id="highlight-task"' : '' !!} >
+                <td class="select-col">
+                    <input type="checkbox" class="row-checkbox" data-id="{{ $task->id }}">
+                </td>
                 <td>{{ $task->no_invoice }}</td>
                 <td>{{ $task->judul }}</td>
                 <td>{{ $task->total_jumlah }}</td>
@@ -82,7 +168,7 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
                 
                 <td>
                     <div class="dropdown">
-                        <button class="status-btn status-{{ Str::slug($task->status->name) }} dropdown-toggle" type="button" id="statusDropdown{{ $task->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="status-btn status-{{ Str::slug($task->status->name) }} dropdown-toggle" type="button" id="statusDropdown{{ $task->id }}"  data -task-id="{{ $task->id }}" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="status-text">{{ $task->status->name }}</span>
                         </button>
                         <div class="dropdown-menu" aria-labelledby="statusDropdown{{ $task->id }}">
@@ -96,9 +182,38 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
                 </td>
     
                 <td>
-                    {{ $linePekerjaan && $linePekerjaan->deadline ? \Carbon\Carbon::parse($linePekerjaan->deadline)->diffForHumans() : '-' }}
-                </td>
+                    @php
+                        // (Asumsi $linePekerjaan dan $isDone sudah dihitung di atas <tr>)
+                        $timeLeftString = '-';
+                        $timeClass = ''; 
+                        $deadlineISO = $linePekerjaan && $linePekerjaan->deadline ? \Carbon\Carbon::parse($linePekerjaan->deadline)->toIso8601String() : '';
     
+                        if ($isDone) {
+                            // --- LOGIKA KEMBALI KE SEDERHANA ---
+                            $timeLeftString = 'Selesai';
+                            $timeClass = 'time-completed'; // Hijau
+                        
+                        } elseif ($linePekerjaan && $linePekerjaan->deadline) {
+                            // --- LOGIKA JIKA BELUM SELESAI (HITUNG MUNDUR) ---
+                            $deadline = \Carbon\Carbon::parse($linePekerjaan->deadline);
+                            $rawTimeLeft = $deadline->diffForHumans();
+                            $timeLeftString = str_replace(['dari sekarang', 'sebelumnya'], ['lagi', 'lalu'], $rawTimeLeft);
+    
+                            if ($deadline->isPast()) {
+                                // 1. Jika sudah lewat: KUNING
+                                $timeClass = 'time-late'; 
+                            } 
+                            elseif ($deadline->lte(now()->addDays(2))) {
+                                // 2. Jika kurang dari 2 hari lagi: MERAH
+                                $timeClass = 'time-mustdo'; 
+                            }
+                        }
+                    @endphp
+                    
+                    <span id="time-left-{{ $task->id }}" class="{{ $timeClass }}" data-deadline="{{ $deadlineISO }}">
+                        {{ $timeLeftString }}
+                    </span>
+                </td>
                 <td class="icon-cell">
                     <div class="mockup-wrapper">
                         @foreach($task->mockups as $mockup)
@@ -109,41 +224,10 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
                     </div>
                 </td>
                 
-                <td>
-                    @php
-                        $picName = $task->user->name ?? 'A'; // Default ke 'A' jika null
-                        $initials = \App\Http\Controllers\TaskController::buatInisial($picName);
-                        
-                        // --- Logika Warna HSL BARU ---
-                        // 1. Ambil huruf pertama (A-Z)
-                        $firstLetter = strtoupper(substr($initials, 0, 1));
-                        
-                        // 2. Ubah huruf menjadi angka 0-25 (A=0, B=1, ...)
-                        // (ord('P') - ord('A') = 15)
-                        $letterValue = ord($firstLetter) - ord('A'); 
-                        
-                        // 3. Hitung Hue (0-360). Kita kalikan ~13.8 (360/26)
-                        // Menggunakan 14 akan memberikan sebaran warna yang bagus
-                        $hue = ($letterValue * 14) % 360;
-    
-                        // 4. Atur Saturation (65%) dan Lightness (40%) agar warna solid
-                        $bgColor = "hsl({$hue}, 65%, 40%)";
-                        // --- Akhir Logika Baru ---
-                    @endphp
-                    
-                    <div class="pic" style="background-color: {{ $bgColor }};">
-                        {{ $initials }}
-                    </div>
-                </td>
+                <td>{{ $task->nama_pelanggan }}</td>
                 
                 <td>
-                    @php
-                        // Ambil checklist HANYA dari line pekerjaan ini
-                        $allChecklists = $linePekerjaan ? $linePekerjaan->checklists : collect();
-                        $completed = $allChecklists->where('is_completed', true)->count();
-                        $total = $allChecklists->count();
-                        $percentage = ($total > 0) ? round(($completed / $total) * 100) : 0;
-                    @endphp
+              
                     <div class="dropdown">
                         <button class="progress dropdown-toggle" type="button" id="progressDropdown{{ $task->id }}" data-task-id="{{ $task->id }}" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="progress-text">{{ $percentage }}%</span>
@@ -255,24 +339,7 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
                     <div class="context-menu-item text-danger" data-action="delete-col">Hapus Kolom Ini</div>
                 </div>
 
-<div id="customContextMenu" class="context-menu shadow-lg">
-    <div class="context-menu-item" data-action="insert-row-after">Tambah Baris di Bawah</div>
-    <hr>
-    <div class="context-menu-item" data-action="insert-col-left">Sisipkan Kolom Kiri</div>
-    <div class="context-menu-item" data-action="insert-col-right">Sisipkan Kolom Kanan</div>
-    <div class="context-menu-item text-danger" data-action="delete-row">Hapus Baris Ini</div>
 
-    <div class="context-menu-item text-danger" data-action="delete-col">Hapus Kolom Ini</div>
-</div>
-                
-                <div id="customContextMenu" class="context-menu shadow-lg">
-                    <div class="context-menu-item" data-action="insert-row-after">Tambah Baris di Bawah</div>
-                    <div class="context-menu-item" data-action="delete-row">Hapus Baris Ini</div>
-                    <hr>
-                    <div class="context-menu-item" data-action="insert-col-left">Sisipkan Kolom Kiri</div>
-                    <div class="context-menu-item" data-action="insert-col-right">Sisipkan Kolom Kanan</div>
-                    <div class="context-menu-item text-danger" data-action="delete-col">Hapus Kolom Ini</div>
-                </div>
 
 
                 <div class="row mb-2">

@@ -206,3 +206,32 @@ body{
   .confirm-no {
     background-color: #ccc;
   }
+  /* === CSS UNTUK LOGIKA "PILIH" (SELECT) === */
+
+  #trashTable .select-col {
+  display: none;
+  }
+
+  #trashTable.selection-mode .select-col {
+  display: table-cell;
+  }
+
+  .trash-header-actions .select-toggle.active {
+  background-color: #dc3545; 
+  color: white;
+  }
+
+    /* PIC */
+    .pic-circle {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background-color: #e74c3c;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    

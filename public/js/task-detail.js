@@ -218,6 +218,46 @@ document.addEventListener("DOMContentLoaded", () => {
         chatContainer.appendChild(bubble);
         scrollToBottom(); // Auto-scroll ke bawah
     }
-
+    
+    if (detailChecklistContainer) {
+        detailChecklistContainer.addEventListener('change', function(event) {
+            if (event.target.type === 'checkbox' && event.target.dataset.id) {
+                // Sama seperti listener utama
+                const checklistId = event.target.dataset.id;
+                const isChecked = event.target.checked;
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+                fetch(`/checklist/update/${checklistId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ is_completed: isChecked })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw new Error(err.message || 'Server error'); });
+                    }
+                    return response.json();
+                })
+                .then(result => {
+                    if (result.success) {
+                        console.log(`Checklist ${checklistId} updated (detail page)`);
+                        
+                    } else {
+                        alert('Gagal menyimpan: ' + result.message);
+                        event.target.checked = !isChecked;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Gagal menyimpan checklist.');
+                    event.target.checked = !isChecked;
+                });
+            }
+        });
+    }
 
 });

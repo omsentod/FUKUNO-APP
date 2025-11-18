@@ -34,11 +34,13 @@
 <!-- Navbar -->
 <nav class="navbar">
     <div class="header-logo">
+        <i class="bi bi-list icon-kanan" id="navbar-hamburger-btn"></i>
         <img src="{{ asset('assets/img/web-logo.png') }}" alt="header logo">
     </div>
 
   <!-- Navbarkanan -->
   <div class="navbarkanan">
+    
       <!-- Notifikasi -->
       <i class="bi bi-bell-fill icon-kanan {{ $unreadNotificationsCount > 0 ? 'is-ringing' : '' }}" 
         id="bell-icon" 
@@ -122,6 +124,9 @@
 
 {{-- sidebar --}}
 <div class="sidebar">
+    <div class="sidebar-close-toggle" id="sidebar-close-btn">
+        <i class="bi bi-x-lg"></i>
+    </div>
   <div class="sidebar-menu">
       <div class="sidebar-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
           <a class="sidebar-cell" href="{{ route('dashboard') }}">
@@ -146,12 +151,12 @@
               Line Pekerjaan
           </a>
       </div>
-      <div class="sidebar-item {{ request()->routeIs('status') ? 'active' : '' }}">
+      {{-- <div class="sidebar-item {{ request()->routeIs('status') ? 'active' : '' }}">
           <a class="sidebar-cell" href="{{ route('status') }}">
               <i class="bi bi-arrow-repeat" style="margin-right: 8px;"></i>
               Status
           </a>
-      </div>
+      </div> --}}
       <div class="sidebar-item {{ request()->routeIs('checklist') ? 'active' : '' }}">
           <a class="sidebar-cell" href="{{ route('checklist') }}">
               <i class="bi bi-card-checklist" style="margin-right: 8px;"></i>
@@ -177,10 +182,11 @@
               Trash
           </a>
       </div>
-      <div class="setting">
-          <a href=""><i class="bi bi-gear-wide-connected" style="margin-right: 8px;"></i>Setting</a>
-      </div>
+      {{-- <div class="setting">
+        <a href=""><i class="bi bi-gear-wide-connected" style="margin-right: 8px;"></i>Setting</a>
+    </div> --}}
   </div>
+
 </div>
 </div> <div class="sidebar-toggle" id="sidebar-toggle-btn">
     <i class="bi bi-chevron-left"></i>

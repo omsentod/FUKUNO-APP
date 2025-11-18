@@ -88,4 +88,18 @@ class PekerjaansController extends Controller
         // Set auto increment ke id berikutnya
         DB::statement("ALTER TABLE pekerjaans AUTO_INCREMENT = {$newId}");
     }
+
+
+   public function search(Request $request)
+   {
+       $query = $request->input('query', ''); // Ambil kata kunci 'query'
+
+       // ▼▼▼ GANTI 'name' MENJADI 'nama_pekerjaan' ▼▼▼
+       $pekerjaan = Pekerjaan::where('nama_pekerjaan', 'LIKE', "%{$query}%") 
+                         ->limit(5) // Batasi 5 hasil
+                         ->get();
+       // ▲▲▲ AKHIR PERBAIKAN ▲▲▲
+                         
+       return response()->json($pekerjaan); // Kirim sebagai JSON
+   }
 }

@@ -7,6 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use App\Models\Task; 
 use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 
 class TaskCreated extends Notification
 {

@@ -1,127 +1,196 @@
-// === Sidebar Active untuk Trash ===
+// ==========================================================
+// === FILE TRASH.JS (VERSI FINAL & BERSIH)
+// ==========================================================
+
 document.addEventListener("DOMContentLoaded", () => {
-    const sidebarItems = document.querySelectorAll(".sidebar-item");
-    sidebarItems.forEach(item => item.classList.remove("active"));
-    const trashItem = Array.from(sidebarItems).find(item =>
-      item.textContent.trim().includes("Trash")
-    );
-    if (trashItem) trashItem.classList.add("active");
-  });
+    
+  // === 1. PILIH ELEMEN ===
+  const trashTableBody = document.querySelector(".trash-table tbody");
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
   
-  // === Restore satuan ===
-  document.querySelectorAll(".restore-icon").forEach(icon => {
-    icon.addEventListener("click", () => {
-      alert("Task berhasil direstore ke halaman Task!");
-      window.location.href = "task.html";
-    });
-  });
-  
-  // === Delete satuan dengan popup ===
-  document.querySelectorAll(".delete-icon").forEach(icon => {
-    icon.addEventListener("click", (e) => {
-      const row = e.target.closest("tr");
-  
-      const popup = document.createElement("div");
-      popup.className = "confirm-popup";
-      popup.innerHTML = `
-        <p>Apakah yakin ingin menghapus task ini?</p>
-        <button class="confirm-yes">Ya</button>
-        <button class="confirm-no">Batal</button>
-      `;
-      document.body.appendChild(popup);
-  
-      popup.querySelector(".confirm-yes").addEventListener("click", () => {
-        row.remove();
-        popup.remove();
-        alert("Task berhasil dihapus permanen!");
-      });
-  
-      popup.querySelector(".confirm-no").addEventListener("click", () => {
-        popup.remove();
-      });
-    });
-  });
-  
-  // === Mode Pilih (Multi-select) ===
-  const selectToggle = document.querySelector(".select-toggle");
-  let selectMode = false;
-  
-  selectToggle.addEventListener("click", () => {
-    selectMode = !selectMode;
-    const table = document.querySelector(".trash-table");
-    table.classList.toggle("checkbox-mode", selectMode);
-  
-    const rows = table.querySelectorAll("tbody tr");
-  
-    if (selectMode) {
-      selectToggle.textContent = "Batal Pilih";
-      rows.forEach(row => {
-        const cell = row.querySelector("td:first-child");
-        if (!cell.querySelector("input[type='checkbox']")) {
-          const checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          cell.prepend(checkbox);
-        }
-      });
-    } else {
-      selectToggle.textContent = "Pilih";
-      rows.forEach(row => {
-        const checkbox = row.querySelector("input[type='checkbox']");
-        if (checkbox) checkbox.remove();
-      });
-    }
-  });
-  
-  // === Restore All dan Delete All ===
+  // Elemen Aksi Massal
+  const selectToggleBtn = document.querySelector(".select-toggle");
+  const trashTable = document.getElementById('trashTable');
+  const selectAllCheckbox = document.getElementById('selectAllTrash');
+  const rowCheckboxes = document.querySelectorAll('.row-select-trash');
+  const bulkActionBar = document.querySelector('.trash-actions'); // (Sesuaikan jika ID beda)
   const restoreAllBtn = document.querySelector(".restore-all");
   const deleteAllBtn = document.querySelector(".delete-all");
-  
-  restoreAllBtn.addEventListener("click", () => {
-    if (!selectMode) {
-      alert("Aktifkan mode pilih terlebih dahulu!");
-      return;
-    }
-  
-    const checkedRows = document.querySelectorAll("tbody tr input[type='checkbox']:checked");
-    if (checkedRows.length === 0) {
-      alert("Pilih minimal satu task untuk direstore!");
-      return;
-    }
-  
-    checkedRows.forEach(checkbox => checkbox.closest("tr").remove());
-    alert(`${checkedRows.length} task berhasil direstore ke halaman Task!`);
-    window.location.href = "task.html";
+
+  let selectMode = false; // Status mode pilih
+
+  // === 2. FUNGSI HELPER ===
+
+  /**
+   * Menampilkan/menyembunyikan bar aksi massal & update centang
+   */
+  function updateBulkActionBar() {
+      const selectedCount = document.querySelectorAll('.row-select-trash:checked').length;
+      
+      if (selectedCount > 0) {
+          if(bulkActionBar) bulkActionBar.style.display = 'flex'; // Tampilkan bar
+      } else {
+          if(bulkActionBar) bulkActionBar.style.display = 'none'; // Sembunyikan bar
+      }
+      
+      // Update checkbox "Select All"
+      if(selectAllCheckbox) {
+          selectAllCheckbox.checked = (selectedCount > 0 && selectedCount === rowCheckboxes.length);
+          selectAllCheckbox.indeterminate = (selectedCount > 0 && selectedCount < rowCheckboxes.length);
+      }
+  }
+
+  /**
+   * Mengirim request fetch untuk aksi massal
+   */
+  async function performBulkAction(action) {
+      const selectedIds = Array.from(document.querySelectorAll('.row-select-trash:checked'))
+                               .map(cb => cb.dataset.id);
+
+      if (selectedIds.length === 0) {
+          alert("Pilih minimal satu task!");
+          return;
+      }
+
+      // Tentukan URL berdasarkan aksi (Controller Anda sudah punya ini)
+      const url = '/trash/bulk-action'; 
+
+      try {
+          const response = await fetch(url, {
+              method: 'POST',
+              headers: { 
+                  'Content-Type': 'application/json', 
+                  'X-CSRF-TOKEN': csrfToken,
+                  'Accept': 'application/json'
+              },
+              body: JSON.stringify({ 
+                  action: action, // 'restore_all' or 'delete_permanent_all'
+                  task_ids: selectedIds 
+              })
+          });
+
+          const result = await response.json();
+          if (result.success) {
+              alert(result.message);
+              location.reload(); // Muat ulang halaman
+          } else {
+              throw new Error(result.message);
+          }
+      } catch (error) {
+          alert('Gagal: ' + error.message);
+      }
+  }
+
+  /**
+   * Menampilkan popup konfirmasi
+   */
+  function showConfirmPopup(message, onConfirm) {
+      // (Anda bisa ganti 'alert'/'confirm' bawaan dengan popup kustom jika mau)
+      if (confirm(message)) {
+          onConfirm();
+      }
+  }
+
+  // === 3. EVENT LISTENERS ===
+
+  // Listener untuk Tombol "Pilih / Batal"
+  if (selectToggleBtn && trashTable) {
+      selectToggleBtn.addEventListener('click', () => {
+          // Toggle class utama di tabel
+          trashTable.classList.toggle('selection-mode');
+          selectMode = trashTable.classList.contains('selection-mode');
+
+          if (selectMode) {
+              selectToggleBtn.textContent = "Batal";
+              selectToggleBtn.classList.add('active'); 
+          } else {
+              selectToggleBtn.textContent = "Pilih";
+              selectToggleBtn.classList.remove('active');
+              
+              // Sembunyikan Bar Aksi dan batalkan centang
+              if (bulkActionBar) bulkActionBar.style.display = 'none';
+              if (selectAllCheckbox) selectAllCheckbox.checked = false;
+              rowCheckboxes.forEach(cb => { cb.checked = false; });
+          }
+      });
+  }
+
+  // Listener untuk "Select All"
+  if (selectAllCheckbox) {
+      selectAllCheckbox.addEventListener('click', (e) => {
+          rowCheckboxes.forEach(cb => {
+              cb.checked = e.target.checked;
+          });
+          updateBulkActionBar();
+      });
+  }
+
+  // Listener untuk setiap checkbox baris
+  rowCheckboxes.forEach(cb => {
+      cb.addEventListener('change', (e) => { // Gunakan 'change'
+          e.stopPropagation(); 
+          updateBulkActionBar();
+      });
   });
-  
-  deleteAllBtn.addEventListener("click", () => {
-    if (!selectMode) {
-      alert("Aktifkan mode pilih terlebih dahulu!");
-      return;
-    }
-  
-    const checkedRows = document.querySelectorAll("tbody tr input[type='checkbox']:checked");
-    if (checkedRows.length === 0) {
-      alert("Pilih minimal satu task untuk dihapus!");
-      return;
-    }
-  
-    const popup = document.createElement("div");
-    popup.className = "confirm-popup";
-    popup.innerHTML = `
-      <p>Yakin ingin menghapus ${checkedRows.length} task secara permanen?</p>
-      <button class="confirm-yes">Ya</button>
-      <button class="confirm-no">Batal</button>
-    `;
-    document.body.appendChild(popup);
-  
-    popup.querySelector(".confirm-yes").addEventListener("click", () => {
-      checkedRows.forEach(checkbox => checkbox.closest("tr").remove());
-      popup.remove();
-      alert(`${checkedRows.length} task berhasil dihapus permanen!`);
-    });
-  
-    popup.querySelector(".confirm-no").addEventListener("click", () => {
-      popup.remove();
-    });
-  });
-  
+
+  // Listener untuk Aksi Massal "Restore All"
+  if (restoreAllBtn) {
+      restoreAllBtn.addEventListener('click', () => {
+          showConfirmPopup(`Yakin ingin me-restore task yang dipilih?`, () => {
+              performBulkAction('restore_all');
+          });
+      });
+  }
+
+  // Listener untuk Aksi Massal "Delete All"
+  if (deleteAllBtn) {
+      deleteAllBtn.addEventListener('click', () => {
+          showConfirmPopup(`Yakin ingin menghapus task yang dipilih secara permanen?`, () => {
+              performBulkAction('delete_permanent_all');
+          });
+      });
+  }
+
+  // Listener untuk Aksi di dalam Tabel (Restore Satuan / Delete Satuan)
+  if (trashTableBody) {
+      trashTableBody.addEventListener('click', (e) => {
+          const target = e.target;
+          const row = target.closest('tr');
+          if (!row || !target.dataset.id || selectMode) return; // Abaikan jika mode pilih aktif
+
+          const id = target.dataset.id;
+
+          // Aksi RESTORE (Pulihkan)
+          if (target.classList.contains('restore-icon')) {
+              showConfirmPopup('Pulihkan task ini?', () => {
+                  fetch(`/task/restore/${id}`, {
+                      method: 'POST',
+                      headers: {
+                          'X-CSRF-TOKEN': csrfToken,
+                          'Accept': 'application/json'
+                      }
+                  })
+                  .then(res => res.json())
+                  .then(result => {
+                      if (result.success) {
+                          row.remove();
+                          alert('Task berhasil dipulihkan.');
+                          window.location.href = '/task'; // Arahkan ke halaman task
+                      } else {
+                          alert('Gagal memulihkan task: ' + result.message);
+                      }
+                  })
+                  .catch(err => alert('Gagal memulihkan: ' + err.message));
+              });
+          }
+
+          // Aksi DELETE PERMANENT
+          if (target.classList.contains('delete-icon')) {
+              showConfirmPopup('Yakin ingin menghapus task ini secara permanen?', () => {
+                  // Panggil fungsi massal dengan ID tunggal
+                  performBulkAction('delete_permanent_all', [id]);
+              });
+          }
+      });
+  }
+});
