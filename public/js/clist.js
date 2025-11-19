@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("newChecklistInput").value = "";
       itemsContainer.innerHTML = `
           <div class="d-flex gap-2 mb-2 item-row">
-              <input type="text" class="form-control item-input" placeholder="Item 1...">
+              <input type="text" class="form-control item-input">
           </div>`;
       addPopup.style.display = "flex";
   });

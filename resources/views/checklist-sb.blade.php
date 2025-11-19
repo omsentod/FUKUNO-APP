@@ -82,8 +82,8 @@
   <div class="popup" id="deletePopup">
     <div class="popup-content">
       <h4>Apakah yakin ingin menghapus?</h4>
-      <button id="confirmDelete">Ya</button>
       <button class="close-popup">Batal</button>
+      <button id="confirmDelete">Ya</button>
     </div>
   </div>
 

@@ -95,6 +95,41 @@ body.sidebar-closed .page {
     padding-left: 40px !important; /* Beri ruang ekstra di kiri untuk ikon */
 }
 
+/* === INPUT DENGAN TOGGLE DI DALAM === */
+
+.input-with-toggle {
+    position: relative; 
+    width: 100%;
+}
+
+.input-with-toggle input.form-control {
+    padding-right: 40px; 
+}
+
+/* 3. Tombol Toggle (Absolute di kanan) */
+.input-with-toggle .toggle-search-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%; /* Tinggi mengikuti input */
+    width: 40px;  /* Lebar area klik */
+    border: none;
+    background: transparent; /* Transparan agar menyatu */
+    color: #6c757d; /* Warna ikon abu-abu */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5; /* Di atas input */
+    transition: color 0.2s;
+}
+
+.input-with-toggle .toggle-search-btn:hover {
+    color: #333; /* Warna lebih gelap saat hover */
+}
+
+
+
   .title-page h2 {
     font-weight: var(--font-bold);
     display: inline-block;
@@ -145,7 +180,7 @@ td {
     width: min-content;
     font-size: 12px;
     text-align: center;
-    padding: 20px 0;
+    padding: 5px 0;
 }
 
 
@@ -346,16 +381,22 @@ th {
 }
 
 .modal-content {
-    margin: auto;
-    display: block;
-    max-width: 80vw;
-    max-height: 90vh;
+    width: 80%; 
+    max-width: 700px; 
+    max-height: 90vh; 
+    overflow-y: auto;  
+    overflow-x: hidden; 
+    border-radius: 8px;
+    padding: 5px;
 }
 
 .modal-content img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+    width: 100%;      
+    
+    height: auto;     
+    object-fit: unset; 
+    
+    display: block;   
 }
 
 /* Tombol Close (X) */
@@ -474,7 +515,6 @@ th {
 .popup {
     background-color: white;
     margin-left:70vh;
-    border-radius: 8px;
     padding: 20px;
     width: 500px;
     height: 100%;
@@ -492,6 +532,10 @@ th {
     border-radius: 8px;
     padding: 8px;
     margin-bottom: 10px;
+  }
+
+  .popup .form-control{
+    border-radius: 0;
   }
   
   .popup .btn {
@@ -511,7 +555,7 @@ th {
     color: black;
   }
 
-  
+
 
   /* CSS untuk Menu Klik Kanan */
 .context-menu {
@@ -668,15 +712,24 @@ thead th a i.bi {
     position: absolute;
     top: 100%;
     left: 0;
-    width: calc(100% - 30px); 
+    width:100%; 
     background-color: #fff;
     border-radius: 0 0 5px 5px;
     z-index: 1000;
-    font-weight: var(--font-semibold);
+    font-weight: var(--font-regular);
     max-height: 100px;
     overflow-y: auto;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 
+}
+
+.autocomplete-results.job-results{
+    position: absolute;
+    top: 100%;
+    left: 0;
+    font-weight: var(--font-semibold);
+    border-radius: 0 0 5px 5px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 .autocomplete-item {
@@ -692,6 +745,8 @@ thead th a i.bi {
 .autocomplete-item:hover {
     background-color: #f0f0f0;
 }
+
+
 
 
 .time-overdue,

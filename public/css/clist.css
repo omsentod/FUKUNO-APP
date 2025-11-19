@@ -124,6 +124,12 @@ body{
     text-align: center;
     width: 350px;
   }
+
+  .popup-content label{
+    display: block;
+    text-align: left;
+    font-weight: var(--font-regular);
+  }
   
   .popup-content input {
     width: 100%;

@@ -303,7 +303,10 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
                 <hr>
 
                 <h6>Line Pekerjaan & Checklist</h6>
-                <a href="#" id="addLine" class="text-primary small mb-2 d-inline-block">+ Tambah Line Pekerjaan</a>
+                <div class="addjob">
+                    <a href="#" id="addLine">+ Tambah Line Pekerjaan</a>
+                </div>
+          
                 <div id="lineContainer"></div>
 
                 <hr>
