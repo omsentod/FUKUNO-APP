@@ -17,7 +17,6 @@ Route::get('/test', function () {
 });
 
 
-
 // Protected routes (butuh login)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
