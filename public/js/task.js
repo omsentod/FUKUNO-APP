@@ -792,9 +792,24 @@ function showValidationErrors(popup, errors) {
     }
 
     if (mockupInput) {
-        mockupInput.onchange = () => { // Gunakan .onchange
+        mockupInput.onchange = () => {
             if (mockupInput.files.length > 0) {
+                // Daftar tipe file yang diizinkan
+                const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+
                 for (const file of mockupInput.files) {
+                    // Cek apakah tipe file valid
+                    if (!validTypes.includes(file.type)) {
+                        alert(`File "${file.name}" bukan gambar yang didukung! Harap upload JPG, PNG, atau WEBP.`);
+                        continue; // Lewati file ini
+                    }
+                    
+                    // Cek ukuran file (opsional, misal max 2MB)
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert(`File "${file.name}" terlalu besar! Maksimal 2MB.`);
+                        continue;
+                    }
+
                     mockupFiles.set(file.name, file);
                 }
                 updateMockupPreview();
@@ -1005,22 +1020,25 @@ function showValidationErrors(popup, errors) {
 
             //  D.  LOGIKA TOMBOL TOGGLE
             const toggleBtn = target.closest('.toggle-search-btn');
+            
             if (toggleBtn) {
-                event.preventDefault();
+                event.preventDefault(); // Mencegah submit form
                 
+                // 1. Cari elemen terkait (input & container hasil)
                 const wrapper = toggleBtn.closest('.position-relative');
                 const input = wrapper.querySelector('input');
                 const resultsContainer = wrapper.querySelector('.autocomplete-results');
                 
-                // Toggle: Jika terbuka, tutup.
+                // 2. Toggle: Jika sudah ada isinya (terbuka), kosongkan (tutup).
                 if (resultsContainer.innerHTML.trim() !== '') {
                     resultsContainer.innerHTML = '';
                     return;
                 }
 
-                // Jika tertutup, Fetch Data (Query Kosong = Semua)
+                // 3. Jika tertutup, ambil data dari server (Query kosong = semua data)
                 try {
                     let url = '';
+                    // Cek jenis input (Nama Pekerjaan atau Checklist)
                     if (input.classList.contains('line-nama')) {
                         url = `/pekerjaan/search?query=`; 
                     } else {
@@ -1030,14 +1048,17 @@ function showValidationErrors(popup, errors) {
                     const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
                     const data = await response.json();
 
+                    // 4. Tampilkan Hasil
                     let html = '';
                     if (data.length === 0) {
                         html = '<div class="p-2 text-muted small">Tidak ada data.</div>';
                     } else {
                         data.forEach(item => {
                             if (input.classList.contains('line-nama')) {
+                                // Render Item Pekerjaan
                                 html += `<div class="autocomplete-item">${item.nama_pekerjaan}</div>`;
                             } else {
+                                // Render Item Checklist (dengan data items tersembunyi)
                                 const itemsJson = JSON.stringify(item.items || []).replace(/"/g, '&quot;');
                                 let subInfo = (item.items && item.items.length > 0) ? 
                                     `<small class="text-muted d-block" style="font-size:10px;">Isi: ${item.items.map(i => i.name).join(', ')}</small>` : '';
@@ -1046,11 +1067,12 @@ function showValidationErrors(popup, errors) {
                         });
                     }
                     resultsContainer.innerHTML = html;
-                    input.focus();
+                    input.focus(); // Kembalikan fokus ke input
 
                 } catch (error) {
                     console.error('Gagal load dropdown:', error);
                 }
+                return; // Selesai
             }
    
             
@@ -1058,33 +1080,48 @@ function showValidationErrors(popup, errors) {
             // E. Klik pada item hasil autocomplete
             const resultItem = target.closest('.autocomplete-item');
             if (resultItem) {
-                const widget = resultItem.closest('.d-flex.gap-2.mb-2');
-                const parentContainer = widget.parentElement; 
-                const itemsData = JSON.parse(resultItem.dataset.items || '[]');
+                // 1. Cari wrapper & input terdekat (Aman untuk Job & Checklist)
+                const wrapper = resultItem.closest('.position-relative');
+                const inputField = wrapper.querySelector('input');
+                const resultsContainer = wrapper.querySelector('.autocomplete-results');
 
-                if (itemsData.length > 0) {
-                    // KASUS A: GRUP (Ada itemnya)
-                    itemsData.forEach(item => {
-                        const newWidget = document.createElement("div");
-                        newWidget.className = "d-flex gap-2 mb-2 align-items-center"; 
-                        newWidget.innerHTML = `
-                             <div class="position-relative" style="flex-grow: 1;">
-                                <input type="search" class="form-control checklist-item" value="${item.name}">
-                                <div class="autocomplete-results"></div>
-                             </div>
-                             <span class="btn-remove-checklist">x</span>
-                        `;
-                        parentContainer.insertBefore(newWidget, widget);
-                    });
-                    widget.remove();
-                } else {
-                    // KASUS B: SINGLE
-                    const inputField = widget.querySelector('.checklist-item');
-                    const nameText = resultItem.querySelector('strong') ? resultItem.querySelector('strong').textContent : resultItem.textContent;
-                    if (inputField) {
+                if (inputField.classList.contains('line-nama')) {
+                    // --- KASUS NAMA PEKERJAAN ---
+                    // Cukup isi valuenya dan tutup dropdown
+                    inputField.value = resultItem.textContent.trim();
+                    resultsContainer.innerHTML = '';
+                
+                } else if (inputField.classList.contains('checklist-item')) {
+                    // --- KASUS CHECKLIST ---
+                    const itemsData = JSON.parse(resultItem.dataset.items || '[]');
+                    
+                    if (itemsData.length > 0) {
+                        // KASUS GRUP: Pecah jadi banyak input
+                        const checklistContainer = wrapper.closest('.checklist-container');
+                        const currentWidget = wrapper.closest('.d-flex'); // Widget saat ini
+
+                        itemsData.forEach(item => {
+                            // PENTING: Gunakan struktur HTML baru (dengan toggle)
+                            const newWidget = document.createElement("div");
+                            newWidget.className = "d-flex gap-2 mb-2 align-items-center"; 
+                            newWidget.innerHTML = `
+                                 <div class="position-relative input-with-toggle" style="flex-grow: 1;">
+                                    <input type="search" class="form-control checklist-item" value="${item.name}">
+                                    <button class="toggle-search-btn" type="button"><i class="bi bi-chevron-down"></i></button>
+                                    <div class="autocomplete-results checklist-results"></div>
+                                 </div>
+                                 <span class="btn-remove-checklist">x</span>
+                            `;
+                            checklistContainer.insertBefore(newWidget, currentWidget);
+                        });
+                        currentWidget.remove(); // Hapus input pencarian awal
+
+                    } else {
+                        // KASUS SINGLE: Isi saja
+                        const nameText = resultItem.querySelector('strong') ? resultItem.querySelector('strong').textContent : resultItem.textContent;
                         inputField.value = nameText.trim(); 
+                        resultsContainer.innerHTML = '';
                     }
-                    widget.querySelector('.autocomplete-results').innerHTML = '';
                 }
             }
         };
@@ -1189,24 +1226,23 @@ function showValidationErrors(popup, errors) {
 
 // Add Line Function
 
-function addLine() {
+
+ function addLine() {
     const lineContainer = document.querySelector("#lineContainer");
     if (!lineContainer) return;
     const lineDiv = document.createElement("div");
     lineDiv.classList.add("border", "p-3", "mb-3", "rounded");
-
     lineDiv.innerHTML = `
       <div class="d-flex justify-content-between align-items-center mb-2">
         <strong class="line-title">Line</strong>
         <button type="button" class="btn btn-danger btn-sm btn-remove-line">Hapus</button>
       </div>
       <div class="row mb-2">
-        
         <div class="col-md-6"> 
           <label>Nama Pekerjaan</label>
           
           <div class="position-relative input-with-toggle">
-             <input type="search" class="form-control line-nama" placeholder="Cari pekerjaan...">
+             <input type="search" class="form-control line-nama" placeholder="Ketik untuk mencari pekerjaan...">
              
              <button class="toggle-search-btn" type="button">
                 <i class="bi bi-chevron-down"></i>
@@ -1215,13 +1251,11 @@ function addLine() {
              <div class="autocomplete-results job-results"></div>
           </div>
           </div>
-        
         <div class="col-md-6">
           <label>Deadline</label>
           <input type="datetime-local" class="form-control line-deadline">
         </div>
       </div>
-      
       <div class="mb-2">
         <label>Checklist</label>
         <div class="checklist-container"></div>
@@ -1385,6 +1419,9 @@ function addLine() {
  * Fungsi untuk menambah 'widget' checklist baru
  * (VERSI BARU dengan autocomplete)
  */
+/**
+   * Fungsi untuk menambah checklist di dalam line
+   */
  function addChecklist(button) {
     const checklistContainer = button.previousElementSibling; 
     if (!checklistContainer) return;
@@ -1392,9 +1429,8 @@ function addLine() {
     const checklistWidget = document.createElement("div");
     checklistWidget.className = "d-flex gap-2 mb-2 align-items-center"; 
 
-    // 1. Wrapper Utama (Input + Toggle + Results)
+    // 1. Wrapper Input
     const inputWrapper = document.createElement("div");
-    // Gunakan class 'input-with-toggle' agar CSS kita bekerja
     inputWrapper.className = "position-relative input-with-toggle"; 
     inputWrapper.style.flexGrow = "1"; 
 
@@ -1402,13 +1438,14 @@ function addLine() {
     const checklistInput = document.createElement("input");
     checklistInput.type = "search";
     checklistInput.className = "form-control checklist-item";
-    checklistInput.placeholder = "Cari checklist...";
+    checklistInput.placeholder = "Ketik untuk mencari checklist...";
     
-    // 3. Tombol Toggle
+    // ▼▼▼ 3. BUAT TOMBOL TOGGLE ▼▼▼
     const toggleBtn = document.createElement("button");
     toggleBtn.className = "toggle-search-btn"; 
     toggleBtn.type = "button";
     toggleBtn.innerHTML = '<i class="bi bi-chevron-down"></i>';
+    // ▲▲▲ ▲▲▲ ▲▲▲
 
     // 4. Container Hasil
     const resultsContainer = document.createElement("div");
@@ -1419,9 +1456,9 @@ function addLine() {
     deleteBtn.className = "btn-remove-checklist"; 
     deleteBtn.innerHTML = 'x';
     
-    // Rakit elemen
+    // Rakit elemen (JANGAN LUPA appendChild toggleBtn)
     inputWrapper.appendChild(checklistInput);
-    inputWrapper.appendChild(toggleBtn); // Masukkan tombol
+    inputWrapper.appendChild(toggleBtn); // <--- Masukkan tombol
     inputWrapper.appendChild(resultsContainer);
     
     checklistWidget.appendChild(inputWrapper);

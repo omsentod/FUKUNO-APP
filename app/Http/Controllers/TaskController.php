@@ -103,8 +103,9 @@ public function store(Request $request)
             'jumlah' => 'required|integer',
             'lines' => 'required|json',
             'sizes' => 'nullable|json',
-            'mockups.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'mockups.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
         ]);
+        
 
         $taskData = $request->except(['lines', 'sizes', 'mockups']);
         $lineData = json_decode($request->input('lines'), true);
@@ -451,10 +452,9 @@ public function updateChecklistStatus(Request $request, $id)
         $validatedData = $request->validate([
             'noInvoice' => 'required|string',
             'namaPelanggan' => 'required|string|max:255',
-            // ... validasi lainnya ...
             'lines' => 'required|json',
             'sizes' => 'nullable|json',
-            'mockups.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'mockups.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'existing_mockup_urls' => 'nullable|json',
             'mockups_to_delete' => 'nullable|json'
         ]);
