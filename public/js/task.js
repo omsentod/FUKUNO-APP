@@ -1431,6 +1431,19 @@ function addLine() {
     checklistInput.focus();
 }
 
+function showNotif(text) {
+    const notif = document.getElementById("notif");
+    if (!notif) return;
+    
+    notif.textContent = text;
+    notif.style.display = "block";
+    
+    // Sembunyikan setelah 2.5 detik
+    setTimeout(() => {
+        notif.style.display = "none";
+    }, 2500);
+}
+
 function updateProgress(checkbox) {
     const dropdown = checkbox.closest('.dropdown-menu');
     if (!dropdown) return;
