@@ -175,7 +175,7 @@ body{
 .popup {
   display: none;
   position: fixed;
-  z-index: 9999;
+  z-index: 999999;
   left: 0;
   top: 0;
   width: 100%;
@@ -186,9 +186,13 @@ body{
 }
 
 .popup img {
-  max-width: 80%;
-  max-height: 80%;
-  border-radius: 10px;
+  width: 80%; 
+  max-width: 700px; 
+  max-height: 90vh; 
+  overflow-y: auto;  
+  overflow-x: hidden; 
+  border-radius: 8px;
+  padding: 5px;
 }
 
 .popup #close-popup {

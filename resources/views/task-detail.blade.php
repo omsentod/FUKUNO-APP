@@ -122,10 +122,6 @@
                 <p class="text-muted">Tidak ada mockup.</p>
             @endforelse
           </div>
-          <div class="popup" id="image-popup">
-            <span id="close-popup">&times;</span>
-            <img id="popup-img" src="" alt="popup-image">
-          </div>
         </div>
       </div>
     </div>
@@ -198,6 +194,12 @@
 
     </div>
   </div>
+</div>
+
+{{-- Pop Up image --}}
+<div class="popup" id="image-popup">
+  <span id="close-popup">&times;</span>
+  <img id="popup-img" src="" alt="popup-image">
 </div>
 @endsection
 
