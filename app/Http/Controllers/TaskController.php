@@ -12,6 +12,7 @@ use App\Models\TaskMockup;
 use App\Models\Status;       
 use App\Models\User;    
 use App\Models\Comment;
+use App\Events\NewNotification;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use App\Notifications\TaskCreated; 
@@ -19,6 +20,7 @@ use App\Notifications\CommentAdded;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification; 
+
 
 class TaskController extends Controller
 {
@@ -188,14 +190,26 @@ public function store(Request $request)
                     $task->mockups()->createMany($mockupPaths);
                 }
                 
+                
                 $createdTasks[] = Task::with('user', 'status', 'mockups', 'taskPekerjaans.checklists')->find($task->id);
             }
 
             // Notifikasi
             $usersToNotify = User::where('id', '!=', auth()->id())->get();
+        
             if (count($createdTasks) > 0) {
-                Notification::send($usersToNotify, new TaskCreated($createdTasks[0], auth()->user()));
+                $firstTask = $createdTasks[0]; // Ambil task pertama sebagai referensi
+    
+                Notification::send($usersToNotify, new TaskCreated($firstTask, auth()->user()));
+    
+                foreach ($usersToNotify as $targetUser) {
+                    $pesan = auth()->user()->name . " membuat task baru: " . Str::limit($firstTask->judul, 20);
+                    
+                    event(new NewNotification($pesan, $targetUser->id));
+                }
             }
+
+            
 
             DB::commit();
             
@@ -364,6 +378,13 @@ public function updateChecklistStatus(Request $request, $id)
       
         $usersToNotify = User::where('id', '!=', Auth::id())->get();
         Notification::send($usersToNotify, new CommentAdded($comment));
+
+        foreach ($usersToNotify as $targetUser) {
+            
+            $pesan = Auth::user()->name . " mengomentari: " . Str::limit($task->judul, 20);
+            
+            event(new NewNotification($pesan, $targetUser->id));
+        }
 
         return response()->json(['success' => true, 'comment' => $comment]);
     }
@@ -722,20 +743,23 @@ public function updateChecklistStatus(Request $request, $id)
             return response()->json(['success' => true, 'message' => 'Task berhasil dipulihkan dari arsip.']);
         
         } elseif ($action == 'delete_permanent_all') {
-            // Hapus Permanen (Termasuk File Mockup)
-            
-            // Ambil data task dulu untuk hapus file fisiknya
-            $tasks = Task::whereIn('id', $taskIds)->with('mockups')->get();
+        
+            $tasks = Task::onlyTrashed()->with('mockups')->whereIn('id', $taskIds)->get();
             
             foreach ($tasks as $task) {
-                // Hapus file fisik mockup dari storage
                 foreach ($task->mockups as $mockup) {
                     Storage::disk('public')->delete($mockup->file_path);
                 }
-                // Hapus permanen dari database
+    
+           
+                DB::table('notifications')
+                    ->whereJsonContains('data->task_id', $task->id)
+                    ->delete();
+    
                 $task->forceDelete();
             }
-            return response()->json(['success' => true, 'message' => 'Task berhasil dihapus permanen.']);
+            
+            return response()->json(['success' => true, 'message' => 'Task terkait berhasil dihapus permanen.']);
         }
 
         return response()->json(['success' => false, 'message' => 'Aksi tidak valid.'], 400);
@@ -750,12 +774,14 @@ public function updateChecklistStatus(Request $request, $id)
         return response()->json(['success' => true, 'message' => 'Task berhasil dipulihkan.']);
     }
 
+
+    
     public function trashBulkAction(Request $request)
     {
         $request->validate([
             'action' => 'required|string|in:restore_all,delete_permanent_all',
             'task_ids' => 'required|array',
-            'task_ids.*' => 'integer' // Validasi bahwa semua item adalah angka
+            'task_ids.*' => 'integer'
         ]);
 
         $taskIds = $request->input('task_ids');
@@ -771,20 +797,25 @@ public function updateChecklistStatus(Request $request, $id)
         } elseif ($action == 'delete_permanent_all') {
             
             // 2. Hapus Permanen (Force Delete)
-            
-            // Ambil task-nya dulu untuk menghapus file mockup
             $tasks = Task::onlyTrashed()->with('mockups')->whereIn('id', $taskIds)->get();
             
             foreach ($tasks as $task) {
-                // Hapus file fisik dari storage
+                // A. Hapus file fisik dari storage
                 foreach ($task->mockups as $mockup) {
                     Storage::disk('public')->delete($mockup->file_path);
                 }
-                // Hapus permanen dari database
+
+                // ▼▼▼ B. HAPUS NOTIFIKASI TERKAIT (INI YANG KURANG) ▼▼▼
+                DB::table('notifications')
+                    ->whereJsonContains('data->task_id', $task->id)
+                    ->delete();
+                // ▲▲▲ AKHIR TAMBAHAN ▲▲▲
+
+                // C. Hapus permanen dari database
                 $task->forceDelete();
             }
             
-            return response()->json(['success' => true, 'message' => 'Task berhasil dihapus permanen.']);
+            return response()->json(['success' => true, 'message' => 'Task dan notifikasi terkait berhasil dihapus permanen.']);
         }
 
         return response()->json(['success' => false, 'message' => 'Aksi tidak valid.'], 400);

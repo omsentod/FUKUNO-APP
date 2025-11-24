@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const tabActivity = document.getElementById('tab-activity');
     const contentDetail = document.getElementById('content-detail');
     const contentActivity = document.getElementById('content-activity');
+    const detailChecklistContainer = document.querySelector('.activity-section');
 
     if (tabDetail) {
         tabDetail.addEventListener('click', () => {

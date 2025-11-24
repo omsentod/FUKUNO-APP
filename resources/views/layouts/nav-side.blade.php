@@ -4,12 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="csrf-token" content="{{ csrf_token() }}"> 
+  <meta name="user-id" content="{{ Auth::id() }}">
   <title>@yield('title', 'Default Title')</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="icon" href="{{ asset('assets/img/web-logo.ico') }}" type="image/x-icon">
   <link rel="stylesheet" href="{{ asset('css/dash.css') }}">
+
   @stack('styles')
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
     <div id="page-preloader">
@@ -42,16 +45,18 @@
   <div class="navbarkanan">
     
       <!-- Notifikasi -->
-      <i class="bi bi-bell-fill icon-kanan {{ $unreadNotificationsCount > 0 ? 'is-ringing' : '' }}" 
-        id="bell-icon" 
-        style="position: relative;">
+  <div class="notification-wrapper" style="position: relative; display: inline-block;">
           
-           @if($unreadNotificationsCount > 0)
-               <span class="notification-badge">
-                   {{ $unreadNotificationsCount }}
-               </span>
-           @endif
-     </i>
+          <i class="bi bi-bell-fill icon-kanan {{ $unreadNotificationsCount > 0 ? 'is-ringing' : '' }}" 
+             id="bell-icon"></i>
+          
+          <span class="notification-badge" 
+                id="notification-badge" 
+                style="{{ $unreadNotificationsCount > 0 ? 'display: flex;' : 'display: none;' }}">
+              {{ $unreadNotificationsCount }}
+          </span>
+
+      </div>
      
      <div class="notification" id="notification">
           

@@ -174,11 +174,9 @@ body{
 }
 /* Class untuk memicu animasi */
 .is-ringing {
-  /* Terapkan animasi 'bell-shake' */
+  display: inline-block;
   animation: bell-shake 1.2s ease-in-out infinite;
-  
-  /* Atur titik tumpu ayunan di TENGAH ATAS */
-  transform-origin: top center; 
+    transform-origin: top center; 
 }
 
 .notification-group-header {
@@ -205,23 +203,19 @@ body{
 }
 .notification-badge {
   position: absolute;
-  top: 0;  /* Posisikan di atas ikon */
-  right: 0; /* Posisikan di kanan ikon */
-  
-  background-color: var(--main-color, #CF221B); /* Warna merah */
+  top: 10px;
+  right: 10px;
+  background-color: #CF221B;
   color: white;
-  font-family: 'Poppins', sans-serif; /* Pastikan font konsisten */
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
   font-size: 10px;
-  font-weight: bold;
-  line-height: 1; /* Pastikan angka pas di tengah */
-  
-  border-radius: 50%; /* Membuatnya bulat */
-  padding: 3px 5px;   /* Jarak di dalam lingkaran */
-  min-width: 18px;    /* Lebar minimum agar "1" tetap bulat */
-  text-align: center;
-  
-  /* Border agar terlihat "terpisah" dari ikon */
-  border: 2px solid var(--ctn-color); /* Ganti var(--ctn-color) dengan warna BG navbar Anda */
+  display: flex; /* Flex agar angka di tengah */
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  z-index: 10;
 }
 
 .notification-mockup {
@@ -669,7 +663,61 @@ body.sidebar-closed .sidebar-toggle i {
   margin-left: 15px; 
 }
 
+
+/* Container untuk Toast */
+#toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Kotak Notifikasinya */
+.toast-box {
+  background-color: #fff;
+  color: #333;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-left: 5px solid #CF221B; /* Warna merah tema Anda */
+  min-width: 250px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  
+  /* Animasi Masuk */
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Animasi slide dari kanan */
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Animasi Keluar (nanti ditambah lewat JS) */
+.toast-box.hide {
+  animation: fadeOut 0.3s ease-in forwards;
+}
+@keyframes fadeOut {
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+
+
+
+
+
+
+
+
 /* Responsive Page */
+
 @media (max-width: 1200px) {
 
 

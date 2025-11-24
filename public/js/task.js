@@ -423,7 +423,7 @@ document.addEventListener("DOMContentLoaded", () => {
         dropdownMenu.innerHTML = newMenuHTML;
     }
 
-    // ▼▼▼ 4. [TAMBAHKAN BLOK INI] LOGIKA BARU: UPDATE TIME LEFT LIVE ▼▼▼
+    // ▼▼▼ 4.  UPDATE TIME LEFT LIVE ▼▼▼
     const timeLeftSpan = document.querySelector(`#time-left-${taskId}`);
     if (timeLeftSpan) {
         
