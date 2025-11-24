@@ -211,7 +211,7 @@ public function store(Request $request)
         }
     }
     
-    public function markAllAsRead()
+    public function markNotificationsAsRead()
     {
         Auth::user()->unreadNotifications->markAsRead();
         
