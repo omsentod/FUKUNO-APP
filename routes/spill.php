@@ -30,7 +30,9 @@ Route::get('/register', function () {
     return view('regis');
 })->name('regis');
 
-
+// ==========================
+// PROTECTED ROUTES (Wajib Login)
+// ==========================
 Route::middleware(['auth'])->group(function() {
 
     // --- GLOBAL ---

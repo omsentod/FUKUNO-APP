@@ -363,8 +363,7 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
                 <div class="mb-3">
                     <label for="mockups" class="form-label">Mockup</label>
                     
-                    <input type="file" id="mockups" class="form-control" name="mockups[]" multiple>
-                    
+                    <input type="file" id="mockups" class="form-control" name="mockups[]" multiple accept="image/png, image/jpeg, image/jpg, image/webp">                    
                     <div id="mockup-preview-area" class="mt-2" style="font-size: 14px;">
                         </div>
                 </div>
