@@ -203,9 +203,22 @@ public function store(Request $request)
                 Notification::send($usersToNotify, new TaskCreated($firstTask, auth()->user()));
     
                 foreach ($usersToNotify as $targetUser) {
-                    $pesan = auth()->user()->name . " membuat task baru: " . Str::limit($firstTask->judul, 20);
+                
+                    // Siapkan Data Lengkap untuk JS
+                    $notifData = [
+                        'message'          => auth()->user()->name . " membuat task baru: " . Str::limit($firstTask->judul, 20),
+                        'url'              => route('task', ['highlight' => $firstTask->id]),
+                        'creator_initials' => auth()->user()->initials,    
+                        'creator_color'    => auth()->user()->avatar_color, 
+                        'first_mockup_url' => $firstTask->mockups->first() ? Storage::url($firstTask->mockups->first()->file_path) : null,
+                        'time'             => 'Baru saja',
+                        'creator_name'     => Auth::user()->name,
+                        'task_title'       => $task->judul,
+                        'comment_body'     => $comment->body
+                    ];
                     
-                    event(new NewNotification($pesan, $targetUser->id));
+                    // Kirim Data Array
+                    event(new NewNotification($notifData, $targetUser->id));
                 }
             }
 
@@ -225,11 +238,11 @@ public function store(Request $request)
         }
     }
     
-    public function markNotificationsAsRead()
+    public function markNotificationsAsRead(Request $request)
     {
         Auth::user()->unreadNotifications->markAsRead();
         
-        return back()->with('success', 'Semua notifikasi telah ditandai dibaca.');
+        return response()->json(['success' => true]);
     }
 
 public function showPrintPage($id) 
@@ -381,9 +394,19 @@ public function updateChecklistStatus(Request $request, $id)
 
         foreach ($usersToNotify as $targetUser) {
             
-            $pesan = Auth::user()->name . " mengomentari: " . Str::limit($task->judul, 20);
-            
-            event(new NewNotification($pesan, $targetUser->id));
+            $notifData = [
+                'message'          => Auth::user()->name . " mengomentari: " . Str::limit($task->judul, 20),
+                'url'              => route('task.show', $task->id) . '#content-activity',
+                'creator_initials' => Auth::user()->initials,
+                'creator_color'    => Auth::user()->avatar_color,
+                'first_mockup_url' => $task->mockups->first() ? Storage::url($task->mockups->first()->file_path) : null,
+                'time'             => 'Baru saja',
+                'creator_name'     => Auth::user()->name,
+                'task_title'       => $task->judul,
+                'comment_body'     => $comment->body
+            ];
+
+            event(new NewNotification($notifData, $targetUser->id));
         }
 
         return response()->json(['success' => true, 'comment' => $comment]);
@@ -399,9 +422,7 @@ public function updateChecklistStatus(Request $request, $id)
             return response()->json(['success' => false, 'message' => 'Task not found.'], 404);
         }
     
-        // ▼▼▼ PERBAIKAN: Definisikan variabel ini dulu ▼▼▼
         $newStatusName = $request->status_name; 
-        // ▲▲▲ ▲▲▲ ▲▲▲
     
         // 2. Cari ID status baru
         $newStatus = Status::where('name', $newStatusName)->first();
@@ -775,7 +796,7 @@ public function updateChecklistStatus(Request $request, $id)
     }
 
 
-    
+
     public function trashBulkAction(Request $request)
     {
         $request->validate([
@@ -805,11 +826,9 @@ public function updateChecklistStatus(Request $request, $id)
                     Storage::disk('public')->delete($mockup->file_path);
                 }
 
-                // ▼▼▼ B. HAPUS NOTIFIKASI TERKAIT (INI YANG KURANG) ▼▼▼
                 DB::table('notifications')
                     ->whereJsonContains('data->task_id', $task->id)
                     ->delete();
-                // ▲▲▲ AKHIR TAMBAHAN ▲▲▲
 
                 // C. Hapus permanen dari database
                 $task->forceDelete();

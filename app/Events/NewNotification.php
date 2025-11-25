@@ -5,24 +5,23 @@ namespace App\Events;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast; 
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class NewNotification implements ShouldBroadcast // <--- PASTIKAN IMPLEMENTS INI
+class NewNotification implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $message;
-    public $targetUserId; // ID User yang akan menerima notif
+    public $data; 
+    public $targetUserId;
 
-    public function __construct($message, $targetUserId)
+    public function __construct($data, $targetUserId)
     {
-        $this->message = $message;
+        $this->data = $data; 
         $this->targetUserId = $targetUserId;
     }
 
-    // Tentukan 'Saluran' (Channel) privat khusus untuk user tersebut
     public function broadcastOn(): array
     {
         return [
@@ -32,6 +31,6 @@ class NewNotification implements ShouldBroadcast // <--- PASTIKAN IMPLEMENTS INI
 
     public function broadcastAs(): string
     {
-        return 'NewNotification'; // Nama pendek yang kita inginkan
+        return 'NewNotification';
     }
 }
