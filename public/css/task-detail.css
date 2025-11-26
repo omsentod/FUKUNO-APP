@@ -404,3 +404,16 @@ body{
   justify-content: center;
   cursor: pointer;
 }
+
+
+.comment-bubble.highlight-target {
+  animation: highlight-fade 3s ease-in-out;
+  border: 2px solid #ffc107; /* Border kuning */
+}
+
+@keyframes highlight-fade {
+  0% { background-color: #fff3cd; transform: scale(1.02); }
+  50% { background-color: #ffeeba; transform: scale(1.02); }
+  100% { background-color: transparent; transform: scale(1); }
+}
+

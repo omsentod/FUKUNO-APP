@@ -1,22 +1,69 @@
 document.addEventListener("DOMContentLoaded", () => {
     
-    // --- Helper: Scroll chat ke bawah ---
+    // =========================================
+    // 1. SETUP VARIABEL UTAMA
+    // =========================================
     const chatContainer = document.getElementById('chat-container');
+    const tabDetail = document.getElementById('tab-detail');
+    const tabActivity = document.getElementById('tab-activity');
+    const contentDetail = document.getElementById('content-detail');
+    const contentActivity = document.getElementById('content-activity');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+    // --- Helper: Scroll chat ke bawah ---
     function scrollToBottom() {
         if (chatContainer) {
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
     }
-    // Langsung scroll saat halaman dimuat
-    // scrollToBottom();
 
-    // --- 1. LOGIKA TAB ---
-    const tabDetail = document.getElementById('tab-detail');
-    const tabActivity = document.getElementById('tab-activity');
-    const contentDetail = document.getElementById('content-detail');
-    const contentActivity = document.getElementById('content-activity');
-    const detailChecklistContainer = document.querySelector('.activity-section');
+    // --- Helper: Pindah Tab ---
+    function activateActivityTab() {
+        if (tabDetail) tabDetail.classList.remove('active');
+        if (contentDetail) contentDetail.classList.remove('active');
+        if (tabActivity) tabActivity.classList.add('active');
+        if (contentActivity) contentActivity.classList.add('active');
+    }
 
+    // =========================================
+    // 2. LOGIKA SCROLL PINTAR (DEEP LINKING)
+    // =========================================
+    const hash = window.location.hash; 
+
+    if (hash && hash.startsWith('#comment-')) {
+        // SKENARIO A: Buka dari Notifikasi Komentar
+        activateActivityTab();
+
+        setTimeout(() => {
+            const targetComment = document.querySelector(hash);
+            if (targetComment && chatContainer) {
+                // Scroll container utama agar chat terlihat
+                chatContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Scroll di dalam chat box menuju komentar spesifik
+                const topPos = targetComment.offsetTop - chatContainer.offsetTop;
+                chatContainer.scrollTo({
+                    top: topPos - 20, 
+                    behavior: 'smooth'
+                });
+
+                // Efek Kedip
+                targetComment.classList.add('highlight-target');
+            }
+        }, 300);
+
+    } else if (hash === '#content-activity') {
+        // SKENARIO B: Buka Tab Activity Umum
+        activateActivityTab();
+        scrollToBottom();
+    } else {
+        // SKENARIO C: Buka Halaman Biasa
+        scrollToBottom();
+    }
+
+    // =========================================
+    // 3. EVENT LISTENER TABS
+    // =========================================
     if (tabDetail) {
         tabDetail.addEventListener('click', () => {
             tabDetail.classList.add('active');
@@ -31,38 +78,13 @@ document.addEventListener("DOMContentLoaded", () => {
             tabDetail.classList.remove('active');
             contentActivity.classList.add('active');
             contentDetail.classList.remove('active');
+            setTimeout(scrollToBottom, 50); 
         });
     }
 
-    if (window.location.hash === '#content-activity') {
-        
-        // 1. Pindahkan 'active' class dari Detail ke Activity
-        if (tabDetail) tabDetail.classList.remove('active');
-        if (contentDetail) contentDetail.classList.remove('active');
-        
-        if (tabActivity) tabActivity.classList.add('active');
-        if (contentActivity) contentActivity.classList.add('active');
-
-        // 2. Scroll ke chat container
-        // (Kita beri sedikit delay agar tab-nya selesai di-render)
-        setTimeout(() => {
-            if (chatContainer) {
-                chatContainer.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center' // Posisikan di tengah layar
-                });
-            }
-        }, 100); // 100ms delay
-
-    } else {
-        // Jika TIDAK ada hash, jalankan scroll normal (jika ada chat)
-        scrollToBottom();
-    }
-
-
-
-  
-    // --- 2. LOGIKA GALERI GAMBAR ---
+    // =========================================
+    // 4. LOGIKA GALERI GAMBAR
+    // =========================================
     const imageGallery = document.getElementById('image-gallery');
     const popup = document.getElementById('image-popup');
     const popupImg = document.getElementById('popup-img');
@@ -71,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (imageGallery) {
         imageGallery.addEventListener('click', (e) => {
             if (e.target.classList.contains('gallery-image')) {
-                popup.style.display = 'flex'; // 'flex' agar rata tengah
+                popup.style.display = 'flex'; 
                 popupImg.src = e.target.src;
             }
         });
@@ -85,13 +107,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- 3. LOGIKA CHECKLIST (AUTO-SAVE & PROGRESS BAR) ---
+    // =========================================
+    // 5. LOGIKA CHECKLIST (AUTO-SAVE & DROPDOWN)
+    // =========================================
     const activityContainer = document.getElementById('activity-container');
     const progressBarFill = document.getElementById('progress-bar-fill');
     const progressText = document.getElementById('progress-text');
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    // Fungsi untuk menghitung progres
     function calculateProgress() {
         if (!activityContainer) return;
         const allCheckboxes = activityContainer.querySelectorAll('.progress-check');
@@ -102,10 +124,27 @@ document.addEventListener("DOMContentLoaded", () => {
         if (progressBarFill) progressBarFill.style.width = percentage + '%';
         if (progressText) progressText.textContent = percentage + '% complete';
     }
-    // (Kalkulasi awal sudah dilakukan oleh Blade)
 
-    // Listener untuk auto-save checklist
     if (activityContainer) {
+        // A. Toggle Dropdown Line Pekerjaan
+        activityContainer.addEventListener('click', (e) => {
+            const dropdownBtn = e.target.closest('.dropdown-btn');
+            if (dropdownBtn) {
+                // Toggle tampilan dropdown content
+                const content = dropdownBtn.nextElementSibling;
+                // Toggle class active pada parent dropdown untuk styling (opsional)
+                dropdownBtn.parentElement.classList.toggle('active');
+                
+                // Logika display sederhana
+                if (content.style.display === 'block') {
+                    content.style.display = 'none';
+                } else {
+                    content.style.display = 'block';
+                }
+            }
+        });
+
+        // B. Auto-Save Checklist (Ganti 'change' listener yang hilang/error)
         activityContainer.addEventListener('change', (e) => {
             if (e.target.classList.contains('progress-check')) {
                 const checkbox = e.target;
@@ -114,102 +153,81 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 calculateProgress(); // Update UI langsung
 
-                // Kirim auto-save
                 fetch(`/checklist/update/${checklistId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
                     body: JSON.stringify({ is_completed: isChecked })
                 })
-                .then(response => response.json())
+                .then(res => res.json())
                 .then(result => {
                     if (result.success) {
-                        console.log(`Checklist ${checklistId} updated.`);
+                        console.log(`Checklist ${checklistId} saved.`);
                     } else {
-                        alert('Gagal menyimpan checklist: ' + result.message);
+                        alert('Gagal menyimpan: ' + result.message);
                         checkbox.checked = !isChecked;
                         calculateProgress();
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Error koneksi saat menyimpan checklist.');
                     checkbox.checked = !isChecked;
                     calculateProgress();
                 });
             }
         });
     }
-    
-    // --- 4. LOGIKA DROPDOWN CHECKLIST ---
-    if(activityContainer) {
-        activityContainer.addEventListener('click', (e) => {
-            const dropdownBtn = e.target.closest('.dropdown-btn');
-            if (dropdownBtn) {
-                dropdownBtn.classList.toggle('active');
-                const content = dropdownBtn.nextElementSibling;
-                content.style.display = content.style.display === 'block' ? 'none' : 'block';
-            }
-        });
-    }
 
-    // --- 5. LOGIKA SUBMIT KOMENTAR BARU ---
+    // =========================================
+    // 6. LOGIKA KOMENTAR
+    // =========================================
     const commentBox = document.getElementById('comment');
     const submitBtn = document.getElementById('submit-btn');
 
     if (submitBtn) {
         submitBtn.addEventListener('click', () => {
             const text = commentBox.value.trim();
-            const taskId = submitBtn.dataset.taskId; // Ambil ID task dari tombol
+            const taskId = submitBtn.dataset.taskId;
             
             if (!text) {
                 alert('Tulis komentar terlebih dahulu!');
                 return;
             }
 
-            // Kirim komentar ke server
             fetch(`/task/comment/${taskId}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
                 body: JSON.stringify({ body: text })
             })
-            .then(response => response.json())
+            .then(res => res.json())
             .then(result => {
                 if (result.success) {
-                    // Berhasil, tambahkan bubble chat baru secara dinamis
                     addCommentBubble(result.comment);
-                    commentBox.value = ''; // Kosongkan input
+                    commentBox.value = ''; 
                 } else {
                     alert('Gagal mengirim komentar: ' + result.message);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error koneksi saat mengirim komentar.');
+                alert('Error koneksi.');
             });
         });
     }
 
-    /**
-     * Helper function untuk menambah bubble chat baru
-     * @param {object} comment - Objek komentar dari server
-     */
+    // Fungsi membuat bubble chat baru
     function addCommentBubble(comment) {
-        // Hapus 'Belum ada komentar' jika ada
         const noComments = document.getElementById('no-comments');
         if (noComments) noComments.remove();
 
-        const time = new Date(comment.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        // Format waktu sederhana
+        const dateObj = new Date(comment.created_at);
+        const time = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
         
-        // Buat elemen bubble
         const bubble = document.createElement('div');
-        // Tentukan apakah ini 'own' (milik user yg login)
-        // Kita bandingkan user ID, tapi 'comment.user' mungkin tidak ada jika 'load' gagal
-        // Cara aman: kita tahu yg baru disubmit pasti 'own'
+        // Komentar baru pasti milik user yang login ('own')
         bubble.className = 'comment-bubble own';
+        // Beri ID untuk deep linking di masa depan
+        bubble.id = `comment-${comment.id}`; 
         
         bubble.innerHTML = `
             <div class="comment-body">${comment.body}</div>
@@ -217,48 +235,6 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         
         chatContainer.appendChild(bubble);
-        scrollToBottom(); // Auto-scroll ke bawah
+        scrollToBottom();
     }
-    
-    if (detailChecklistContainer) {
-        detailChecklistContainer.addEventListener('change', function(event) {
-            if (event.target.type === 'checkbox' && event.target.dataset.id) {
-                // Sama seperti listener utama
-                const checklistId = event.target.dataset.id;
-                const isChecked = event.target.checked;
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    
-                fetch(`/checklist/update/${checklistId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ is_completed: isChecked })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(err => { throw new Error(err.message || 'Server error'); });
-                    }
-                    return response.json();
-                })
-                .then(result => {
-                    if (result.success) {
-                        console.log(`Checklist ${checklistId} updated (detail page)`);
-                        
-                    } else {
-                        alert('Gagal menyimpan: ' + result.message);
-                        event.target.checked = !isChecked;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Gagal menyimpan checklist.');
-                    event.target.checked = !isChecked;
-                });
-            }
-        });
-    }
-
 });

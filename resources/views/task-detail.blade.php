@@ -166,7 +166,7 @@
         <h4>Comments</h4>
         <div class="chat-container" id="chat-container">
             @forelse($comments as $comment)
-                <div class="comment-bubble {{ $comment->user_id == Auth::id() ? 'own' : '' }}">
+                  <div id="comment-{{ $comment->id }}" class="comment-bubble {{ $comment->user_id == Auth::id() ? 'own' : '' }}">
                     <div class="comment-meta">
                         @if($comment->user_id != Auth::id())
                             <strong>{{ $comment->user->name }}</strong>
