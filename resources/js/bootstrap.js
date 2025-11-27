@@ -1,7 +1,13 @@
+// ==========================================
+// 1. SETUP AXIOS
+// ==========================================
 import axios from 'axios';
 window.axios = axios;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
+// ==========================================
+// 2. SETUP LARAVEL ECHO & PUSHER
+// ==========================================
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 
@@ -14,6 +20,10 @@ window.Echo = new Echo({
     forceTLS: true
 });
 
+// ==========================================
+// 3. LOGIKA LISTEN NOTIFIKASI & UPDATE UI
+// ==========================================
+
 const userId = document.querySelector('meta[name="user-id"]')?.getAttribute('content');
 const notificationSound = new Audio('/assets/audio/notif.mp3');
 
@@ -22,20 +32,23 @@ if (userId) {
 
     window.Echo.private(`notifications.${userId}`)
     .listen('.NewNotification', (e) => {
-        console.log("Notifikasi Masuk:", e.data); 
+        // Ambil data (support struktur e.data atau e langsung)
+        const dataNotif = e.data || e;
+        console.log("Notifikasi Masuk:", dataNotif.message); 
 
-        // 1. SUARA
+        // 1. MAINKAN SUARA
         notificationSound.play().catch(() => {});
 
-        // 2. BADGE
+        // 2. UPDATE BADGE ANGKA
         const badge = document.getElementById('notification-badge'); 
         if (badge) {
-            let currentCount = parseInt(badge.innerText) || 0;
+            let currentCount = parseInt(badge.innerText);
+            if (isNaN(currentCount)) currentCount = 0;
             badge.innerText = currentCount + 1;
             badge.style.display = 'flex'; 
         }
 
-        // 3. LONCENG GOYANG
+        // 3. BUAT LONCENG BERGOYANG
         const bell = document.getElementById('bell-icon');
         if (bell) {
             bell.classList.remove('is-ringing');
@@ -43,66 +56,87 @@ if (userId) {
             bell.classList.add('is-ringing');
         }
 
-        // 4. UPDATE HTML DROPDOWN (UI BAGUS)
-        const notifContainer = document.getElementById('notification');
+        // 4. UPDATE DROPDOWN NOTIFIKASI (HTML)
+        const notifContainer = document.getElementById('notification-list'); // Pastikan ID ini benar di blade
         if (notifContainer) {
             const emptyMsg = notifContainer.querySelector('.notification-empty');
             if (emptyMsg) emptyMsg.remove();
 
-            // Fungsi pemotong teks
             const limit = (str, length) => str.length > length ? str.substring(0, length) + '...' : str;
 
-            // Susun Pesan HTML (Bold User & Title)
             let messageHtml = '';
-            
-            // Sekarang e.data.creator_name & task_title SUDAH ADA (karena kita update Controller)
-            if (e.data.comment_body) {
-                // Format Komentar
-                messageHtml = `
-                    mengomentari <strong>${limit(e.data.task_title, 20)}</strong>: 
-                    "${limit(e.data.comment_body, 20)}"
-                `;
+            if (dataNotif.comment_body) {
+                messageHtml = `mengomentari <strong>${limit(dataNotif.task_title, 20)}</strong>: "${limit(dataNotif.comment_body, 20)}"`;
             } else {
-                // Format Task Baru
-                messageHtml = `
-                    telah membuat task: <strong>${limit(e.data.task_title, 25)}</strong>
-                `;
+                messageHtml = `telah membuat task: <strong>${limit(dataNotif.task_title, 25)}</strong>`;
             }
 
-            const mockupHtml = e.data.first_mockup_url 
-                ? `<img src="${e.data.first_mockup_url}" class="notification-mockup">` 
+            const mockupHtml = dataNotif.first_mockup_url 
+                ? `<img src="${dataNotif.first_mockup_url}" class="notification-mockup">` 
                 : `<div class="notification-mockup placeholder"></div>`;
 
             const newItemHtml = `
-              <a href="${e.data.url}" class="notification-item new-item" style="background-color: #f0f8ff; transition: background 1s;">
-                  <div class="pic pic-sm" style="background-color: ${e.data.creator_color};">
-                       ${e.data.creator_initials}
+              <a href="${dataNotif.url}" class="notification-item new-item" style="background-color: #f0f8ff; transition: background 1s;">
+                  <div class="pic pic-sm" style="background-color: ${dataNotif.creator_color};">
+                       ${dataNotif.creator_initials}
                   </div>
                   <div class="notification-content">
-                      <p>
-                        <strong>${e.data.creator_name}</strong>
-                        ${messageHtml}
-                      </p>
-                      <small>${e.data.time}</small>
+                      <p><strong>${dataNotif.creator_name}</strong> ${messageHtml}</p>
+                      <small>${dataNotif.time}</small>
                   </div>
                   ${mockupHtml}
               </a>
             `;
             
-            // Sisipkan di paling atas
             const firstHeader = notifContainer.querySelector('.notification-group-header');
             if (firstHeader) {
                 firstHeader.insertAdjacentHTML('afterend', newItemHtml);
             } else {
                 notifContainer.insertAdjacentHTML('afterbegin', newItemHtml);
             }
+            
+            const clearBtn = document.getElementById('clear-notif-btn');
+            if(clearBtn) clearBtn.style.display = 'block';
         }
 
-        // 5. TOAST
-        showToast(e.data.message); 
+        // 5. UPDATE TABEL TASK SECARA REAL-TIME 
+        const taskTableBody = document.querySelector("#taskTable tbody");
+        
+        if (taskTableBody && dataNotif.type === 'new_task' && dataNotif.task_id) {
+            
+            fetch(`/task/get-row/${dataNotif.task_id}`)
+                .then(response => response.json())
+                .then(result => {
+                    if (result.html) {
+                        const emptyRow = taskTableBody.querySelector('tr td.text-center');
+                        if (emptyRow && emptyRow.textContent.includes('Belum ada task')) {
+                            emptyRow.closest('tr').remove();
+                        }
+
+                        taskTableBody.insertAdjacentHTML('afterbegin', result.html);
+                        
+                        const newRow = taskTableBody.firstElementChild;
+                        newRow.style.backgroundColor = '#fff3cd'; 
+                        
+                        if (typeof window.initGalleryIndicator === 'function') {
+                             window.initGalleryIndicator(newRow);
+                        }
+
+                        setTimeout(() => { 
+                            newRow.style.transition = 'background-color 2s';
+                            newRow.style.backgroundColor = 'transparent'; 
+                        }, 2000);
+                    }
+                })
+                .catch(err => console.error("Gagal update tabel task:", err));
+        }
+        
+        // 6. TAMPILKAN TOAST
+        showToast(dataNotif.message); 
     });
 }
 
+// --- FUNGSI HELPER TOAST ---
 function showToast(message) {
     let container = document.getElementById('toast-container');
     if (!container) {

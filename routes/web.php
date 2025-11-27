@@ -9,10 +9,6 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\PekerjaansController;
 
-// ==========================
-// GUEST ROUTES (Tanpa Login)
-// ==========================
-
 Route::get('/', function () {
     return redirect()->route('login');
 })->name('home');
@@ -21,83 +17,85 @@ Route::get('/login', function () {
     return view('login');
 })->name('login');
 
-// Proses Login & Register
 Route::post('/', [AuthController::class, 'login'])->name('login.submit');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
-
-// Halaman Register (Biasanya tamu boleh akses)
 Route::get('/register', function () {
     return view('regis');
 })->name('regis');
 
+// AUTH ROUTES (User & Admin)
 
 Route::middleware(['auth'])->group(function() {
 
     // --- GLOBAL ---
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/user-name', [AuthController::class, 'getUserName']);
 
-    // --- DASHBOARD ---
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    // --- TASKS ---
+    // --- TASK READ & INTERACTION ---
     Route::get('/task', [TaskController::class, 'index'])->name('task');
     Route::get('/task/detail/{id}', [TaskController::class, 'show'])->name('task.show');
+    Route::get('/print-po/{id}', [TaskController::class, 'showPrintPage'])->name('task.printPage');
+    Route::get('/task/get-row/{id}', [TaskController::class, 'getTaskRowHtml'])->name('task.getRowHtml');
+
+    // Update Checklist (Progress otomatis)
+    Route::post('/checklist/update/{id}', [TaskController::class, 'updateChecklistStatus'])->name('checklist.updateStatus');
+    // Komentar
+    Route::post('/task/comment/{task_id}', [TaskController::class, 'storeComment'])->name('task.storeComment');
+    
+    // Update Status Manual (Hold/Resume)
+    Route::post('/task/status/update/{id}', [TaskController::class, 'updateStatus'])->name('task.updateStatus');
+
+    // --- NOTIFIKASI ---
+    Route::post('/notifications/mark-as-read', [TaskController::class, 'markNotificationsAsRead'])->name('notifications.markAsRead');
+    Route::delete('/notifications/clear', [TaskController::class, 'clearNotifications'])->name('notifications.clear');
+
+    
+    Route::get('/checklists/search', [ChecklistController::class, 'search'])->name('checklist.search');
+    Route::get('/pekerjaan/search', [PekerjaansController::class, 'search'])->name('pekerjaan.search');
+});
+
+
+
+// ADMIN ROUTES (Hanya Admin)
+
+Route::middleware(['auth', 'admin'])->group(function() { 
+
+    // --- TASK CRUD ---
     Route::post('/task/store', [TaskController::class, 'store'])->name('task.store');
     Route::post('/task/update/{id}', [TaskController::class, 'update'])->name('task.update');
     Route::get('/task/edit/{id}', [TaskController::class, 'edit'])->name('task.edit');
     Route::delete('/task/delete/{id}', [TaskController::class, 'destroy'])->name('task.destroy');
     
-    // Task Actions
-    Route::post('/task/status/update/{id}', [TaskController::class, 'updateStatus'])->name('task.updateStatus');
-    Route::post('/task/comment/{task_id}', [TaskController::class, 'storeComment'])->name('task.storeComment');
-    Route::get('/print-po/{id}', [TaskController::class, 'showPrintPage'])->name('task.printPage');
-    
-    // Archive & Trash
+    // --- ARCHIVE & TRASH ---
     Route::get('/archive', [TaskController::class, 'showArchive'])->name('archive');
     Route::get('/trash', [TaskController::class, 'showTrash'])->name('trash');
     Route::post('/task/restore/{id}', [TaskController::class, 'restore'])->name('task.restore');
     Route::post('/task/unarchive/{id}', [TaskController::class, 'unarchive'])->name('task.unarchive');
     
-    // Bulk Actions
+    // --- BULK ACTIONS ---
     Route::post('/tasks/bulk-action', [TaskController::class, 'bulkAction'])->name('task.bulkAction');
-    // (Route trashBulkAction bisa dihapus karena sudah digabung ke bulkAction, tapi jika mau dipakai tetap oke)
     Route::post('/trash/bulk-action', [TaskController::class, 'trashBulkAction'])->name('trash.bulkAction'); 
 
-    // Notifications
-    // Pastikan nama method di controller adalah 'markNotificationsAsRead'
-    Route::post('/notifications/mark-as-read', [TaskController::class, 'markNotificationsAsRead'])->name('notifications.markAsRead');
-
-
-    // --- CHECKLISTS ---
+    // --- MASTER DATA: CHECKLISTS ---
     Route::get('/checklist', function () { return view('checklist-sb'); })->name('checklist');
     Route::get('/checklist/all', [ChecklistController::class, 'index'])->name('checklist.all');
     Route::post('/checklist/store', [ChecklistController::class, 'store'])->name('checklist.store');
     Route::put('/checklist/update/{id}', [ChecklistController::class, 'update'])->name('checklist.update');
     Route::delete('/checklist/delete/{id}', [ChecklistController::class, 'destroy'])->name('checklist.destroy');
-    
-    // Checklist Search & Update Status
-    Route::get('/checklists/search', [ChecklistController::class, 'search'])->name('checklist.search');
-    Route::post('/checklist/update/{id}', [TaskController::class, 'updateChecklistStatus'])->name('checklist.updateStatus');
 
-
-    // --- PEKERJAAN (WORKLINE) ---
+    // --- MASTER DATA: PEKERJAAN (WORKLINE) ---
     Route::get('/workline', [PekerjaansController::class, 'index'])->name('workline');
     Route::post('/pekerjaan', [PekerjaansController::class, 'store'])->name('pekerjaan.store');
     Route::get('/pekerjaan/edit/{id}', [PekerjaansController::class, 'edit'])->name('pekerjaan.edit');
     Route::put('/pekerjaan/{id}', [PekerjaansController::class, 'update'])->name('pekerjaan.update');
     Route::delete('/pekerjaan/{id}', [PekerjaansController::class, 'destroy'])->name('pekerjaan.destroy');
-    Route::get('/pekerjaan/search', [PekerjaansController::class, 'search'])->name('pekerjaan.search');
-
 
     // --- USER MANAGEMENT ---
     Route::get('/user', [UserController::class, 'index'])->name('user');
     Route::get('/user/list', [UserController::class, 'list'])->name('user.list');
     Route::post('/user/store', [UserController::class, 'store'])->name('user.store');
-    
-    // Perbaikan: Ganti PUT ke POST agar sesuai dengan JS Fetch FormData
     Route::post('/user/update/{id}', [UserController::class, 'update'])->name('user.update');
-    
     Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.delete');
 
     // --- STATUS MASTER ---

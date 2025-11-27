@@ -27,25 +27,22 @@ class TaskController extends Controller
   
     public function index(Request $request) 
 {
-    // 1. Tentukan SEMUA kolom yang BOLEH di-sort
-    // (Gunakan nama logis untuk relasi)
+
     $allowedSorts = [
         'no_invoice', 
         'judul', 
         'total_jumlah', 
         'urgensi',
-        'nama_pelanggan', // Ini adalah 'Klien'
-        'status',         // Relasi: 'statuses.name'
-        'line',           // Relasi: 'task_pekerjaans.nama_pekerjaan'
-        'deadline'        // Relasi: 'task_pekerjaans.deadline'
+        'nama_pelanggan', 
+        'status',         
+        'line',          
+        'deadline'        
     ];
 
-    // 2. Ambil parameter 'sort' & 'order' dari URL
-    //    Default: urutkan berdasarkan 'created_at' (terlama)
+
     $sortColumn = $request->query('sort', 'created_at');
     $sortOrder = $request->query('order', 'asc');
 
-    // 3. Keamanan: Jika user mencoba sort kolom aneh, kembalikan ke default
     if (!in_array($sortColumn, $allowedSorts) && $sortColumn != 'created_at') {
         $sortColumn = 'created_at';
     }
@@ -53,43 +50,47 @@ class TaskController extends Controller
         $sortOrder = 'asc';
     }
 
-    // 4. Mulai Kueri
     $query = Task::with('user', 'status', 'mockups', 'taskPekerjaans.checklists')
                  ->select('tasks.*')
                  ->where('is_archived', false); 
                  
 
-    // 5. Terapkan Sorting (JOIN jika perlu)
     if ($sortColumn == 'status') {
-        // --- Sort berdasarkan Nama Status ---
         $query->join('statuses', 'tasks.status_id', '=', 'statuses.id')
               ->orderBy('statuses.name', $sortOrder);
               
-    } elseif ($sortColumn == 'line' || $sortColumn == 'deadline') {
-        // --- Sort berdasarkan Line Pekerjaan atau Deadline ---
-        // Map 'line' (logis) ke 'nama_pekerjaan' (database)
-        $realSortColumn = ($sortColumn == 'line') ? 'nama_pekerjaan' : 'deadline';
+            } elseif ($sortColumn == 'line') {
+                $query->join('task_pekerjaans', 'tasks.id', '=', 'task_pekerjaans.task_id')
+                      ->orderBy('task_pekerjaans.nama_pekerjaan', $sortOrder);
         
-        $query->join('task_pekerjaans', 'tasks.id', '=', 'task_pekerjaans.task_id')
-              ->orderBy('task_pekerjaans.' . $realSortColumn, $sortOrder);
-              
-    } else {
-        // --- Sort berdasarkan kolom di tabel 'tasks' (no_invoice, judul, nama_pelanggan, dll) ---
-        $query->orderBy($sortColumn, $sortOrder);
-    }
+            } elseif ($sortColumn == 'deadline') {
+                
+                $query->join('task_pekerjaans', 'tasks.id', '=', 'task_pekerjaans.task_id')
+                      ->join('statuses', 'tasks.status_id', '=', 'statuses.id');
+        
+           
+                
+                if ($sortOrder == 'asc') {
+                    $query->orderByRaw("CASE WHEN statuses.name = 'Done and Ready' THEN 1 ELSE 0 END ASC");
+                    $query->orderBy('task_pekerjaans.deadline', 'asc');
+                } else {
+                   
+                    $query->orderByRaw("CASE WHEN statuses.name = 'Done and Ready' THEN 1 ELSE 0 END DESC");
+                    $query->orderBy('task_pekerjaans.deadline', 'desc');
+                }
+            } else {
+                $query->orderBy($sortColumn, $sortOrder);
+            }
     
-    // 6. Eksekusi Kueri
-    $tasks = $query->get();
+  $tasks = $query->get();
     
-    // 7. Ambil ID highlight (Anda sudah punya ini)
     $highlightId = $request->query('highlight');
 
-    // 8. Kirim semua data ke view
     return view('task-sb', [
         'tasks' => $tasks,
         'highlightId' => $highlightId ?? null,
-        'currentSort' => $sortColumn,   // Kirim info sort saat ini
-        'currentOrder' => $sortOrder, // Kirim info order saat ini
+        'currentSort' => $sortColumn,   
+        'currentOrder' => $sortOrder, 
     ]);
 }
 
@@ -214,7 +215,10 @@ public function store(Request $request)
                         'time'             => 'Baru saja',
                         'creator_name'     => Auth::user()->name,
                         'task_title'       => $task->judul,
-                        'comment_body'     => $comment->body
+                        'comment_body'     => null,
+
+                        'type'             => 'new_task',    
+                        'task_id'          => $firstTask->id,
                     ];
                     
                     // Kirim Data Array
@@ -237,6 +241,8 @@ public function store(Request $request)
             return response()->json(['success' => false, 'message' => 'Gagal menyimpan task: ' . $e->getMessage()], 500);
         }
     }
+
+    
     
     public function markNotificationsAsRead(Request $request)
     {
@@ -335,13 +341,14 @@ public function updateChecklistStatus(Request $request, $id)
     public function show($id)
     {
         // 1. Temukan task utama yang diklik
-        $mainTask = Task::findOrFail($id);
+        $mainTask = Task::withTrashed()->findOrFail($id);
 
         // 2. Dapatkan No. PO-nya
         $noPo = $mainTask->no_invoice;
 
         // 3. Ambil SEMUA task (termasuk dirinya sendiri) yang punya No. PO yang sama
-        $allTasksInGroup = Task::with('user', 'status', 'taskPekerjaans.checklists', 'mockups', 'taskSizes')
+        $allTasksInGroup = Task::withTrashed()
+                            ->with('user', 'status', 'taskPekerjaans.checklists', 'mockups', 'taskSizes')
                             ->where('no_invoice', $noPo)
                             ->orderBy('created_at', 'asc') // Urutkan berdasarkan line
                             ->get();
@@ -376,7 +383,8 @@ public function updateChecklistStatus(Request $request, $id)
         ]);
     }
 
-    public function storeComment(Request $request, $task_id)
+
+public function storeComment(Request $request, $task_id)
     {
         $request->validate(['body' => 'required|string']);
 
@@ -848,5 +856,21 @@ public function updateChecklistStatus(Request $request, $id)
         $task->save();
 
         return response()->json(['success' => true, 'message' => 'Task berhasil dipulihkan dari arsip.']);
+    }
+    
+    public function clearNotifications()
+    {
+        Auth::user()->notifications()->delete();
+        
+        return response()->json(['success' => true, 'message' => 'Semua notifikasi dihapus.']);
+    }
+
+    public function getTaskRowHtml($id)
+    {
+        $task = Task::with('user', 'status', 'mockups', 'taskPekerjaans.checklists')->findOrFail($id);
+        
+        $html = view('partials.task-row', ['task' => $task])->render();
+        
+        return response()->json(['html' => $html]);
     }
 }

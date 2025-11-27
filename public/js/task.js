@@ -242,15 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
       inputElement.addEventListener('keydown', handleKeyDown);
   }
 
-  // --- FUNGSI CAROUSEL MOCKUP ---
 
-  /**
-   * Menampilkan daftar file yang dipilih di area preview.
-   */
-   /**
- * Menampilkan daftar file dari Map global di area preview.
- * (VERSI BARU - Memeriksa properti file, bukan parameter)
- */
     function updateMockupPreview() {
         const previewArea = document.querySelector(".popup #mockup-preview-area");
         if (!previewArea) return;
@@ -1303,7 +1295,7 @@ function showValidationErrors(popup, errors) {
         });
     }
 
-    if (maxDeadline) { // Gunakan maxDeadline, bukan deadline line pertama
+    if (maxDeadline) { 
         const deadline = maxDeadline; 
         const now = new Date();
         deadline.setHours(0, 0, 0, 0);
@@ -1320,14 +1312,11 @@ function showValidationErrors(popup, errors) {
             timeleft = `Lewat ${Math.abs(diffDays)} hari`;
         }
     }
-    // ▲▲▲ AKHIR FIX #3 ▲▲▲
 
-    // [FIX #4] Logika Checklist (dari line pertama)
     let checklistsHTML = '';
     let completed = 0;
     let totalChecklists = 0;
     if (linePekerjaan && linePekerjaan.checklists && linePekerjaan.checklists.length > 0) {
-        // Kita tidak perlu loop 'line', langsung loop 'checklists' dari 1 line itu
         checklistsHTML += `<strong class="d-block mt-2 mb-1">${lineName}</strong>`;
         linePekerjaan.checklists.forEach(check => {
             totalChecklists++;
@@ -1392,7 +1381,7 @@ function showValidationErrors(popup, errors) {
         </td>
         <td class="icon-cell">
             <i class="bi bi-pencil-square icon-edit"></i>
-            <i class="bi bi-cloud-download-fill icon-download" data-id="${task.id}"></i> 
+            <i class="bi bi-file-earmark-arrow-down icon-download" data-id="${task.id}"></i> 
             <i class="bi bi-trash3-fill icon-trash" data-id="${task.id}"></i>
         </td>
     `;
@@ -1411,17 +1400,7 @@ function showValidationErrors(popup, errors) {
     }
   }
 
-/**
- * Fungsi untuk menambah checklist di dalam line
- * (VERSI BARU dengan tombol Hapus "x" tanpa latar)
- */
-/**
- * Fungsi untuk menambah 'widget' checklist baru
- * (VERSI BARU dengan autocomplete)
- */
-/**
-   * Fungsi untuk menambah checklist di dalam line
-   */
+
  function addChecklist(button) {
     const checklistContainer = button.previousElementSibling; 
     if (!checklistContainer) return;
@@ -1638,7 +1617,6 @@ function updateProgress(checkbox) {
 document.querySelectorAll('.task table tbody tr').forEach(row => {
     const progressButton = row.querySelector('.dropdown-toggle.progress');
     if (progressButton) {
-        // ▼▼▼ GANTI DENGAN LOGIKA BARU INI ▼▼▼
         const progressText = progressButton.querySelector('.progress-text');
         if (progressText) {
             
@@ -1658,7 +1636,6 @@ document.querySelectorAll('.task table tbody tr').forEach(row => {
                 progressButton.classList.add('status-yellow');
             }
         }
-        // ▲▲▲ AKHIR LOGIKA BARU ▲▲▲
     }
     // Init galeri (INI BENAR, JANGAN DIHAPUS)
     initGalleryIndicator(row);
@@ -1885,81 +1862,68 @@ const searchInput = document.getElementById("taskSearchInput");
   }
   
 
-  // 3.Listener untuk KLIK (click) - GABUNGAN SEMUA DELEGASI
-  document.body.addEventListener('click', function(event) {
+// 3. Listener untuk KLIK (click) - GABUNGAN SEMUA DELEGASI
+document.body.addEventListener('click', function(event) {
     const target = event.target;
     
-    // 1. Jangan jalankan jika di dalam popup
+    // 1. Abaikan jika klik di dalam popup overlay
     if (target.closest('.popup-overlay')) return; 
 
-    // 2. Cek Aksi Prioritas Tinggi (Ikon Aksi)
-    // Cek apakah kita mengklik IKON di dalam .icon-cell
-    const iconCell = target.closest('.icon-cell');
-    if (iconCell) {
-        // Aksi Edit (Membuka popup)
-        if (target.classList.contains('icon-edit')) {
-            event.preventDefault();
-            handleEdit(target); // Panggil fungsi edit
-            return; // Berhenti di sini
-        }
-        // Aksi Download (Print)
-        if (target.classList.contains('icon-download')) {
-            event.preventDefault();
-            handlePrint(target); // Panggil fungsi print
-            return; // Berhenti di sini
-        }
-        // Aksi Hapus (Fetch Delete)
-        if (target.classList.contains('icon-trash')) {
-            event.preventDefault();
-            handleDelete(target); // Panggil fungsi delete
-            return; // Berhenti di sini
-        }
+    // 2. Cek Aksi Tombol (Edit, Print, Delete)
+    // Gunakan .closest() agar aman jika user klik ikon <i> di dalam tombol
+    if (target.closest('.icon-edit')) {
+        event.preventDefault();
+        handleEdit(target.closest('.icon-edit')); 
+        return; 
+    }
+    if (target.closest('.icon-download')) {
+        event.preventDefault();
+        handlePrint(target.closest('.icon-download')); 
+        return; 
+    }
+    if (target.closest('.icon-trash')) {
+        event.preventDefault();
+        handleDelete(target.closest('.icon-trash')); 
+        return; 
     }
 
-    // 3. Cek Aksi Prioritas Sedang (Elemen Interaktif Lain)
-    // (Dropdown, Mockup, Checklist, Status)
+    // 3. Cek Elemen Interaktif Lain (Dropdown, Mockup, Checkbox)
+    // Jika user klik ini, kita stop, jangan sampai kode pindah halaman jalan
     if (target.closest('.mockup-wrapper') || 
-        target.closest('.dropdown-item[data-status]') || 
         target.closest('.dropdown-toggle') || 
+        target.closest('.dropdown-menu') || 
         target.closest('.line-btn') || 
-        target.closest('.form-check')) {
+        target.closest('input') ||           // Input & Checkbox
+        target.closest('label') ||           // Label Checkbox
+        target.closest('.select-col')) {     // Kolom Select All
         
-        // Buka Modal Galeri
+        // Jalankan logika spesifik (jika ada)
         const wrapper = target.closest('.mockup-wrapper');
         if (wrapper) {
             event.preventDefault();
             openImageModal(wrapper);
-            return; // Berhenti
         }
-        // Ubah status
+        
         const statusItem = target.closest('.dropdown-item[data-status]');
         if (statusItem) {
             event.preventDefault();
             handleStatusChange(statusItem);
-            return; // Berhenti
         }
-        
-        // Jika hanya .dropdown-toggle atau .form-check,
-        // biarkan event default (Bootstrap/centang) bekerja
-        return; 
+
+        return; // BERHENTI DI SINI (Jangan lanjut ke kode pindah halaman)
     }
     
-    // 4. Aksi Prioritas Rendah (Klik Baris)
-    // Kode ini hanya akan berjalan jika kita TIDAK mengklik
-    // elemen-elemen prioritas di atas.
+    // 4. Aksi Pindah Halaman (Klik Baris)
+    // Kode ini hanya akan jalan jika user klik area KOSONG di baris
     const row = target.closest('tr.clickable-row');
     if (row) {
         const url = row.dataset.url;
         if (url) {
-            window.location.href = url; // Pindah ke halaman detail
+            window.location.href = url; 
         }
     }
-
-
-
 });
 
 
 
-
-});
+}); // END DOC

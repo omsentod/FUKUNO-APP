@@ -66,7 +66,9 @@
                   $linePekerjaan = $task->taskPekerjaans->first();
                   $deadline = $linePekerjaan ? $linePekerjaan->deadline : null;
               @endphp
-              <tr>
+              <tr class="clickable-row" 
+              data-url="{{ route('task', ['highlight' => $task->id]) }}" 
+              style="cursor: pointer;">
                   <td>{{ $task->judul }}</td>
                   <td>{{ $task->nama_pelanggan }}</td>
 
@@ -139,16 +141,16 @@
            <tbody>
              @forelse($upcomingDeadlines as $task)
                @php
-                  // (Kita perlu ambil line pekerjaan lagi karena ini task yang berbeda)
                   $linePekerjaan = $task->taskPekerjaans->firstWhere('deadline', '>=', now());
                   $deadline = $linePekerjaan ? $linePekerjaan->deadline : null;
   
-                  // Logika Inisial & Warna PIC
                   $picName = $task->user->name ?? 'A';
                   $initials = \App\Http\Controllers\TaskController::buatInisial($picName);
                   $bgColor = $colors[ord(strtoupper(substr($initials, 0, 1))) % count($colors)];
                @endphp
-               <tr>
+              <tr class="clickable-row" 
+              data-url="{{ route('task', ['highlight' => $task->id]) }}" 
+              style="cursor: pointer;">
                    <td>{{ $task->judul }}</td>
                    <td>{{ $task->nama_pelanggan }}</td>
                    <td>
@@ -173,14 +175,12 @@
                                 $timeClass = 'time-completed'; 
                             
                             } else {
-                                // ▼▼▼ PERBAIKAN DI SINI ▼▼▼
-                                // 1. Ambil string mentah (e.g., "5 jam dari sekarang")
+                        
                                 $rawTimeLeft = $deadline->diffForHumans();
                                 
-                                // 2. Ganti stringnya
                                 $timeLeftString = str_replace('dari sekarang', 'lagi', $rawTimeLeft);
-                                $timeLeftString = str_replace('sebelumnya', 'lalu', $timeLeftString); // (Untuk "5 jam lalu")
-                                // ▲▲▲ AKHIR PERBAIKAN ▲▲▲
+                                $timeLeftString = str_replace('sebelumnya', 'lalu', $timeLeftString);
+                    
     
                                 if ($deadline->isPast()) {
                                     $timeClass = 'time-overdue'; 

@@ -661,6 +661,19 @@ min-width: 120px;
 
 /* Style sort */
 
+.reset-sort{
+    color: var(--main-color);
+    font-size: 15px;
+}
+
+.reset-sort-icon{
+    font-size: 12px;
+}
+
+.reset-sort:hover{
+    text-decoration: underline;
+    color: var(--main-color);
+}
 
 thead th a {
     text-decoration: none;

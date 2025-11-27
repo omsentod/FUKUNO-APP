@@ -90,11 +90,42 @@ body{
         opacity: 0;
         width: 50vh;
         transition: opacity 0.3s ease;
-
-        max-height: 93vh; 
         overflow-y: auto;
       }
-            .notification.show {
+      .notification-header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        border-bottom: 1px solid #eee;
+        background-color: #fff;
+        font-weight: bold;
+        color: #333;
+        border-radius: 10px 10px 0 0; 
+      }
+
+      .notif-title{
+        font-weight: var(--font-semibold);
+      }
+
+      .clear-btn {
+        background: none;
+        border: none;
+        color: #CF221B; 
+        font-size: 12px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    .clear-btn:hover {
+        text-decoration: underline;
+    }
+
+    .notification-list-container {
+      max-height: 400px; 
+      overflow-y: auto;
+  }
+
+      .notification.show {
         display: block;
         opacity: 1;
       }
