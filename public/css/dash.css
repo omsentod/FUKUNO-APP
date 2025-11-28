@@ -661,6 +661,20 @@ body.sidebar-closed .sidebar-toggle i {
   }
 }
 
+/* Aturan umum untuk card rows (desktop dan mobile) */
+.card-row {
+    display: flex;
+    flex-direction: row;
+    gap: 20px; /* Jarak antar card dalam baris */
+    justify-content: flex-start;
+}
+/* Aturan untuk tabel responsif */
+.table-responsive {
+    overflow-x: auto; /* Scroll horizontal jika tabel lebar */
+}
+
+
+/* MOBILE */
 #navbar-hamburger-btn {
   display: none;
   font-size: 1.8rem;
@@ -833,13 +847,103 @@ body.sidebar-open-mobile .sidebar {
 
 }
 
-@media (max-width: 768px) {
-
-
-}
-
 @media (max-width: 576px) {
+.card-row {
+        flex-direction: column; /* Jika layar terlalu kecil, card dalam baris jadi vertikal (1 per baris) */
+        gap: 10px;
+}
 
+.task-category {
+        width: 80%; /* Card lebih lebar */
+        height: 70px;
+}
+
+.task-name {
+        font-size: 12px;
+}
+
+.task-clr {
+        width: 35px;
+        height: 35px;
+}
+
+.table-dashboard {
+        width: 95%; /* Hampir penuh */
+}
+
+.task-indash, .deadline {
+        width: 100%;
+}
 
 }
+
+
+@media (max-width: 768px) {
+  /* Dashboard: Ubah ke column biar card dalam baris vertikal */
+  .dashboard {
+        flex-direction: column; /* Card dalam baris vertikal */
+        gap: 15px; /* Jarak antar baris card */
+        align-items: center; /* Tengah di layar */
+  }
+
+  /* Card rows: Tetap row, tapi sesuaikan ukuran */
+  .card-row {
+    width: 100%; /* Lebar penuh */
+    justify-content: space-around; /* Card sejajar di tengah */
+    gap: 10px; /* Kurangi jarak */
+  }
+
+  .task-category {
+        width: 45%; /* Card lebih kecil, 2 per baris */
+        height: 80px; /* Tinggi lebih kecil */
+        margin: 0; /* Hapus margin kiri */
+  }
+
+  .task-name {
+        font-size: 14px; /* Font lebih kecil */
+        margin-bottom: 10px;
+  }
+
+  .task-clr {
+        width: 40px; /* Lingkaran lebih kecil */
+        height: 40px;
+  }
+
+  .total-task {
+        font-size: 16px; /* Font angka lebih kecil */
+  }
+
+  /* Tabel: Ubah ke column biar vertikal, responsif */
+  .table-dashboard {
+        flex-direction: column; /* Tabel vertikal */
+        gap: 20px; /* Jarak antar tabel */
+        align-items: center;
+  }
+
+  .task-indash, .deadline {
+        width: 90%; /* Lebar penuh layar */
+        margin: 20px 0 0 0; /* Margin atas */
+        height: auto; /* Tinggi otomatis */
+  }
+
+  .data-table, .dldata-table {
+        font-size: 12px; /* Font tabel lebih kecil */
+  }
+
+  .table-tittle, .dltable-tittle {
+        font-size: 18px; /* Judul tabel lebih kecil */
+  }
+
+  .data-table th, .data-table td, .dldata-table th, .dldata-table td {
+        padding: 8px; /* Padding lebih kecil */
+  }
+
+  /* Hover dan interaksi tetap sama, tapi pastikan nyaman di touch */
+  .data-table tr:hover td, .dldata-table tr:hover td {
+        background-color: rgba(226, 226, 226, 0.8); /* Hover lebih halus */
+  }
+
+}
+
+
 
