@@ -441,9 +441,11 @@ public function storeComment(Request $request, $task_id)
         // 3. Update status_id
         $task->status_id = $newStatus->id;
     
-        if ($newStatusName == 'Done and Ready') {
+        if ($newStatusName == 'Done and Ready' || $newStatusName == 'Delivered') {
             $task->completed_at = now();
-        } else if ($newStatusName != 'Hold') { 
+        } 
+        // Jika status lain (Hold/In Progress/Needs Work), reset waktu selesai
+        else if ($newStatusName != 'Hold') { 
             $task->completed_at = null; 
         }
         
@@ -872,5 +874,17 @@ public function storeComment(Request $request, $task_id)
         $html = view('partials.task-row', ['task' => $task])->render();
         
         return response()->json(['html' => $html]);
+    }
+
+    public function updateBahan(Request $request, $id)
+    {
+        $task = Task::findOrFail($id);
+        
+        $task->update([
+            'bahan_terpakai' => $request->bahan_terpakai,
+            'bahan_reject'   => $request->bahan_reject
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Data bahan disimpan.']);
     }
 }

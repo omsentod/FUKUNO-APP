@@ -107,51 +107,123 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // =========================================
-    // 5. LOGIKA CHECKLIST (AUTO-SAVE & DROPDOWN)
+   // =========================================
+    // 5. LOGIKA CHECKLIST & BAHAN (GABUNGAN)
     // =========================================
     const activityContainer = document.getElementById('activity-container');
     const progressBarFill = document.getElementById('progress-bar-fill');
     const progressText = document.getElementById('progress-text');
+    
+    // Elemen Bahan
+    const bahanInputs = document.querySelectorAll('.bahan-input');
+    const bahanTerpakai = document.getElementById('bahan-terpakai');
+    const bahanReject = document.getElementById('bahan-reject');
 
-    function calculateProgress() {
-        if (!activityContainer) return;
-        const allCheckboxes = activityContainer.querySelectorAll('.progress-check');
-        const completedTasks = activityContainer.querySelectorAll('.progress-check:checked').length;
-        const total = allCheckboxes.length;
-        const percentage = (total > 0) ? Math.round((completedTasks / total) * 100) : 0;
-        
-        if (progressBarFill) progressBarFill.style.width = percentage + '%';
-        if (progressText) progressText.textContent = percentage + '% complete';
-    }
+    // --- A. Auto-Save Bahan ---
+ if (bahanInputs.length > 0) {
+    bahanInputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            const taskId = this.dataset.taskId;
+            
+            // 1. Simpan Data Bahan (Logika Lama)
+            fetch(`/task/update-bahan/${taskId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    bahan_terpakai: bahanTerpakai.value,
+                    bahan_reject: bahanReject.value
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) console.log('Bahan tersimpan.');
+            })
+            .catch(err => console.error('Gagal simpan bahan:', err));
 
+          
+            const valTerpakai = bahanTerpakai.value.trim();
+            const valReject = bahanReject.value.trim();
+
+            // Jika salah satu kosong...
+            if (valTerpakai === '' || valReject === '') {
+                // ...Cari checklist terakhir
+                const finalCheckbox = document.querySelector('.final-checklist');
+                
+                // Jika checklist terakhir sedang tercentang
+                if (finalCheckbox && finalCheckbox.checked) {
+                    
+                    // A. Lepas Centang secara Visual
+                    finalCheckbox.checked = false;
+                    
+                    // B. Beri Peringatan
+                    alert("⚠️ PERINGATAN SISTEM:\n\nChecklist terakhir otomatis dilepas karena Anda menghapus data Bahan.\nHarap isi kembali bahan sebelum menyelesaikan tugas.");
+
+                    // C. Update Progress Bar UI
+                    if (typeof calculateProgress === 'function') {
+                        calculateProgress();
+                    }
+
+                    fetch(`/checklist/update/${finalCheckbox.dataset.id}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+                        body: JSON.stringify({ is_completed: false }) // Set ke FALSE
+                    })
+                    .then(res => res.json())
+                    .then(res => console.log("System auto-unchecked final list"))
+                    .catch(err => console.error("Auto-uncheck error", err));
+                }
+            }
+
+        });
+    });
+}
+
+    // --- B. Listener Klik Activity Container (Satu Pintu) ---
     if (activityContainer) {
-        // A. Toggle Dropdown Line Pekerjaan
         activityContainer.addEventListener('click', (e) => {
+            
+            // 1. Logika Dropdown
             const dropdownBtn = e.target.closest('.dropdown-btn');
             if (dropdownBtn) {
-                // Toggle tampilan dropdown content
                 const content = dropdownBtn.nextElementSibling;
-                // Toggle class active pada parent dropdown untuk styling (opsional)
                 dropdownBtn.parentElement.classList.toggle('active');
-                
-                // Logika display sederhana
-                if (content.style.display === 'block') {
-                    content.style.display = 'none';
-                } else {
-                    content.style.display = 'block';
+                content.style.display = content.style.display === 'block' ? 'none' : 'block';
+                return; // Selesai
+            }
+
+            // 2. Logika Validasi Checklist Terakhir
+            if (e.target.classList.contains('final-checklist')) {
+                const valTerpakai = bahanTerpakai ? bahanTerpakai.value.trim() : '';
+                const valReject = bahanReject ? bahanReject.value.trim() : '';
+
+                if (valTerpakai === '' || valReject === '') {
+                    e.preventDefault(); // Batalkan centang
+                    alert("⚠️ PERHATIAN:\n\nHarap isi 'Bahan Terpakai' dan 'Bahan Reject' sebelum menyelesaikan pekerjaan ini!");
+                    
+                    bahanTerpakai.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    bahanTerpakai.classList.add('is-invalid');
+                    bahanReject.classList.add('is-invalid');
+                    
+                    setTimeout(() => {
+                         bahanTerpakai.classList.remove('is-invalid');
+                         bahanReject.classList.remove('is-invalid');
+                    }, 3000);
+                    return; // Stop, jangan lanjut auto-save
                 }
             }
         });
 
-        // B. Auto-Save Checklist (Ganti 'change' listener yang hilang/error)
+        // --- C. Listener Change (Auto-Save Checklist) ---
         activityContainer.addEventListener('change', (e) => {
             if (e.target.classList.contains('progress-check')) {
                 const checkbox = e.target;
                 const checklistId = checkbox.dataset.id;
                 const isChecked = checkbox.checked;
                 
-                calculateProgress(); // Update UI langsung
+                calculateProgress();
 
                 fetch(`/checklist/update/${checklistId}`, {
                     method: 'POST',
@@ -160,9 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 })
                 .then(res => res.json())
                 .then(result => {
-                    if (result.success) {
-                        console.log(`Checklist ${checklistId} saved.`);
-                    } else {
+                    if (!result.success) {
                         alert('Gagal menyimpan: ' + result.message);
                         checkbox.checked = !isChecked;
                         calculateProgress();
@@ -175,6 +245,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             }
         });
+    }
+
+    function calculateProgress() {
+        // ... (fungsi hitung progress Anda tetap sama) ...
+        if (!activityContainer) return;
+        const allCheckboxes = activityContainer.querySelectorAll('.progress-check');
+        const completedTasks = activityContainer.querySelectorAll('.progress-check:checked').length;
+        const total = allCheckboxes.length;
+        const percentage = (total > 0) ? Math.round((completedTasks / total) * 100) : 0;
+        
+        if (progressBarFill) progressBarFill.style.width = percentage + '%';
+        if (progressText) progressText.textContent = percentage + '% complete';
     }
 
     // =========================================
@@ -237,4 +319,6 @@ document.addEventListener("DOMContentLoaded", () => {
         chatContainer.appendChild(bubble);
         scrollToBottom();
     }
+
+   
 });

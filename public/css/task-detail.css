@@ -269,14 +269,20 @@ body{
 
 .progress-bar-container {
   background: #eaeaea;
-  height: 20px; /* Tentukan tinggi yang konsisten */
-  width: 100%; /* Gunakan 100% agar responsif */
+  height: 20px; 
+  width: 100%; 
   border-radius: 10px;
   position: relative; 
   overflow: hidden;
   
   display: flex;
+  flex-direction: row;
   align-items: center;
+}
+.reject-bar{
+  background: #eaeaea;
+  height: 20px; 
+  width: 100%;
 }
 
 /* 2. Bar Isian (Lapisan Bawah) */

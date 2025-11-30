@@ -162,7 +162,6 @@ table {
  .table-bg tr:hover{
     background-color:#fbefbc;
     color: var(--txt-color);
-    cursor: pointer;
     transform: scale(1.02);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
     position: relative;
@@ -248,7 +247,11 @@ th {
     background-color: var(--main-color) !important;
     color: var(--ctn-color) !important;
 }
-
+/* Status Delivered */
+.status-delivered {
+    background-color: #17a2b8; /* Warna Cyan */
+    color: white;
+}
 
 /* Anda bisa menyesuaikan warnanya sesuai selera */
 
@@ -559,7 +562,8 @@ th {
 
   /* CSS untuk Menu Klik Kanan */
 .context-menu {
-    display: none; /* Sembunyi secara default */
+    display: none; 
+    position: fixed;
     background-color: white;
     border: 1px solid #ddd;
     border-radius: 6px;
@@ -773,12 +777,17 @@ thead th a i.bi {
 }
 
 .time-late {
-    color: #f1c40f; /* Kuning / Emas */
+    color: #f1c40f; 
+    font-weight: 600;
+}
+
+.time-delivered {
+    color: #17a2b8; 
     font-weight: 600;
 }
 
 .time-completed {
-    color: #159758; 
+    color: #2ecc71; 
     font-weight: var(--font-semibold);
 }
 
@@ -808,8 +817,16 @@ thead th a i.bi {
     display: none;
 }
 
+.row-checkbox{
+    cursor: pointer;
+}
+
+
+
 #taskTable.selection-mode .select-col {
     display: table-cell;
+
+    
 }
 
 .bulk-action-bar{
@@ -817,6 +834,8 @@ thead th a i.bi {
     flex-direction: row;
     gap: 10px;
 }
+
+
 
 
 /* CSS untuk highlight task baru */

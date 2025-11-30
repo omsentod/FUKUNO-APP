@@ -38,12 +38,8 @@
                 <th>Tanggal Selesai</th>
                 <td>{{ $latestDeadline ? Carbon::parse($latestDeadline)->format('j M Y') : '-' }}</td>
             </tr>
-            <tr>
-                <th>Article / Model</th><td colspan="3">{{ $mainTask->model ?? '-' }}</td>
-            </tr>
-            <tr>
-                <th>Material</th><td colspan="3">{{ $mainTask->bahan ?? '-' }}</td>
-            </tr>
+       
+   
             <tr>
                 <th>Line Pekerjaan</th>
                 <td colspan="3">
@@ -60,8 +56,12 @@
               <h4>Spesifikasi</h4>
               <table>
                 <tr><th>Warna</th><td>{{ $mainTask->warna ?? '-' }}</td></tr>
-                <tr><th>Printing</th><td>-</td></tr>
-                <tr><th>Bording</th><td>-</td></tr>
+                <tr>
+                  <th>Article / Model</th><td colspan="3">{{ $mainTask->model ?? '-' }}</td>
+              </tr>
+              <tr>
+                <th>Material</th><td colspan="3">{{ $mainTask->bahan ?? '-' }}</td>
+            </tr>
               </table>
             </div>
             <div class="note">
@@ -128,20 +128,49 @@
 
     {{-- ===== TAB 2: ACTIVITY / TIMELINE ===== --}}
     <div id="content-activity" class="tab-content">
+      
+      <div class="bahan-section mb-4 p-3 border rounded bg-light">
+          <h5 class="mb-3" style="font-size: 16px; font-weight:600;">Laporan Bahan</h5>
+          <div class="row">
+              <div class="col-md-6">
+                  <label class="small fw-bold">Bahan Terpakai</label>
+                  <textarea class="form-control bahan-input" 
+                            id="bahan-terpakai" 
+                            data-task-id="{{ $mainTask->id }}"
+                            placeholder="Contoh: 5 Meter Kain..." rows="2">{{ $mainTask->bahan_terpakai }}</textarea>
+              </div>
+              <div class="col-md-6">
+                  <label class="small fw-bold text-danger">Bahan Reject</label>
+                  <textarea class="form-control bahan-input" 
+                            id="bahan-reject" 
+                            data-task-id="{{ $mainTask->id }}"
+                            placeholder="Contoh: 2 meter kain..." rows="2">{{ $mainTask->bahan_reject }}</textarea>
+              </div>
+          </div>
+          <small class="text-muted fst-italic mt-1 d-block">*Wajib diisi sebelum mencentang checklist terakhir.</small>
+      </div>
+
       <h4>Checklist Activity</h4>
 
       <div class="activity-section" id="activity-container">
+        @php
+            // Hitung total checklist di seluruh grup untuk tahu mana yang terakhir
+            $totalAllChecklists = $allTasksInGroup->flatMap->taskPekerjaans->flatMap->checklists->count();
+            $counter = 0;
+        @endphp
+
         @foreach($allTasksInGroup as $task)
             @php
-                $line = $task->taskPekerjaans->first(); // Ambil line tunggal dari task ini
+                $line = $task->taskPekerjaans->first();
             @endphp
             @if($line)
                 <div class="dropdown">
                   <button class="dropdown-btn">{{ $line->nama_pekerjaan }}<span class="dropdown-icon">▾</span></button>
-                  <div class="dropdown-content">
-                    @forelse($line->checklists as $checklist)
+                  <div class="dropdown-content" style="display: block;"> @forelse($line->checklists as $checklist)
+                        @php $counter++; @endphp
                         <label>
-                            <input type="checkbox" class="activity-box progress-check" 
+                            <input type="checkbox" 
+                                   class="activity-box progress-check {{ $counter === $totalAllChecklists ? 'final-checklist' : '' }}" 
                                    data-id="{{ $checklist->id }}" 
                                    {{ $checklist->is_completed ? 'checked' : '' }}>
                             {{ $checklist->nama_checklist }}
@@ -155,12 +184,14 @@
         @endforeach
       </div>
       
+     
       <div class="progress-bar-container">
         <div id="progress-bar-fill" style="width: {{ $progressPercentage }}%;"></div>
         <span id="progress-text">{{ $progressPercentage }}% complete</span>
-      </div>
 
-    
+        
+      </div>
+      
 
       <div class="comment-section">
         <h4>Comments</h4>

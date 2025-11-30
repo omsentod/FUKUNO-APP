@@ -37,6 +37,7 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/task/detail/{id}', [TaskController::class, 'show'])->name('task.show');
     Route::get('/print-po/{id}', [TaskController::class, 'showPrintPage'])->name('task.printPage');
     Route::get('/task/get-row/{id}', [TaskController::class, 'getTaskRowHtml'])->name('task.getRowHtml');
+    Route::post('/task/update-bahan/{id}', [TaskController::class, 'updateBahan'])->name('task.updateBahan');
 
     // Update Checklist (Progress otomatis)
     Route::post('/checklist/update/{id}', [TaskController::class, 'updateChecklistStatus'])->name('checklist.updateStatus');

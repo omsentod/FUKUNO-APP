@@ -380,20 +380,18 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       return { headers: headers, rows: rows };
   }
-// ▼▼▼  FUNGSI UPDATE TASK▼▼▼
 /**
  * @param {string} taskId - ID dari task yang akan diupdate.
  * @param {string} newStatusName - Nama status baru (e.g., "In Progress").
  */
  function updateTaskStatus(taskId, newStatusName) {
-    // 1. Temukan tombol status di tabel utama
     const statusButton = document.querySelector(`#statusDropdown${taskId}`);
     if (!statusButton) return;
 
     const statusTextSpan = statusButton.querySelector('.status-text');
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    // 2. Update Tampilan Tombol Status (Kode Anda yang sudah ada)
+    // 2. Update Tampilan Tombol
     statusTextSpan.textContent = newStatusName;
     statusButton.classList.forEach(className => {
         if (className.startsWith('status-') && className !== 'status-btn') {
@@ -403,58 +401,52 @@ document.addEventListener("DOMContentLoaded", () => {
     const newClass = 'status-' + newStatusName.toLowerCase().replace(/\s+/g, '-');
     statusButton.classList.add(newClass);
 
-    // 3. Update Tampilan Dropdown Menu (Kode Anda yang sudah ada)
+    // 3. Update Tampilan Dropdown Menu
     const dropdownMenu = statusButton.nextElementSibling;
     if (dropdownMenu) {
         let newMenuHTML = '';
-        if (newStatusName === 'Hold') {
-            newMenuHTML = `<a class="dropdown-item" href="#" data-status="Resume Progress"><i class="bi bi-play-circle"></i> Resume Progress</a>`;
-        } else {
-            newMenuHTML = `<a class="dropdown-item" href="#" data-status="Hold"><i class="bi bi-pause-circle"></i> Set to Hold</a>`;
+
+        if (newStatusName === 'Hold' || newStatusName === 'Delivered') {
+            newMenuHTML += `<a class="dropdown-item" href="#" data-status="Resume Progress"><i class="bi bi-play-circle"></i> Resume Progress</a>`;
         }
+
+        if (newStatusName !== 'Hold') {
+            newMenuHTML += `<a class="dropdown-item" href="#" data-status="Hold"><i class="bi bi-pause-circle"></i> Set to Hold</a>`;
+        }
+
+        if (newStatusName !== 'Delivered') {
+            newMenuHTML += `<a class="dropdown-item" href="#" data-status="Delivered"><i class="bi bi-truck"></i> Set to Delivered</a>`;
+        }
+
         dropdownMenu.innerHTML = newMenuHTML;
     }
-
-    // ▼▼▼ 4.  UPDATE TIME LEFT LIVE ▼▼▼
+    // 4. UPDATE TIME LEFT LIVE
     const timeLeftSpan = document.querySelector(`#time-left-${taskId}`);
     if (timeLeftSpan) {
+        const deadlineString = timeLeftSpan.dataset.deadline; 
         
-        const isDone = (newStatusName === 'Done and Ready');
-        
-        if (isDone) {
-            // --- LOGIKA JIKA SELESAI (LIVE) ---
-            const deadlineString = timeLeftSpan.dataset.deadline; // Ambil data ISO
-            
-            if (deadlineString) {
-                const deadline = new Date(deadlineString); // Waktu deadline
-                const now = new Date(); // Waktu selesai (sekarang)
+        // Cek status "Final"
+        const isDone = (newStatusName === 'Done and Ready' || newStatusName === 'Delivered');
 
-                if (now < deadline) {
-                    timeLeftSpan.textContent = "Selesai (Lebih Awal)";
-                    timeLeftSpan.className = 'time-completed'; // Hijau
-                } else {
-                    timeLeftSpan.textContent = "Selesai (Terlambat)";
-                    timeLeftSpan.className = 'time-overdue'; // Merah
-                }
+        if (isDone) {
+    
+            if (newStatusName === 'Delivered') {
+                timeLeftSpan.textContent = "Terkirim";
+                timeLeftSpan.className = 'time-delivered';
             } else {
-                timeLeftSpan.textContent = "Selesai"; // Fallback
-                timeLeftSpan.className = 'time-completed';
+                timeLeftSpan.textContent = "Selesai";
+                timeLeftSpan.className = 'time-completed'; 
+
             }
-        
-        } else if (newStatusName === 'Hold') {
-            // --- LOGIKA JIKA HOLD ---
-            timeLeftSpan.className = 'text-muted'; 
-            timeLeftSpan.textContent = 'Paused';
-            // (Biarkan teksnya apa adanya)
-        
+
         } else {
-            // --- LOGIKA JIKA "RESUME" (Needs Work / In Progress) ---
-            // Hitung ulang dari data-deadline
-            const deadlineString = timeLeftSpan.dataset.deadline;
+   
             
             if (deadlineString) {
                 const deadline = new Date(deadlineString);
                 const now = new Date();
+                
+                // Reset jam agar hitungan hari akurat
                 deadline.setHours(0, 0, 0, 0);
                 now.setHours(0, 0, 0, 0);
 
@@ -463,14 +455,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (diffDays > 0) {
                     timeLeftSpan.textContent = `${diffDays} hari lagi`;
-                    timeLeftSpan.className = '';
+                    timeLeftSpan.className = ''; // Warna hitam biasa
                 } else if (diffDays === 0) {
                     timeLeftSpan.textContent = 'Hari ini';
                     timeLeftSpan.className = '';
                 } else {
                     timeLeftSpan.textContent = `Lewat ${Math.abs(diffDays)} hari`;
-                    timeLeftSpan.className = 'time-overdue'; // Merah
+                    timeLeftSpan.className = 'time-late'; // Kuning (Lewat)
                 }
+                
+         
+                if (diffDays >= 0 && diffDays <= 2) {
+                     timeLeftSpan.className = 'time-mustdo'; // Merah
+                }
+
             } else {
                 timeLeftSpan.textContent = '-';
                 timeLeftSpan.className = '';
@@ -917,32 +915,43 @@ function showValidationErrors(popup, errors) {
         };
     }
 
-    // LOGIKA KLIK KANAN (CONTEXT MENU) - Gunakan .oncontextmenu
+    // LOGIKA KLIK KANAN (CONTEXT MENU) - PERBAIKAN POSISI
     if (sizeTable && contextMenu) {
+        
+        // 1. Listener Menu Klik Kanan
         sizeTable.oncontextmenu = (e) => {
-            e.preventDefault();
+            e.preventDefault(); 
+            
+            // Cari sel yang diklik
             clickedCell = e.target.closest('td, th');
             if (!clickedCell) return;
-            const popupRect = popup.getBoundingClientRect();
-            const x = e.clientX - popupRect.left;
-            const y = e.clientY - popupRect.top + popup.scrollTop;
-            contextMenu.style.top = `${y}px`;
-            contextMenu.style.left = `${x}px`;
+
+         
+            contextMenu.style.top = `${e.clientY}px`;
+            contextMenu.style.left = `${e.clientX}px`;
+            
+            // Tampilkan
             contextMenu.classList.add("show");
         };
-        popup.onclick = (e) => {
-             if (!e.target.closest('.context-menu-item') && !e.target.closest('#sizeTable')) {
+
+        // 2. Listener Tutup Menu (Gunakan window agar lebih luas jangkauannya)
+        window.addEventListener('click', () => {
+             if (contextMenu.classList.contains("show")) {
                  contextMenu.classList.remove("show");
              }
-        };
+        });
+
+        // 3. Listener Aksi Menu (Tetap Sama)
         contextMenu.onclick = (e) => {
             if (!clickedCell) return;
             const targetItem = e.target.closest('.context-menu-item');
             if (!targetItem) return;
+            
             const action = targetItem.dataset.action;
             const table = clickedCell.closest('table');
             const cellIndex = clickedCell.cellIndex;
             const parentRow = clickedCell.closest('tr');
+            
             switch (action) {
                 case 'insert-row-after': insertSizeRow(table, parentRow); break;
                 case 'delete-row': deleteSizeRow(table, parentRow); break;
@@ -950,7 +959,7 @@ function showValidationErrors(popup, errors) {
                 case 'delete-col': deleteTypeColumn(table, cellIndex); break;
             }
             clickedCell = null;
-            contextMenu.classList.remove("show");
+            // Menu akan tertutup otomatis oleh listener window di atas
         };
     }
 
@@ -1522,44 +1531,48 @@ function updateProgress(checkbox) {
    * Mengganti teks dan warna status dropdown
    */
    function handleStatusChange(clickedItem) {
-    const newStatusName = clickedItem.dataset.status; // Akan berisi "Hold" atau "Resume Progress"
+    const newStatusName = clickedItem.dataset.status; // "Hold", "Delivered", atau "Resume Progress"
     const dropdown = clickedItem.closest('.dropdown');
     if (!dropdown) return;
     
-    // Ambil ID Task dari tombol status
     const statusButton = dropdown.querySelector('.dropdown-toggle');
-    const taskId = statusButton.dataset.taskId;
+    const taskId = statusButton.dataset.taskId; // Pastikan ID Task diambil dengan benar
 
-    if (newStatusName === 'Hold') {
-        // --- Aksi: SET TO HOLD ---
-        // Cukup panggil fungsi update universal
-        updateTaskStatus(taskId, 'Hold');
-    
-    } else if (newStatusName === 'Resume Progress') {
-        // --- Aksi: CANCEL HOLD / RESUME ---
+    // === LOGIKA RESUME (PENTING) ===
+    if (newStatusName === 'Resume Progress') {
         
-        // 1. Temukan baris (tr) dari task ini
+        let percentage = 0; // Default 0 jika tidak ketemu
+        
+        // 1. Cari baris tabel (tr) tempat tombol ini berada
         const row = statusButton.closest('tr');
-        if (!row) return;
-
-        // 2. Temukan tombol progress bar di baris yang sama
-        const progressButton = row.querySelector('.progress.dropdown-toggle');
-        if (!progressButton) return;
         
-        // 3. Baca persentase saat ini
-        const progressText = progressButton.querySelector('.progress-text').textContent;
-        const percentage = parseInt(progressText, 10);
+        if (row) {
+ 
+            const progressTextEl = row.querySelector('.progress-text');
+            
+            if (progressTextEl) {
+                // Ambil angkanya saja (parseInt membuang simbol %)
+                percentage = parseInt(progressTextEl.textContent, 10);
+            }
+        }
 
-        // 4. Tentukan status otomatis yang baru
-        let autoStatusName = 'Needs Work'; // Default jika 0%
+        // 3. Tentukan status baru berdasarkan persentase yang ditemukan
+        let autoStatusName = 'Needs Work'; // Default (0%)
+        
         if (percentage === 100) {
             autoStatusName = 'Done and Ready';
         } else if (percentage > 0) {
             autoStatusName = 'In Progress';
         }
         
-        // 5. Panggil fungsi update universal
+        console.log(`Resuming Task ${taskId}: Progress ${percentage}% -> Status ${autoStatusName}`);
+
+        // 4. Update status ke hasil hitungan (BUKAN "Resume Progress")
         updateTaskStatus(taskId, autoStatusName);
+    
+    } else {
+
+        updateTaskStatus(taskId, newStatusName);
     }
 }
 

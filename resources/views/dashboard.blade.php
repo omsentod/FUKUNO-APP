@@ -198,13 +198,6 @@
                         <button class="status-btn status-{{ Str::slug($task->status->name) }} dropdown-toggle" type="button" id="statusDropdown{{ $task->id }}" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="status-text">{{ $task->status->name }}</span>
                         </button>
-                        <div class="dropdown-menu" aria-labelledby="statusDropdown{{ $task->id }}">
-                            @if($task->status->name == 'Hold')
-                                <a class="dropdown-item" href="#" data-status="Resume Progress"><i class="bi bi-play-circle"></i> Resume Progress</a>
-                            @else
-                                <a class="dropdown-item" href="#" data-status="Hold"><i class="bi bi-pause-circle"></i> Set to Hold</a>
-                            @endif
-                        </div>
                     </div>
                 </td>
                </tr>
