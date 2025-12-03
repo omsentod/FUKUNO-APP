@@ -1,10 +1,10 @@
-window.addEventListener('load', function() {
-  const preloader = document.getElementById('page-preloader');
-  if (preloader) {
-      preloader.classList.add('loaded');
-  }
-  
-});
+function hidePreloader() {
+    const preloader = document.getElementById('page-preloader');
+    if (preloader) {
+        preloader.classList.add('loaded');
+    }
+}
+
 window.addEventListener('load', hidePreloader);
 
 setTimeout(hidePreloader, 3000);
