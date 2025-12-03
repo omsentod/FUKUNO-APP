@@ -24,7 +24,6 @@
                 <tr>
                     <th>KLIEN</th>
                     <td>{{ $task->nama_pelanggan }}</td> @php
-                        // Ambil line pekerjaan (karena task sudah di-split, hanya ada 1)
                         $linePekerjaan = $task->taskPekerjaans->first();
                     @endphp
 
@@ -44,16 +43,24 @@
 
         <main class="main-content">
             <section class="product-info">
+
+                <div class="specs-list">
+                    <h3>Spesifikasi</h3>
+                    <ul>
+                        <li><strong>WARNA</strong>: {{ $task->warna ?? '-' }}</li>
+                        <li><strong>BAHAN</strong> : {{ $task->bahan ?? '-' }}</li>
+                        <li><strong>MODEL</strong>: {{ $task->model ?? '-' }}</li>
+                    </ul>
+                </div>
+
                 @php
-                // 1. Hitung jumlah mockup
                 $mockupCount = $task->mockups->count();
                 
-                // 2. Siapkan class dinamis
                 $collageClass = 'mockup-collage-container';
                 if ($mockupCount === 1) {
-                    $collageClass .= ' image-count-1'; // Tambah class jika 1
+                    $collageClass .= ' image-count-1'; 
                 } elseif ($mockupCount === 2) {
-                    $collageClass .= ' image-count-2'; // Tambah class jika 2
+                    $collageClass .= ' image-count-2'; 
                 }
             @endphp
 
@@ -63,28 +70,10 @@
                         <img src="{{ Storage::url($mockup->file_path) }}" alt="Mockup Gambar">
                     </div>
                 @endforeach
-            </div>             
-                 <div class="signature-box">
-                    <p class="sign">HEAD PRODUCTION</p>
-                    <p class="sign">Vendor</p>
-                </div>
+          
             </section>
             
             <section class="order-details">
-                
-                <div class="specs-list">
-                    <h3>Spesifikasi</h3>
-                    <ul>
-                        <li><strong>WARNA</strong>: {{ $task->warna ?? '-' }}</li>
-                        <li><strong>BAHAN</strong> : {{ $task->bahan ?? '-' }}</li>
-                        <li><strong>MODEL</strong>: {{ $task->model ?? '-' }}</li>
-                    </ul>
-                </div>
-                
-                <div class="specs-list">
-                    <h3>Note</h3>
-                    {{ $task->catatan ?? 'Tidak ada catatan.' }}
-                </div>
                  
                  <div class="size-table-container">
                     <h3>Rincian Ukuran</h3>
@@ -106,7 +95,6 @@
                                     
                                     @foreach($tipeHeaders as $tipe)
                                         @php
-                                            // Cari jumlah untuk (Jenis, Tipe) ini
                                             $size = $sizes->firstWhere('tipe', $tipe);
                                             $jumlah = $size ? $size->jumlah : 0;
                                             $rowTotal += $jumlah;
@@ -132,9 +120,27 @@
                         </tfoot>
                     </table>
                 </div>
+
+                   
+                <div class="specs-list">
+                    <h3>Note</h3>
+                    {{ $task->catatan ?? 'Tidak ada catatan.' }}
+                </div>
             </section>
         </main>
+        <footer>
+            <div class="signature-box">
+                <div class="sign-wrapper">
+                    <p class="sign-title">HEAD PRODUCTION</p>
+                </div>
+                <div class="sign-wrapper">
+                    <p class="sign-title">VENDOR</p>
+                </div>
+            </div>
+        </footer>
     </div>
+
+
     
     @php
         use Illuminate\Support\Facades\Storage;
@@ -142,7 +148,6 @@
     @endphp
 
     <script>
-        // Otomatis panggil dialog cetak
         window.onload = function() {
             window.print();
         }

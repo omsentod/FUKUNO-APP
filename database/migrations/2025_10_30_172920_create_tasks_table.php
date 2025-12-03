@@ -24,8 +24,11 @@ return new class extends Migration
             $table->string('warna')->nullable();
             $table->string('model')->nullable();
             $table->string('bahan')->nullable();
+            $table->text('bahan_terpakai')->nullable();
+            $table->text('bahan_reject')->nullable();
             
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

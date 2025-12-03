@@ -12,6 +12,7 @@ use App\Models\TaskMockup;
 use App\Models\Status;       
 use App\Models\User;    
 use App\Models\Comment;
+use App\Events\NewNotification;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use App\Notifications\TaskCreated; 
@@ -20,30 +21,28 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification; 
 
+
 class TaskController extends Controller
 {
   
     public function index(Request $request) 
 {
-    // 1. Tentukan SEMUA kolom yang BOLEH di-sort
-    // (Gunakan nama logis untuk relasi)
+
     $allowedSorts = [
         'no_invoice', 
         'judul', 
         'total_jumlah', 
         'urgensi',
-        'nama_pelanggan', // Ini adalah 'Klien'
-        'status',         // Relasi: 'statuses.name'
-        'line',           // Relasi: 'task_pekerjaans.nama_pekerjaan'
-        'deadline'        // Relasi: 'task_pekerjaans.deadline'
+        'nama_pelanggan', 
+        'status',         
+        'line',          
+        'deadline'        
     ];
 
-    // 2. Ambil parameter 'sort' & 'order' dari URL
-    //    Default: urutkan berdasarkan 'created_at' (terlama)
+
     $sortColumn = $request->query('sort', 'created_at');
     $sortOrder = $request->query('order', 'asc');
 
-    // 3. Keamanan: Jika user mencoba sort kolom aneh, kembalikan ke default
     if (!in_array($sortColumn, $allowedSorts) && $sortColumn != 'created_at') {
         $sortColumn = 'created_at';
     }
@@ -51,43 +50,47 @@ class TaskController extends Controller
         $sortOrder = 'asc';
     }
 
-    // 4. Mulai Kueri
     $query = Task::with('user', 'status', 'mockups', 'taskPekerjaans.checklists')
                  ->select('tasks.*')
                  ->where('is_archived', false); 
                  
 
-    // 5. Terapkan Sorting (JOIN jika perlu)
     if ($sortColumn == 'status') {
-        // --- Sort berdasarkan Nama Status ---
         $query->join('statuses', 'tasks.status_id', '=', 'statuses.id')
               ->orderBy('statuses.name', $sortOrder);
               
-    } elseif ($sortColumn == 'line' || $sortColumn == 'deadline') {
-        // --- Sort berdasarkan Line Pekerjaan atau Deadline ---
-        // Map 'line' (logis) ke 'nama_pekerjaan' (database)
-        $realSortColumn = ($sortColumn == 'line') ? 'nama_pekerjaan' : 'deadline';
+            } elseif ($sortColumn == 'line') {
+                $query->join('task_pekerjaans', 'tasks.id', '=', 'task_pekerjaans.task_id')
+                      ->orderBy('task_pekerjaans.nama_pekerjaan', $sortOrder);
         
-        $query->join('task_pekerjaans', 'tasks.id', '=', 'task_pekerjaans.task_id')
-              ->orderBy('task_pekerjaans.' . $realSortColumn, $sortOrder);
-              
-    } else {
-        // --- Sort berdasarkan kolom di tabel 'tasks' (no_invoice, judul, nama_pelanggan, dll) ---
-        $query->orderBy($sortColumn, $sortOrder);
-    }
+            } elseif ($sortColumn == 'deadline') {
+                
+                $query->join('task_pekerjaans', 'tasks.id', '=', 'task_pekerjaans.task_id')
+                      ->join('statuses', 'tasks.status_id', '=', 'statuses.id');
+        
+           
+                
+                if ($sortOrder == 'asc') {
+                    $query->orderByRaw("CASE WHEN statuses.name = 'Done and Ready' THEN 1 ELSE 0 END ASC");
+                    $query->orderBy('task_pekerjaans.deadline', 'asc');
+                } else {
+                   
+                    $query->orderByRaw("CASE WHEN statuses.name = 'Done and Ready' THEN 1 ELSE 0 END DESC");
+                    $query->orderBy('task_pekerjaans.deadline', 'desc');
+                }
+            } else {
+                $query->orderBy($sortColumn, $sortOrder);
+            }
     
-    // 6. Eksekusi Kueri
-    $tasks = $query->get();
+  $tasks = $query->get();
     
-    // 7. Ambil ID highlight (Anda sudah punya ini)
     $highlightId = $request->query('highlight');
 
-    // 8. Kirim semua data ke view
     return view('task-sb', [
         'tasks' => $tasks,
         'highlightId' => $highlightId ?? null,
-        'currentSort' => $sortColumn,   // Kirim info sort saat ini
-        'currentOrder' => $sortOrder, // Kirim info order saat ini
+        'currentSort' => $sortColumn,   
+        'currentOrder' => $sortOrder, 
     ]);
 }
 
@@ -188,14 +191,42 @@ public function store(Request $request)
                     $task->mockups()->createMany($mockupPaths);
                 }
                 
+                
                 $createdTasks[] = Task::with('user', 'status', 'mockups', 'taskPekerjaans.checklists')->find($task->id);
             }
 
             // Notifikasi
             $usersToNotify = User::where('id', '!=', auth()->id())->get();
+        
             if (count($createdTasks) > 0) {
-                Notification::send($usersToNotify, new TaskCreated($createdTasks[0], auth()->user()));
+                $firstTask = $createdTasks[0]; // Ambil task pertama sebagai referensi
+    
+                Notification::send($usersToNotify, new TaskCreated($firstTask, auth()->user()));
+    
+                foreach ($usersToNotify as $targetUser) {
+                
+                    // Siapkan Data Lengkap untuk JS
+                    $notifData = [
+                        'message'          => auth()->user()->name . " membuat task baru: " . Str::limit($firstTask->judul, 20),
+                        'url'              => route('task', ['highlight' => $firstTask->id]),
+                        'creator_initials' => auth()->user()->initials,    
+                        'creator_color'    => auth()->user()->avatar_color, 
+                        'first_mockup_url' => $firstTask->mockups->first() ? Storage::url($firstTask->mockups->first()->file_path) : null,
+                        'time'             => 'Baru saja',
+                        'creator_name'     => Auth::user()->name,
+                        'task_title'       => $task->judul,
+                        'comment_body'     => null,
+
+                        'type'             => 'new_task',    
+                        'task_id'          => $firstTask->id,
+                    ];
+                    
+                    // Kirim Data Array
+                    event(new NewNotification($notifData, $targetUser->id));
+                }
             }
+
+            
 
             DB::commit();
             
@@ -210,12 +241,14 @@ public function store(Request $request)
             return response()->json(['success' => false, 'message' => 'Gagal menyimpan task: ' . $e->getMessage()], 500);
         }
     }
+
     
-    public function markNotificationsAsRead()
+    
+    public function markNotificationsAsRead(Request $request)
     {
         Auth::user()->unreadNotifications->markAsRead();
         
-        return back()->with('success', 'Semua notifikasi telah ditandai dibaca.');
+        return response()->json(['success' => true]);
     }
 
 public function showPrintPage($id) 
@@ -308,13 +341,14 @@ public function updateChecklistStatus(Request $request, $id)
     public function show($id)
     {
         // 1. Temukan task utama yang diklik
-        $mainTask = Task::findOrFail($id);
+        $mainTask = Task::withTrashed()->findOrFail($id);
 
         // 2. Dapatkan No. PO-nya
         $noPo = $mainTask->no_invoice;
 
         // 3. Ambil SEMUA task (termasuk dirinya sendiri) yang punya No. PO yang sama
-        $allTasksInGroup = Task::with('user', 'status', 'taskPekerjaans.checklists', 'mockups', 'taskSizes')
+        $allTasksInGroup = Task::withTrashed()
+                            ->with('user', 'status', 'taskPekerjaans.checklists', 'mockups', 'taskSizes')
                             ->where('no_invoice', $noPo)
                             ->orderBy('created_at', 'asc') // Urutkan berdasarkan line
                             ->get();
@@ -349,7 +383,8 @@ public function updateChecklistStatus(Request $request, $id)
         ]);
     }
 
-    public function storeComment(Request $request, $task_id)
+
+public function storeComment(Request $request, $task_id)
     {
         $request->validate(['body' => 'required|string']);
 
@@ -365,6 +400,23 @@ public function updateChecklistStatus(Request $request, $id)
         $usersToNotify = User::where('id', '!=', Auth::id())->get();
         Notification::send($usersToNotify, new CommentAdded($comment));
 
+        foreach ($usersToNotify as $targetUser) {
+            
+            $notifData = [
+                'message'          => Auth::user()->name . " mengomentari: " . Str::limit($task->judul, 20),
+                'url'              => route('task.show', $task->id) . '#content-activity',
+                'creator_initials' => Auth::user()->initials,
+                'creator_color'    => Auth::user()->avatar_color,
+                'first_mockup_url' => $task->mockups->first() ? Storage::url($task->mockups->first()->file_path) : null,
+                'time'             => 'Baru saja',
+                'creator_name'     => Auth::user()->name,
+                'task_title'       => $task->judul,
+                'comment_body'     => $comment->body
+            ];
+
+            event(new NewNotification($notifData, $targetUser->id));
+        }
+
         return response()->json(['success' => true, 'comment' => $comment]);
     }
     
@@ -378,9 +430,7 @@ public function updateChecklistStatus(Request $request, $id)
             return response()->json(['success' => false, 'message' => 'Task not found.'], 404);
         }
     
-        // ▼▼▼ PERBAIKAN: Definisikan variabel ini dulu ▼▼▼
         $newStatusName = $request->status_name; 
-        // ▲▲▲ ▲▲▲ ▲▲▲
     
         // 2. Cari ID status baru
         $newStatus = Status::where('name', $newStatusName)->first();
@@ -391,9 +441,11 @@ public function updateChecklistStatus(Request $request, $id)
         // 3. Update status_id
         $task->status_id = $newStatus->id;
     
-        if ($newStatusName == 'Done and Ready') {
+        if ($newStatusName == 'Done and Ready' || $newStatusName == 'Delivered') {
             $task->completed_at = now();
-        } else if ($newStatusName != 'Hold') { 
+        } 
+        // Jika status lain (Hold/In Progress/Needs Work), reset waktu selesai
+        else if ($newStatusName != 'Hold') { 
             $task->completed_at = null; 
         }
         
@@ -722,20 +774,23 @@ public function updateChecklistStatus(Request $request, $id)
             return response()->json(['success' => true, 'message' => 'Task berhasil dipulihkan dari arsip.']);
         
         } elseif ($action == 'delete_permanent_all') {
-            // Hapus Permanen (Termasuk File Mockup)
-            
-            // Ambil data task dulu untuk hapus file fisiknya
-            $tasks = Task::whereIn('id', $taskIds)->with('mockups')->get();
+        
+            $tasks = Task::onlyTrashed()->with('mockups')->whereIn('id', $taskIds)->get();
             
             foreach ($tasks as $task) {
-                // Hapus file fisik mockup dari storage
                 foreach ($task->mockups as $mockup) {
                     Storage::disk('public')->delete($mockup->file_path);
                 }
-                // Hapus permanen dari database
+    
+           
+                DB::table('notifications')
+                    ->whereJsonContains('data->task_id', $task->id)
+                    ->delete();
+    
                 $task->forceDelete();
             }
-            return response()->json(['success' => true, 'message' => 'Task berhasil dihapus permanen.']);
+            
+            return response()->json(['success' => true, 'message' => 'Task terkait berhasil dihapus permanen.']);
         }
 
         return response()->json(['success' => false, 'message' => 'Aksi tidak valid.'], 400);
@@ -750,12 +805,14 @@ public function updateChecklistStatus(Request $request, $id)
         return response()->json(['success' => true, 'message' => 'Task berhasil dipulihkan.']);
     }
 
+
+
     public function trashBulkAction(Request $request)
     {
         $request->validate([
             'action' => 'required|string|in:restore_all,delete_permanent_all',
             'task_ids' => 'required|array',
-            'task_ids.*' => 'integer' // Validasi bahwa semua item adalah angka
+            'task_ids.*' => 'integer'
         ]);
 
         $taskIds = $request->input('task_ids');
@@ -771,20 +828,23 @@ public function updateChecklistStatus(Request $request, $id)
         } elseif ($action == 'delete_permanent_all') {
             
             // 2. Hapus Permanen (Force Delete)
-            
-            // Ambil task-nya dulu untuk menghapus file mockup
             $tasks = Task::onlyTrashed()->with('mockups')->whereIn('id', $taskIds)->get();
             
             foreach ($tasks as $task) {
-                // Hapus file fisik dari storage
+                // A. Hapus file fisik dari storage
                 foreach ($task->mockups as $mockup) {
                     Storage::disk('public')->delete($mockup->file_path);
                 }
-                // Hapus permanen dari database
+
+                DB::table('notifications')
+                    ->whereJsonContains('data->task_id', $task->id)
+                    ->delete();
+
+                // C. Hapus permanen dari database
                 $task->forceDelete();
             }
             
-            return response()->json(['success' => true, 'message' => 'Task berhasil dihapus permanen.']);
+            return response()->json(['success' => true, 'message' => 'Task dan notifikasi terkait berhasil dihapus permanen.']);
         }
 
         return response()->json(['success' => false, 'message' => 'Aksi tidak valid.'], 400);
@@ -798,5 +858,33 @@ public function updateChecklistStatus(Request $request, $id)
         $task->save();
 
         return response()->json(['success' => true, 'message' => 'Task berhasil dipulihkan dari arsip.']);
+    }
+    
+    public function clearNotifications()
+    {
+        Auth::user()->notifications()->delete();
+        
+        return response()->json(['success' => true, 'message' => 'Semua notifikasi dihapus.']);
+    }
+
+    public function getTaskRowHtml($id)
+    {
+        $task = Task::with('user', 'status', 'mockups', 'taskPekerjaans.checklists')->findOrFail($id);
+        
+        $html = view('partials.task-row', ['task' => $task])->render();
+        
+        return response()->json(['html' => $html]);
+    }
+
+    public function updateBahan(Request $request, $id)
+    {
+        $task = Task::findOrFail($id);
+        
+        $task->update([
+            'bahan_terpakai' => $request->bahan_terpakai,
+            'bahan_reject'   => $request->bahan_reject
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Data bahan disimpan.']);
     }
 }

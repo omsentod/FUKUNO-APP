@@ -50,7 +50,9 @@
         @php
             $linePekerjaan = $task->taskPekerjaans->first();
         @endphp
-        <tr>
+        <tr class="clickable-row" 
+        data-url="{{ route('task.show', $task->id) }}" 
+        style="cursor: pointer;">
           <td class="select-col"><input type="checkbox" class="row-select" data-id="{{ $task->id }}"></td>
           <td>{{ $task->no_invoice }}</td>
           <td>{{ $task->judul }}</td>

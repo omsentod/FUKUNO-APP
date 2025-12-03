@@ -7,9 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+
     public function up(): void
     {
         // 2. Membuat Struktur Tabel
@@ -19,8 +17,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 3. LANGSUNG ISI DATA DI SINI
-        // Kita pakai DB::table karena Model mungkin belum siap saat migrasi jalan
         DB::table('statuses')->insert([
             [
                 'name' => 'Needs Work', 
@@ -42,12 +38,16 @@ return new class extends Migration
                 'created_at' => now(), 
                 'updated_at' => now()
             ],
+
+            [
+                'name' => 'Delivered', 
+                'created_at' => now(), 
+                'updated_at' => now()
+            ],
         ]);
     }
 
-    /**
-     * Reverse the migrations.
-     */
+
     public function down(): void
     {
         Schema::dropIfExists('statuses');

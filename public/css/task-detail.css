@@ -269,14 +269,20 @@ body{
 
 .progress-bar-container {
   background: #eaeaea;
-  height: 20px; /* Tentukan tinggi yang konsisten */
-  width: 100%; /* Gunakan 100% agar responsif */
+  height: 20px; 
+  width: 100%; 
   border-radius: 10px;
   position: relative; 
   overflow: hidden;
   
   display: flex;
+  flex-direction: row;
   align-items: center;
+}
+.reject-bar{
+  background: #eaeaea;
+  height: 20px; 
+  width: 100%;
 }
 
 /* 2. Bar Isian (Lapisan Bawah) */
@@ -404,3 +410,16 @@ body{
   justify-content: center;
   cursor: pointer;
 }
+
+
+.comment-bubble.highlight-target {
+  animation: highlight-fade 3s ease-in-out;
+  border: 2px solid #ffc107; /* Border kuning */
+}
+
+@keyframes highlight-fade {
+  0% { background-color: #fff3cd; transform: scale(1.02); }
+  50% { background-color: #ffeeba; transform: scale(1.02); }
+  100% { background-color: transparent; transform: scale(1); }
+}
+

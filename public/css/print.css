@@ -35,12 +35,15 @@ body {
 
 /* Kontainer Utama PO (Saat dibuka di tab baru) */
 .po-container {
-    max-width: 1000px;
-    margin: 20px auto;
-    padding: 30px 40px;
+    width: 290mm;
+    min-height: 320mm;
+    margin: 30px auto;
+    padding: 8mm;
+    min-height: 297mm;
     background-color: #ffffff;
     border: 1px solid #dcdcdc;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
 }
 
 /* Header */
@@ -70,7 +73,7 @@ header h2 {
 }
 .po-details th,
 .po-details td {
-    padding: 10px 12px;
+    padding: 5px;
     text-align: left;
     border: 1px solid #e0e0e0;
     font-size: 14px;
@@ -91,11 +94,14 @@ header h2 {
 
 /* Kolom Kiri */
 .product-info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
     flex: 1;
 }
 .product-image {
-    width: 100%; /* Ubah dari 500px agar responsif */
-    height: auto;
+    width: 50%; 
+    height: 50%;
     border: 1px solid #e0e0e0;
     border-radius: 4px;
 }
@@ -171,34 +177,41 @@ header h2 {
     font-weight: 700;
 }
 
-/* Footer (Tanda Tangan) */
+
 footer {
-    margin-top: 60px;
-    padding-top: 20px;
-    display: flex;
-    justify-content: space-around;
-    text-align: center;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding-bottom: 15mm;
+    margin-top: 20vh;
 }
+
 .signature-box {
-    margin-top: 30px;
     display: flex;
-    justify-content: space-around;
-    text-align: center;
-    padding: 100px 30px 20px;
-    font-weight: var(--font-semibold);
-    border-width: 2px;
-    font-size: 12px;
+    justify-content: space-between;
+    padding: 0 20mm;
+    margin-top: 10px; 
+    width: 100%;
+    /* margin-bottom: 10px;  */
+    box-sizing: border-box;
+}
+
+.sign-wrapper {
+    width: 40%; 
+    max-width: 200px; 
     text-align: center;
 }
 
-.signature-box p{
-    white-space: nowrap; 
-    margin: 0 100px 0 0;
-}
-.sign {
+.sign-title {
+    font-weight: bold;
+    font-size: 12px;
+    text-transform: uppercase;
+    
     border-top: 2px solid #000; 
-    padding-top: 5px; 
-    width: 150px;
+    padding-top: 5px;
+    
+    margin-top: 60px; 
+    margin-bottom: 0;
 }
 
 /* KOLASE MOCKUP */
@@ -206,8 +219,8 @@ footer {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 5px; 
-    width: 400px;
-    max-height: 400px; 
+    width: 300px;
+    max-height: 300px; 
     
     border: 1px solid #eee;
     padding: 5px;
@@ -225,8 +238,8 @@ footer {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 80%;
+    height: 80%;
     object-fit: contain; 
 }
 
@@ -250,7 +263,7 @@ footer {
     /* Mengatur halaman cetak menjadi A4 dan memberi margin */
     @page {
         size: A4;
-        margin: 15mm; /* 1.5cm margin di semua sisi */
+        margin: 15mm 15mm 0 15mm; /* 1.5cm margin di semua sisi */
     }
 
     /* Menghilangkan gaya web-only */
@@ -266,7 +279,7 @@ footer {
     /* Memaksa kontainer agar pas dengan area cetak */
     .po-container {
         width: 100%;
-        max-width: none; /* Menghapus batas 1000px */
+        max-width: none; 
         margin: 0;
         padding: 0;
         border: none;
@@ -284,9 +297,12 @@ footer {
         page-break-inside: avoid;
     }
     
-    /* Mencegah footer terpotong */
     footer {
-        page-break-before: auto; /* Pindah ke halaman baru jika perlu */
-        page-break-inside: avoid;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        margin-top: 10vh;
+        page-break-before: auto; 
+        /* page-break-inside: avoid; */
     }
 }
