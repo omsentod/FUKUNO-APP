@@ -107,3 +107,4 @@ Route::middleware(['auth', 'admin'])->group(function() {
     Route::delete('/status/delete/{id}', [StatusController::class, 'destroy'])->name('status.destroy');
 
 });
+
