@@ -63,7 +63,7 @@
           <td>{{ $task->nama_pelanggan }}</td>
           <td> 
             <div class="action-icons"> <i class="bi bi-arrow-counterclockwise" title="Restore" data-id="{{ $task->id }}"></i>
-            <i class="bi bi-file-earmark-text" title="Detail" data-id="{{ $task->id }}"></i>
+            {{-- <i class="bi bi-file-earmark-text" title="Detail" data-id="{{ $task->id }}"></i> --}}
             <i class="bi bi-trash-fill" title="Delete" data-id="{{ $task->id }}"></i>
           </div>
           </td>
