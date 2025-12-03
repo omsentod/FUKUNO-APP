@@ -3,7 +3,11 @@ window.addEventListener('load', function() {
   if (preloader) {
       preloader.classList.add('loaded');
   }
+  
 });
+window.addEventListener('load', hidePreloader);
+
+setTimeout(hidePreloader, 3000);
 
 
 document.addEventListener('DOMContentLoaded', function () {
