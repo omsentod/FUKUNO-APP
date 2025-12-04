@@ -569,7 +569,7 @@ body.sidebar-closed .sidebar-toggle i {
       }
 
 
-      .status-btn.dropdown-toggle {
+      .status-btn{
         border: none;
         color: var(--ctn-color);
         padding: 5px 10px;
