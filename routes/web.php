@@ -67,6 +67,7 @@ Route::middleware(['auth', 'admin'])->group(function() {
     Route::post('/task/update/{id}', [TaskController::class, 'update'])->name('task.update');
     Route::get('/task/edit/{id}', [TaskController::class, 'edit'])->name('task.edit');
     Route::delete('/task/delete/{id}', [TaskController::class, 'destroy'])->name('task.destroy');
+    Route::get('/task/export', [TaskController::class, 'exportExcel'])->name('task.export');
     
     // --- ARCHIVE & TRASH ---
     Route::get('/archive', [TaskController::class, 'showArchive'])->name('archive');

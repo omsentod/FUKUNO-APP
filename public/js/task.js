@@ -1801,6 +1801,7 @@ const searchInput = document.getElementById("taskSearchInput");
   const bulkSelectCount = document.getElementById('bulkSelectCount');
   const bulkArchiveBtn = document.getElementById('bulkArchiveBtn');
   const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+  const bulkExportBtn = document.getElementById('bulkExportBtn');
 
 /**
    * Helper untuk update tampilan bar aksi massal
@@ -1922,6 +1923,23 @@ const searchInput = document.getElementById("taskSearchInput");
           }
       });
   }
+
+  // Listener untuk tombol "Excel (import)"
+  if (bulkExportBtn) {
+    bulkExportBtn.addEventListener('click', () => {
+        const selectedIds = Array.from(document.querySelectorAll('.row-checkbox:checked'))
+                                 .map(cb => cb.dataset.id);
+        
+        if (selectedIds.length === 0) {
+            alert('Pilih minimal satu task untuk diexport!');
+            return;
+        }
+
+
+        const url = `/task/export?ids=${selectedIds.join(',')}`;
+        window.location.href = url;
+    });
+}
   
 
 // 3. Listener untuk KLIK (click) - GABUNGAN SEMUA DELEGASI

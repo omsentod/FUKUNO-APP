@@ -20,6 +20,8 @@ use App\Notifications\CommentAdded;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification; 
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\TasksExport;
 
 
 class TaskController extends Controller
@@ -911,6 +913,7 @@ public function storeComment(Request $request, $task_id)
         
         return response()->json(['html' => $html]);
     }
+    
 
     public function updateBahan(Request $request, $id)
     {
@@ -922,5 +925,21 @@ public function storeComment(Request $request, $task_id)
         ]);
 
         return response()->json(['success' => true, 'message' => 'Data bahan disimpan.']);
+    }
+
+
+    public function exportExcel(Request $request)
+    {
+        // Ambil ID dari query string ?ids=1,2,3
+        $idsString = $request->query('ids');
+        
+        if (!$idsString) {
+            return back()->with('error', 'Tidak ada task dipilih.');
+        }
+
+        $taskIds = explode(',', $idsString);
+
+        // Download file excel dengan nama tasks_export_(tanggal).xlsx
+        return Excel::download(new TasksExport($taskIds), 'tasks_export_' . date('Y-m-d_H-i') . '.xlsx');
     }
 }
