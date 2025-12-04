@@ -252,22 +252,53 @@ public function store(Request $request)
         return response()->json(['success' => true]);
     }
 
-public function showPrintPage($id) 
-{
-    $task = Task::with('user', 'taskPekerjaans.checklists', 'mockups', 'taskSizes')
-                ->findOrFail($id); 
+    public function showPrintPage($id) 
+    {
+        $task = Task::with('user', 'taskPekerjaans.checklists', 'mockups', 'taskSizes')
+                    ->findOrFail($id); 
 
+        $allTasks = Task::with('taskPekerjaans')
+                        ->where('no_invoice', $task->no_invoice)
+                        ->get();
 
-    $tipeHeaders = $task->taskSizes->pluck('tipe')->unique();
-    
-    $jenisRows = $task->taskSizes->groupBy('jenis');
+        $projectFinishDate = $allTasks->flatMap->taskPekerjaans->max('deadline');
 
-    return view('download-task', [
-        'task' => $task,
-        'tipeHeaders' => $tipeHeaders,
-        'jenisRows' => $jenisRows
-    ]);
-}
+       
+        $lineList = $allTasks->map(function($t) {
+            $line = $t->taskPekerjaans->first();
+            return (object) [
+                'name' => $line ? $line->nama_pekerjaan : 'N/A',
+                'date' => $line && $line->deadline ? \Carbon\Carbon::parse($line->deadline)->format('d-M') : '-'
+            ];
+        });
+
+        $tipeHeaders = $task->taskSizes->pluck('tipe')->unique();
+        $jenisRows = $task->taskSizes->groupBy('jenis');
+
+        return view('download-task', [
+            'task' => $task,
+            'tipeHeaders' => $tipeHeaders,
+            'jenisRows' => $jenisRows,
+            'projectFinishDate' => $projectFinishDate, 
+            'lineList' => $lineList 
+        ]);
+
+        // $lineListString = $allTasks->flatMap->taskPekerjaans
+        //                            ->pluck('nama_pekerjaan')
+        //                            ->unique()
+        //                            ->implode(', ');
+
+        // $tipeHeaders = $task->taskSizes->pluck('tipe')->unique();
+        // $jenisRows = $task->taskSizes->groupBy('jenis');
+
+        // return view('download-task', [
+        //     'task' => $task,
+        //     'tipeHeaders' => $tipeHeaders,
+        //     'jenisRows' => $jenisRows,
+        //     'projectFinishDate' => $projectFinishDate,
+        //     'lineListString' => $lineListString 
+        // ]);
+    }
 
 
     public static function buatInisial($nama)

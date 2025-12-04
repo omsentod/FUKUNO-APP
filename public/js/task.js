@@ -1298,6 +1298,21 @@ function showValidationErrors(popup, errors) {
       </div>
     `;
     lineContainer.appendChild(lineDiv);
+    updateLineNumbers();
+}
+
+function updateLineNumbers() {
+    const container = document.querySelector("#lineContainer");
+    if (!container) return;
+    
+    const lines = container.querySelectorAll(".border");
+    
+    lines.forEach((line, index) => {
+        const title = line.querySelector(".line-title");
+        if (title) {
+            title.textContent = `Line ${index + 1}`;
+        }
+    });
 }
 
 

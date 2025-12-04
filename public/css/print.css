@@ -44,6 +44,8 @@ body {
     border: 1px solid #dcdcdc;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Header */
@@ -178,39 +180,32 @@ header h2 {
 }
 
 
-footer {
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    padding-bottom: 15mm;
-    margin-top: 20vh;
-}
 
-.signature-box {
+.signature-area-left {
+    margin-top: 50px; /* Jarak dari gambar di atasnya */
     display: flex;
-    justify-content: space-between;
-    padding: 0 20mm;
-    margin-top: 10px; 
+    justify-content: space-between; /* Head di kiri, Vendor di kanan */
+    gap: 20px; /* Jarak antar tanda tangan */
     width: 100%;
-    /* margin-bottom: 10px;  */
-    box-sizing: border-box;
 }
 
+/* Style Per Item Tanda Tangan */
 .sign-wrapper {
-    width: 40%; 
-    max-width: 200px; 
+    flex: 1; /* Bagi ruang sama rata */
     text-align: center;
 }
 
 .sign-title {
     font-weight: bold;
-    font-size: 12px;
+    font-size: 11px; /* Sedikit dikecilkan agar muat di kolom */
     text-transform: uppercase;
     
+    /* Garis di atas nama */
     border-top: 2px solid #000; 
     padding-top: 5px;
     
-    margin-top: 60px; 
+    /* Ruang untuk paraf */
+    margin-top: 80px; 
     margin-bottom: 0;
 }
 
@@ -298,11 +293,11 @@ footer {
     }
     
     footer {
-        position: absolute;
-        bottom: 0;
-        left: 0;
+        width: 100%;
+        padding: 0; 
+        box-sizing: border-box;
         margin-top: 10vh;
         page-break-before: auto; 
-        /* page-break-inside: avoid; */
+        page-break-inside: avoid;
     }
 }

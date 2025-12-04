@@ -23,21 +23,39 @@
                 </tr>
                 <tr>
                     <th>KLIEN</th>
-                    <td>{{ $task->nama_pelanggan }}</td> @php
-                        $linePekerjaan = $task->taskPekerjaans->first();
-                    @endphp
-
+                    <td>{{ $task->nama_pelanggan }}</td>
+                    
                     <th>TANGGAL SELESAI</th>
-                    <td>{{ $linePekerjaan && $linePekerjaan->deadline ? \Carbon\Carbon::parse($linePekerjaan->deadline)->format('j-M-Y') : '-' }}</td>
+                    <td>
+                        {{ $projectFinishDate ? \Carbon\Carbon::parse($projectFinishDate)->format('j-M-Y') : '-' }}
+                    </td>
                 </tr>
                 <tr>
-                    <th>MODEL</th>
-                    <td colspan="3">{{ $task->model }}</td>
+                    <th>ARTICLE / MODEL</th>
+                    <td colspan="3">{{ $task->judul }} / {{ $task->model }}</td>
                 </tr>
+                
                 <tr>
                     <th>LINE PEKERJAAN</th>
-                    <td colspan="3">{{ $linePekerjaan ? $linePekerjaan->nama_pekerjaan : 'N/A' }}</td>
+                    <td colspan="3" style="padding: 5px 10px;">
+                        <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                            @foreach($lineList as $item)
+                                <span style="background: #eee; padding: 2px 8px; border-radius: 4px; font-size: 13px; border: 1px solid #ddd;">
+                                    <b>{{ $item->name }}</b> 
+                                    <span style="color: #000; font-size: 12px;">({{ $item->date }})</span>
+                                </span>
+                            @endforeach
+                        </div>
+                    </td>
                 </tr>
+
+                {{-- <tr>
+                    <th>LINE PEKERJAAN</th>
+                    <td colspan="3" style="text-transform: capitalize;">
+                        {{ $lineListString ?: 'N/A' }}
+                    </td>
+                </tr> --}}
+
             </tbody>
         </table>
 
@@ -70,7 +88,17 @@
                         <img src="{{ Storage::url($mockup->file_path) }}" alt="Mockup Gambar">
                     </div>
                 @endforeach
-          
+            </div>
+
+                <div class="signature-area-left">
+                    <div class="sign-wrapper">
+                        <p class="sign-title">HEAD PRODUCTION</p>
+                    </div>
+                    <div class="sign-wrapper">
+                        <p class="sign-title">VENDOR</p>
+                    </div>
+                </div>
+
             </section>
             
             <section class="order-details">
@@ -128,16 +156,7 @@
                 </div>
             </section>
         </main>
-        <footer>
-            <div class="signature-box">
-                <div class="sign-wrapper">
-                    <p class="sign-title">HEAD PRODUCTION</p>
-                </div>
-                <div class="sign-wrapper">
-                    <p class="sign-title">ADMIN</p>
-                </div>
-            </div>
-        </footer>
+
     </div>
 
 
