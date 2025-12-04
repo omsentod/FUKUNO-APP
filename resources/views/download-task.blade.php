@@ -31,8 +31,8 @@
                     <td>{{ $linePekerjaan && $linePekerjaan->deadline ? \Carbon\Carbon::parse($linePekerjaan->deadline)->format('j-M-Y') : '-' }}</td>
                 </tr>
                 <tr>
-                    <th>ARTICLE / MODEL</th>
-                    <td colspan="3">{{ $task->judul }} / {{ $task->model }}</td>
+                    <th>MODEL</th>
+                    <td colspan="3">{{ $task->model }}</td>
                 </tr>
                 <tr>
                     <th>LINE PEKERJAAN</th>
@@ -134,7 +134,7 @@
                     <p class="sign-title">HEAD PRODUCTION</p>
                 </div>
                 <div class="sign-wrapper">
-                    <p class="sign-title">VENDOR</p>
+                    <p class="sign-title">ADMIN</p>
                 </div>
             </div>
         </footer>

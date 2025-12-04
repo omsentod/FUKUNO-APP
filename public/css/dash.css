@@ -600,6 +600,11 @@ body.sidebar-closed .sidebar-toggle i {
         color: var(--ctn-color) !important;
     }
 
+    .status-delivered {
+      background-color: #17a2b8; /* Warna Cyan */
+      color: white;
+  }
+
     
 
       .dldata-table {
