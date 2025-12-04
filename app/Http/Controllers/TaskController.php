@@ -106,7 +106,7 @@ public function store(Request $request)
             'jumlah' => 'required|integer',
             'lines' => 'required|json',
             'sizes' => 'nullable|json',
-            'mockups.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+            'mockups.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120'
         ]);
         
 
@@ -142,6 +142,7 @@ public function store(Request $request)
                 $task->catatan = $taskData['catatan'] ?? null;
                 $task->user_id = auth()->id();
                 $task->urgensi = $taskData['urgensi'];
+                $task->size_title = $sizeData['size_title'] ?? 'Size';
                 $task->total_jumlah = $taskData['jumlah'];
                 $task->warna = $taskData['warna'] ?? null;
                 $task->model = $taskData['model'] ?? null;
@@ -347,11 +348,14 @@ public function updateChecklistStatus(Request $request, $id)
         $noPo = $mainTask->no_invoice;
 
         // 3. Ambil SEMUA task (termasuk dirinya sendiri) yang punya No. PO yang sama
-        $allTasksInGroup = Task::withTrashed()
-                            ->with('user', 'status', 'taskPekerjaans.checklists', 'mockups', 'taskSizes')
-                            ->where('no_invoice', $noPo)
-                            ->orderBy('created_at', 'asc') // Urutkan berdasarkan line
-                            ->get();
+        $query = Task::with('user', 'status', 'taskPekerjaans.checklists', 'mockups', 'taskSizes')
+                     ->where('no_invoice', $noPo)
+                     ->orderBy('created_at', 'asc');
+
+        if ($mainTask->trashed()) {
+            $query->withTrashed();
+        }
+        $allTasksInGroup = $query->get();
 
         // 4. Ambil ID dari semua task di grup ini
         $allTaskIds = $allTasksInGroup->pluck('id');
@@ -506,7 +510,7 @@ public function storeComment(Request $request, $task_id)
             'namaPelanggan' => 'required|string|max:255',
             'lines' => 'required|json',
             'sizes' => 'nullable|json',
-            'mockups.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'mockups.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'existing_mockup_urls' => 'nullable|json',
             'mockups_to_delete' => 'nullable|json'
         ]);
@@ -581,6 +585,7 @@ public function storeComment(Request $request, $task_id)
                 $task->warna = $request->input('warna') ?? null;
                 $task->model = $request->input('model') ?? null;
                 $task->bahan = $request->input('bahan') ?? null;
+                $task->size_title = $sizeData['size_title'] ?? 'Size';
                 $task->save(); 
 
                 // --- UPDATE RELASI (Reset isi, pertahankan Task ID) ---

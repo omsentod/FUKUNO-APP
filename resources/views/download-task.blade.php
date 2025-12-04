@@ -80,7 +80,7 @@
                     <table class="size-table">
                         <thead class="table-danger">
                             <tr>
-                                <th>SIZES</th>
+                                <th>{{ $task->size_title ?? 'Size' }}</th>
                                 @foreach($tipeHeaders as $tipe)
                                     <th>{{ strtoupper($tipe) }}</th>
                                 @endforeach

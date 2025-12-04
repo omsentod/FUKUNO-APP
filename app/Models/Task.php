@@ -27,6 +27,7 @@ class Task extends Model
         'warna',
         'model',
         'bahan',
+        'size_title',
         'bahan_terpakai',
         'bahan_reject',
     ];

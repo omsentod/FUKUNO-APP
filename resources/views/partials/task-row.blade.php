@@ -36,45 +36,50 @@
 
     <td>{{ $task->urgensi }}</td>
     
-    {{-- Kolom Status --}}
-    <td>
-        <div class="dropdown">
-            <button class="status-btn status-{{ Str::slug($task->status->name) }} dropdown-toggle" 
-                    type="button" 
-                    id="statusDropdown{{ $task->id }}" 
-                    data-task-id="{{ $task->id }}" 
-                    data-bs-toggle="dropdown" 
-                    aria-expanded="false" 
-                    {{ Auth::user()->role != 'admin' ? 'disabled' : '' }}>
-                <span class="status-text">{{ $task->status->name }}</span>
-            </button>
-            
-            <div class="dropdown-menu" aria-labelledby="statusDropdown{{ $task->id }}">
-                
-                {{-- 1. MENU RESUME (Muncul jika status Hold ATAU Delivered) --}}
-                @if($task->status->name == 'Hold' || $task->status->name == 'Delivered')
-                    <a class="dropdown-item" href="#" data-status="Resume Progress">
-                        <i class="bi bi-play-circle"></i> Resume Progress
-                    </a>
+   {{-- Kolom Status --}}
+   <td>
+    @php
+        // Logika Tampilan Status Dinamis
+        $currentStatus = $task->status->name;
+        $statusSlug = Str::slug($currentStatus);
+
+        // JIKA 100% DAN BUKAN DELIVERED -> PAKSA TAMPILAN 'DONE AND READY'
+        if ($percentage == 100 && $currentStatus != 'Delivered') {
+            $currentStatus = 'Done and Ready';
+            $statusSlug = 'done-and-ready';
+        }
+    @endphp
+
+    <div class="dropdown">
+        {{-- Gunakan variabel $statusSlug dan $currentStatus yang baru --}}
+        <button class="status-btn status-{{ $statusSlug }} dropdown-toggle" 
+                type="button" 
+                id="statusDropdown{{ $task->id }}" 
+                data-task-id="{{ $task->id }}" 
+                data-bs-toggle="dropdown" 
+                aria-expanded="false">
+            <span class="status-text">{{ $currentStatus }}</span>
+        </button>
+        
+        <div class="dropdown-menu" aria-labelledby="statusDropdown{{ $task->id }}">
+            @if(Auth::user()->role == 'admin')
+                @if($currentStatus == 'Hold' || $currentStatus == 'Delivered')
+                    <a class="dropdown-item" href="#" data-status="Resume Progress"><i class="bi bi-play-circle"></i> Resume Progress</a>
                 @endif
 
-                {{-- 2. MENU HOLD (Muncul jika status BUKAN Hold) --}}
-                @if($task->status->name != 'Hold')
-                    <a class="dropdown-item" href="#" data-status="Hold">
-                        <i class="bi bi-pause-circle"></i> Set to Hold
-                    </a>
+                @if($currentStatus != 'Hold')
+                    <a class="dropdown-item" href="#" data-status="Hold"><i class="bi bi-pause-circle"></i> Set to Hold</a>
                 @endif
+            @endif
 
-                {{-- 3. MENU DELIVERED (Muncul jika status BUKAN Delivered) --}}
-                @if($task->status->name != 'Delivered')
-                    <a class="dropdown-item" href="#" data-status="Delivered">
-                        <i class="bi bi-truck"></i> Set to Delivered
-                    </a>
-                @endif
-
-            </div>
+            @if($currentStatus != 'Delivered')
+                <a class="dropdown-item" href="#" data-status="Delivered">
+                    <i class="bi bi-check-circle"></i> Set to Delivered
+                </a>
+            @endif
         </div>
-    </td>
+    </div>
+</td>
 
     {{-- Kolom Time Left --}}
     <td>

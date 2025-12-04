@@ -85,7 +85,7 @@
             <table>
               <thead>
                 <tr>
-                    <th>SIZES</th>
+                  <th>{{ $mainTask->size_title ?? 'Size' }}</th>
                     @foreach($tipeHeaders as $tipe)
                         <th>{{ strtoupper($tipe) }}</th>
                     @endforeach
