@@ -393,7 +393,104 @@ body.sidebar-open-mobile .sidebar {
 }
 
 @media (max-width: 768px) {
+/* Sesuaikan page ke full width */
+  .page {
+      left: 0 !important;
+      width: 100% !important;
+      top: 100px;
+      padding: 15px;
+  }
 
+  /* Kotak utama */
+  .checklist-container {
+      padding: 15px;
+      border-radius: 10px;
+  }
+
+  /* Header content jadi vertikal */
+  .header-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+  }
+
+  /* Judul tetap tapi lebih kecil */
+  .header-content h2 {
+      font-size: 20px;
+  }
+
+  /* Tombol Add New full width */
+  .btn-add {
+      width: 100%;
+      padding: 10px 0;
+      font-size: 14px;
+      border-radius: 10px !important;
+      text-align: center;
+  }
+
+  /* Tabel — tetap tabel, hanya scroll horizontal */
+  .table-checklist {
+      display: block;
+      width: 100%;
+      overflow-x: auto;
+      white-space: nowrap;
+  }
+
+  .table-checklist th,
+  .table-checklist td {
+      font-size: 12px;
+      padding: 10px;
+      white-space: nowrap;
+      text-align: center;
+  }
+
+  /* Popup fullscreen */
+  .popup-content {
+      width: 90% !important;
+      max-width: none !important;
+      margin: 0;
+      border-radius: 12px;
+      padding: 20px !important;
+  }
+
+  .popup {
+      align-items: flex-start; 
+      padding-top: 60px;
+  }
+
+  .popup-footer {
+      flex-direction: column;
+      gap: 10px;
+  }
+
+  .popup-content button {
+      width: 100%;
+      font-size: 14px;
+      padding: 10px 0;
+      border-radius: 8px;
+  }
+
+  /* Input item di popup */
+  .item-input {
+      font-size: 14px;
+  }
+
+  /* Tombol tambah item */
+  #addItemInputBtn,
+  #addEditItemBtn {
+      width: 100%;
+      margin-top: 10px;
+  }
+
+  /* Notifikasi */
+  .notif {
+      right: 50%;
+      transform: translateX(50%);
+      bottom: 20px;
+      padding: 10px 15px;
+      font-size: 14px;
+      width: fit-content;
+  }
 
 }
 

@@ -498,11 +498,125 @@ body.sidebar-open-mobile .sidebar {
 
 @media (max-width: 768px) {
 
+   /* Halaman utama */
+    .page {
+        position: relative;
+        left: 0;
+        top: 110px;
+        width: 100%;
+        padding: 15px;
+    }
+
+    /* Container utama */
+    .archive-container {
+        padding: 15px;
+        border-radius: 10px;
+    }
+
+    /* Header: Archive + Buttons */
+    .archive-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .archive-header h3 {
+        font-size: 20px;
+    }
+
+    .archive-header-actions {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .select-toggle {
+        font-size: 13px;
+        padding: 6px 14px;
+        border-radius: 18px;
+    }
+
+    .archive-actions button {
+        font-size: 13px;
+        margin-left: 0;
+        padding: 5px 10px;
+    }
+
+    /* Tabel wrapper agar bisa scroll horizontal */
+    .archive-table-container {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: visible;
+    }
+
+    /* Table */
+    .archive-table {
+        width: max-content;     /* supaya kolom tidak memaksa mengecil */
+        min-width: 700px;
+        font-size: 12px;
+    }
+
+    .archive-table th,
+    .archive-table td {
+        padding: 10px 12px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    /* Checkbox kolom */
+    .select-col input {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* Icon action */
+    .action-icons i {
+        font-size: 16px;
+    }
+
+    /* Status badge */
+    .status {
+        padding: 4px 10px;
+        font-size: 11px;
+        border-radius: 12px;
+    }
+
+    /* PIC circle kalau ada */
+    .pic-circle {
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+    }
 
 }
 
 @media (max-width: 576px) {
 
+  .archive-header h3 {
+        font-size: 18px;
+    }
+
+    .select-toggle {
+        font-size: 12px;
+        padding: 5px 12px;
+    }
+
+    .archive-actions button {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    .archive-table th,
+    .archive-table td {
+        padding: 8px 10px;
+        font-size: 11px;
+    }
+
+    .action-icons i {
+        font-size: 14px;
+    }
 
 }
   

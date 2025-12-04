@@ -434,6 +434,71 @@ body.sidebar-open-mobile .sidebar {
 
 @media (max-width: 576px) {
 
+  /* Page container mengikuti layout mobile */
+    .page {
+        padding: 15px;
+        top: 90px;
+        left: 0;
+        width: 100%;
+    }
+
+    /* Card putih utama */
+    .line-pekerjaan {
+        padding: 15px;
+        border-radius: 10px;
+    }
+
+    /* Header (Judul + Add New button) */
+    .header-content {
+        flex-direction: row;      /* tetap sejajar */
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .header-content h2 {
+        font-size: 18px;
+    }
+
+    .btn-add {
+        padding: 7px 12px;
+        font-size: 13px;
+        border-radius: 8px;
+    }
+
+    /* Tabel tetap dipertahankan */
+    .table-line {
+        width: 100%;
+        font-size: 13px;      /* lebih kecil sedikit */
+    }
+
+    .table-line th,
+    .table-line td {
+        padding: 10px 8px;
+    }
+
+    /* Icon edit & delete */
+    .btn-icon {
+        padding: 4px;
+    }
+
+    .btn-icon.edit,
+    .btn-icon.delete {
+        font-size: 16px;
+    }
+
+    /* Popup — fullscreen tapi tetap rapi */
+    .popup {
+        width: 92% !important;
+        max-width: none;
+        left: 0;
+        margin: 0 auto;
+        border-radius: 10px;
+    }
+
+    .popup-overlay {
+        padding: 30px 0;
+    }
 
 }
 

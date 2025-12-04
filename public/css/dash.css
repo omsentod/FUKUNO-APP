@@ -849,100 +849,101 @@ body.sidebar-open-mobile .sidebar {
 }
 
 @media (max-width: 576px) {
-.card-row {
-        flex-direction: column; /* Jika layar terlalu kecil, card dalam baris jadi vertikal (1 per baris) */
-        gap: 10px;
-}
 
-.task-category {
-        width: 80%; /* Card lebih lebar */
-        height: 70px;
-}
+  .task-category {
+        width: 100%;        /* 1 card per baris */
+    }
 
-.task-name {
-        font-size: 12px;
-}
+    .task-name {
+        font-size: 13px;
+    }
 
-.task-clr {
+    .task-clr {
         width: 35px;
         height: 35px;
-}
+    }
 
-.table-dashboard {
-        width: 95%; /* Hampir penuh */
-}
+    .table-tittle,
+    .dltable-tittle {
+        font-size: 18px;
+    }
 
-.task-indash, .deadline {
-        width: 100%;
-}
+    .data-table,
+    .dldata-table {
+        font-size: 11px;
+    }
 
 }
 
 
 @media (max-width: 768px) {
-  /* Dashboard: Ubah ke column biar card dalam baris vertikal */
-  .dashboard {
-        flex-direction: column; /* Card dalam baris vertikal */
-        gap: 15px; /* Jarak antar baris card */
-        align-items: center; /* Tengah di layar */
-  }
+  /* Page agar tidak tersangkut sidebar */
+    .page {
+        left: 0;
+        width: 100%;
+        padding: 15px;
+        top: 110px;
+    }
 
-  /* Card rows: Tetap row, tapi sesuaikan ukuran */
-  .card-row {
-    width: 100%; /* Lebar penuh */
-    justify-content: space-around; /* Card sejajar di tengah */
-    gap: 10px; /* Kurangi jarak */
-  }
+    /* === TASK CATEGORY === */
+    .dashboard {
+        display: flex;
+        flex-wrap: wrap;        /* ← 2 per baris */
+        justify-content: center;
+        gap: 10px;
+    }
 
-  .task-category {
-        width: 45%; /* Card lebih kecil, 2 per baris */
-        height: 80px; /* Tinggi lebih kecil */
-        margin: 0; /* Hapus margin kiri */
-  }
+    .task-category {
+        width: 45%;             /* ← 2 card per baris */
+        height: 80px;
+        margin: 0;
+        padding: 10px;
+    }
 
-  .task-name {
-        font-size: 14px; /* Font lebih kecil */
-        margin-bottom: 10px;
-  }
+    .task-name {
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
 
-  .task-clr {
-        width: 40px; /* Lingkaran lebih kecil */
+    .task-clr {
+        width: 40px;
         height: 40px;
-  }
+    }
 
-  .total-task {
-        font-size: 16px; /* Font angka lebih kecil */
-  }
+    .total-task {
+        font-size: 16px;
+    }
 
-  /* Tabel: Ubah ke column biar vertikal, responsif */
-  .table-dashboard {
-        flex-direction: column; /* Tabel vertikal */
-        gap: 20px; /* Jarak antar tabel */
-        align-items: center;
-  }
+    /* === TABEL RESPONSIVE === */
+    .table-dashboard {
+        flex-direction: column;
+        width: 100%;
+        gap: 20px;
+        margin-top: 20px;
+    }
 
-  .task-indash, .deadline {
-        width: 90%; /* Lebar penuh layar */
-        margin: 20px 0 0 0; /* Margin atas */
-        height: auto; /* Tinggi otomatis */
-  }
+    .task-indash,
+    .deadline {
+        width: 100%;
+        margin: 0;
+    }
 
-  .data-table, .dldata-table {
-        font-size: 12px; /* Font tabel lebih kecil */
-  }
+    .table-tittle,
+    .dltable-tittle {
+        font-size: 20px;
+    }
 
-  .table-tittle, .dltable-tittle {
-        font-size: 18px; /* Judul tabel lebih kecil */
-  }
+    .data-table,
+    .dldata-table {
+        font-size: 12px;
+    }
 
-  .data-table th, .data-table td, .dldata-table th, .dldata-table td {
-        padding: 8px; /* Padding lebih kecil */
-  }
-
-  /* Hover dan interaksi tetap sama, tapi pastikan nyaman di touch */
-  .data-table tr:hover td, .dldata-table tr:hover td {
-        background-color: rgba(226, 226, 226, 0.8); /* Hover lebih halus */
-  }
+    .data-table th,
+    .data-table td,
+    .dldata-table th,
+    .dldata-table td {
+        padding: 8px;
+    }
 
 }
 

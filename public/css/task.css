@@ -817,3 +817,304 @@ thead th a i.bi {
 #highlight-task {
     animation: highlight-flash 2.5s 1;
 }
+
+
+
+
+
+
+
+/* MOBILE */
+#navbar-hamburger-btn {
+  display: none;
+  font-size: 1.8rem;
+  color: var(--main-color, #CF221B); 
+  cursor: pointer;
+  margin-left: 15px; 
+}
+
+/* Responsive Page */
+@media (max-width: 1200px) {
+
+
+}
+
+@media (max-width: 992px) {
+
+  .navbar{
+    height: 80px;
+  }
+
+  #navbar-hamburger-btn {
+    display: block; 
+  }
+
+  .navbarkanan {
+    margin-left: auto;
+}
+  .header-logo img{
+    width: 50%;
+  }
+  .sidebar-toggle {
+    display: none;
+  }
+
+  .sidebar {
+    position: fixed;
+    display: flex;
+    justify-content: space-between;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1040; 
+    transform: translateY(-100%); 
+    transition: transform 0.3s ease-in-out;
+    padding-top: 50px;
+    
+}
+
+.sidebar-menu {
+  width: 100%; 
+}
+
+.sidebar-item{
+  padding: 5px 0 0 10px ;
+}
+
+
+
+
+.sidebar-cell {
+  display: flex;
+  justify-content: flex-start ;
+  /* align-items: center; */
+  border-bottom: 1px solid #ddd;
+  height: 40px;
+  width: 98%;
+  text-decoration: none;
+  padding-left: 10px;
+  font-size: 12px;
+  color: var(--txt-color);
+  font-weight: var(--font-semibold);
+}
+
+.sidebar .sidebar-item .sidebar-cell:hover {
+  border-radius: 0%;
+  background-color: var(--ctn-color);
+  color: #c5c5c5;
+  font-weight: var(--font-semibold);
+}
+.sidebar-item.active a {
+  border-radius: 0%;
+}
+
+.sidebar-item.active a:hover {
+  border-radius: 0%;
+  background-color: var(--main-color);  
+  color: var(--txt-color);  
+}
+.sidebar-close-toggle {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    z-index: 2000;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color:var(--main-color);
+    color: var(--ctn-color);
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.sidebar-close-toggle:hover{
+  transform: translateY(-5px);
+}
+
+body.sidebar-open-mobile .sidebar {
+    transform: translateY(0); 
+}
+
+.setting{
+  display: none;
+  margin-top: 20px;
+  margin-left: 10px;
+  z-index: 1;
+}
+
+ .page{
+  left:0;
+  width: 100%;
+ }
+
+ .dashboard{
+  display: flex;
+  flex-direction: row;
+  gap: 20px; 
+  width: 100%; 
+ }
+
+}
+
+@media (max-width: 768px) {
+
+    /* ==== PAGE WRAPPER ==== */
+    .page {
+        left: 0 !important;
+        width: 100% !important;
+        padding: 15px;
+    }
+
+    /* ==== TITLE + SEARCH + ACTION BUTTON ==== */
+    .title-page {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .tp-1 {
+        width: 100% !important;
+        flex-direction: column;
+        gap: 10px !important;
+    }
+
+    .search-container {
+        width: 100% !important;
+    }
+
+    /* Input search */
+    #taskSearchInput {
+        font-size: 13px;
+        padding-left: 35px !important;
+    }
+
+    .search-icon {
+        left: 10px;
+        font-size: 14px;
+    }
+
+    .title-page-actions {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        margin-top: 5px;
+    }
+
+    .btn-select,
+    .btn-add {
+        font-size: 13px;
+        padding: 6px 12px;
+        border-radius: 15px;
+    }
+
+    /* ==== TABLE WRAPPING (Biar bisa scroll) ==== */
+    .task {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: visible;
+        border-radius: 10px;
+    }
+
+    #taskTable {
+        min-width: 1100px;      /* Karena kolom 11, wajib dibuat besar */
+        font-size: 12px;
+    }
+
+    #taskTable th,
+    #taskTable td {
+        padding: 8px 5px;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    /* ==== MOCKUP IMAGE ==== */
+    .mockup-display {
+        width: 26px;
+        height: 26px;
+    }
+
+    /* Hover image tidak membesar di mobile 
+       (untuk menghindari overflow) */
+    .mockup-display:hover {
+        transform: none !important;
+        width: 26px !important;
+        height: 26px !important;
+    }
+
+    /* ==== PROGRESS BUTTON ==== */
+    .progress {
+        width: 36px;
+        height: 36px;
+        font-size: 11px;
+    }
+
+    .dropdown-menu.p-3 {
+        width: 220px !important;
+    }
+
+    /* ==== STATUS BUTTON ==== */
+    .status-btn {
+        font-size: 11px !important;
+        padding: 4px 8px !important;
+    }
+
+    /* ==== ACTION ICON ==== */
+    .icon-edit,
+    .icon-download,
+    .icon-trash {
+        font-size: 16px;
+        margin-right: 3px;
+    }
+
+    /* ==== MOCKUP MODAL ADJUST ==== */
+    .modal-content {
+        width: 92%;
+        max-width: none;
+    }
+
+    /* ==== BULK ACTION ==== */
+    .bulk-action-bar {
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px;
+        background: #fff7e6;
+        border-radius: 6px;
+    }
+}
+
+
+@media (max-width: 480px) {
+
+    .title-page h2 {
+        font-size: 18px;
+    }
+
+    .btn-add,
+    .btn-select {
+        font-size: 11px;
+        padding: 5px 10px;
+    }
+
+    .dropdown-menu.p-3 {
+        width: 200px !important;
+    }
+
+    .progress {
+        width: 32px;
+        height: 32px;
+        font-size: 10px;
+    }
+
+    #taskTable {
+        min-width: 1050px;
+    }
+
+    .mockup-display {
+        width: 22px;
+        height: 22px;
+    }
+}
