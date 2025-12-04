@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Purchase Order - {{ $task->no_invoice }}</title>
     <link rel="stylesheet" href="{{ asset('css/print.css') }}">
+    <link rel="icon" href="{{ asset('assets/img/print-logo.ico') }}" type="image/x-icon">
 </head>
 <body>
     <div class="po-container">
         <header>
-            <h1>APPAREL BERKAH SELALU</h1>
+            <img src="{{ asset('assets/img/web-logo.png') }}" alt="Logo" class="header-logo-img">
             <h2>PURCHASE ORDER</h2>
         </header>
 
