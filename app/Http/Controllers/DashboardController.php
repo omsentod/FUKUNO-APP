@@ -33,19 +33,28 @@ class DashboardController extends Controller
 
 
         // --- 3. Ambil Data Tabel (Deadline Terdekat) ---
-         $upcomingDeadlines = Task::with('user', 'taskPekerjaans')
-        // Tambahkan 'task_pekerjaans.deadline' ke select
-            ->select('tasks.*', 'task_pekerjaans.deadline') 
-            ->join('task_pekerjaans', 'tasks.id', '=', 'task_pekerjaans.task_id') 
-            // Hanya ambil yang deadline-nya di masa depan
-            ->where('task_pekerjaans.deadline', '>=', now()) 
-            // Urutkan berdasarkan deadline (asc = paling dekat)
-            ->orderBy('task_pekerjaans.deadline', 'asc') 
-            ->distinct() // Pastikan task unik
-            ->take(5) // Ambil 5 saja
-            ->get();
+        $upcomingDeadlines = Task::with('user', 'status', 'taskPekerjaans')
+        // ▼▼▼ PERBAIKAN DI SINI ▼▼▼
+        // Tambahkan 'task_pekerjaans.deadline' ke dalam select agar valid dengan ORDER BY
+        ->select('tasks.*', 'task_pekerjaans.deadline') 
+        // ▲▲▲ ▲▲▲ ▲▲▲
+        
+        ->join('task_pekerjaans', 'tasks.id', '=', 'task_pekerjaans.task_id')
+        
+        // Filter Deadline Masa Depan
+        ->where('task_pekerjaans.deadline', '>=', now())
 
-
+        // Filter Status (Bukan Done/Delivered)
+        ->whereHas('status', function ($query) {
+            $query->whereNotIn('name', ['Done and Ready', 'Delivered']);
+        })
+        
+        // Sorting
+        ->orderBy('task_pekerjaans.deadline', 'asc')
+        ->distinct() // Pastikan tidak duplikat
+        ->take(5)
+        ->get();
+        
         // --- 4. Kirim semua data ke View ---
         return view('dashboard', [ 
             'countToDo' => $countToDo,

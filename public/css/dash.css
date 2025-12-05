@@ -544,7 +544,7 @@ body.sidebar-closed .sidebar-toggle i {
       }
 
 
-      .status-btn.dropdown-toggle {
+      .status-btn{
         border: none;
         color: var(--ctn-color);
         padding: 5px 10px;
@@ -574,6 +574,11 @@ body.sidebar-closed .sidebar-toggle i {
         background-color: var(--main-color) !important;
         color: var(--ctn-color) !important;
     }
+
+    .status-delivered {
+      background-color: #17a2b8; /* Warna Cyan */
+      color: white;
+  }
 
     
 

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('no_invoice');
             $table->string('nama_pelanggan');
             $table->string('judul');
+            $table->string('size_title')->nullable()->default('Size');
             $table->text('catatan')->nullable();
             $table->string('urgensi');
             $table->integer('total_jumlah')->default(0); // Grand total dari tabel size
