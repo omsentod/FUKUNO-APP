@@ -193,7 +193,6 @@
                         {{ $timeLeftString }}
                     </span>
                 </td>
-<<<<<<< HEAD
                    <td>
                     <div class="dropdown">
                         <button class="status-btn status-{{ Str::slug($task->status->name) }} dropdown-toggle" type="button" id="statusDropdown{{ $task->id }}" data-bs-toggle="dropdown" aria-expanded="false">
@@ -208,15 +207,6 @@
                         </div>
                     </div>
                 </td>
-=======
-                <td>
-                  <button class="status-btn status-{{ Str::slug($task->status->name) }}" 
-                          type="button" 
-                          style="cursor: default; pointer-events: none;"> 
-                      <span class="status-text">{{ $task->status->name }}</span>
-                  </button>
-              </td>
->>>>>>> task
                </tr>
              @empty
                <tr>

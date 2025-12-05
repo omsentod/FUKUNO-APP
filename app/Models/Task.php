@@ -27,12 +27,6 @@ class Task extends Model
         'warna',
         'model',
         'bahan',
-<<<<<<< HEAD
-=======
-        'size_title',
-        'bahan_terpakai',
-        'bahan_reject',
->>>>>>> task
     ];
 
     /**

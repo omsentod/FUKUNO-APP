@@ -348,10 +348,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // Loop setiap input checklist
         lineDiv.querySelectorAll(".checklist-item").forEach(checkInput => {
             if (checkInput.value) {
-                const status = checkInput.dataset.isCompleted || 0;
-                console.log(`Checklist: ${checkInput.value} | Status: ${status}`);
+           
                 line.checklists.push({
                     name: checkInput.value,
+           
                     is_completed: checkInput.dataset.isCompleted || 0 
                 });
             }
@@ -362,57 +362,18 @@ document.addEventListener("DOMContentLoaded", () => {
     return lines;
 }
 
-function getSizeTableData(popup) {
-    const table = popup.querySelector("#sizeTable");
-    if (!table) return { headers: [], rows: [] };
+  /**
+   * Mengumpulkan semua data dari tabel "Jenis & Size"
+   */
+  function getSizeTableData(popup) {
+      const table = popup.querySelector("#sizeTable");
+      if (!table) return { headers: [], rows: [] };
 
-    const firstTh = table.querySelector("thead tr th:first-child");
-    
-    let sizeTitle = 'Size'; 
-    
-    if (firstTh) {
-        const firstThInput = firstTh.querySelector('input');
-        sizeTitle = firstThInput ? firstThInput.value.trim() : firstTh.textContent.trim();
-    }
+      const headers = [];
+      table.querySelectorAll("thead th:not(:first-child):not(:last-child)").forEach(th => {
+          headers.push(th.textContent.trim() || th.querySelector('input')?.value.trim() || 'Tipe');
+      });
 
-    const headers = [];
-    const thElements = Array.from(table.querySelectorAll("thead tr th"));
-    const contentThs = thElements.slice(1, -1); 
-    
-    contentThs.forEach(th => {
-        const input = th.querySelector('input');
-        headers.push(input ? input.value.trim() : th.textContent.trim());
-    });
-
-    const rows = [];
-    table.querySelectorAll("tbody tr").forEach(tr => {
-        const jenisInput = tr.querySelector('td:first-child input');
-        const jenis = jenisInput ? jenisInput.value.trim() : '';
-        
-        if (!jenis) return; 
-        
-        const rowData = { jenis: jenis, quantities: {} };
-        const qtyInputs = tr.querySelectorAll('.quantity-input');
-        
-        headers.forEach((headerName, index) => {
-             if (qtyInputs[index]) {
-                 const val = parseInt(qtyInputs[index].value, 10);
-                 rowData.quantities[headerName] = isNaN(val) ? 0 : val;
-             }
-        });
-        rows.push(rowData);
-    });
-
-    return { 
-        size_title: sizeTitle, 
-        headers: headers, 
-        rows: rows 
-    };
-}
-
-
-
-<<<<<<< HEAD
       const rows = [];
       table.querySelectorAll("tbody tr").forEach(tr => {
           const jenis = tr.querySelector('td:first-child input')?.value || '';
@@ -428,8 +389,6 @@ function getSizeTableData(popup) {
       return { headers: headers, rows: rows };
   }
 // ▼▼▼  FUNGSI UPDATE TASK▼▼▼
-=======
->>>>>>> task
 /**
  * @param {string} taskId - ID dari task yang akan diupdate.
  * @param {string} newStatusName - Nama status baru (e.g., "In Progress").
@@ -590,12 +549,11 @@ function getSizeTableData(popup) {
     }
 }
 
-
-
-
-
-
-function populateForm(mainTask, allTasks, sizeData) {
+/**
+ * Mengisi form popup dengan data dari task yang diedit.
+ * (VERSI PERBAIKAN: Menggunakan JS Array [0] bukan .first())
+ */
+ function populateForm(mainTask, allTasks, sizeData) {
     const popup = document.querySelector(".popup-overlay .popup");
     if (!popup) return;
     
@@ -605,8 +563,8 @@ function populateForm(mainTask, allTasks, sizeData) {
 
     const noInvoiceInput = popup.querySelector("#noInvoice");
     noInvoiceInput.value = mainTask.no_invoice;
-    noInvoiceInput.disabled = true; 
-    noInvoiceInput.style.backgroundColor = "#e9ecef"; 
+    noInvoiceInput.disabled = true; // Nonaktifkan field
+    noInvoiceInput.style.backgroundColor = "#e9ecef"; // (Opsional) Beri warna abu-abu
 
     // --- 2. Isi Field Sederhana ---
     popup.querySelector("#noInvoice").value = mainTask.no_invoice;
@@ -623,9 +581,13 @@ function populateForm(mainTask, allTasks, sizeData) {
     lineContainer.innerHTML = ''; 
     
     allTasks.forEach(task => {
+        // ▼▼▼ PERBAIKAN DI SINI ▼▼▼
+        // Ambil line pertama (dan satu-satunya) menggunakan [0]
         const line = (task.task_pekerjaans && task.task_pekerjaans.length > 0) ? task.task_pekerjaans[0] : null;
+        // ▲▲▲ AKHIR PERBAIKAN ▲▲▲
         
-        if (!line) return; 
+        if (!line) return; // Lewati jika task tidak punya line
+
         addLine(); 
         const newLineDiv = lineContainer.lastElementChild; 
         
@@ -634,25 +596,14 @@ function populateForm(mainTask, allTasks, sizeData) {
         newLineDiv.querySelector(".line-deadline").value = line.deadline ? line.deadline.substring(0, 16) : '';
 
         // Isi checklists
-        if (line.checklists) {
+        if (line.checklists) { // Pastikan checklists ada
             line.checklists.forEach(check => {
-                // 1. Klik tombol tambah checklist
                 const addChecklistBtn = newLineDiv.querySelector(".addChecklist");
                 addChecklist(addChecklistBtn);
-
-                // 2. Cari container checklist yang baru saja dibuat
-                const checklistContainer = newLineDiv.querySelector(".checklist-container");
-                const newWidget = checklistContainer.lastElementChild; 
-
-                if (newWidget) {
-                    // 3. Cari input di dalam widget tersebut
-                    const newCheckInput = newWidget.querySelector(".checklist-item");
-                    
-                    if (newCheckInput) {
-                        newCheckInput.value = check.nama_checklist;
-                        const status = (check.is_completed == 1 || check.is_completed === true) ? '1' : '0';
-                        newCheckInput.dataset.isCompleted = status;
-                    }
+                const newCheckInput = newLineDiv.querySelector(".d-flex:last-child .checklist-item");
+                if (newCheckInput) {
+                    newCheckInput.value = check.nama_checklist;
+                    newCheckInput.dataset.isCompleted = check.is_completed;
                 }
             });
         }
@@ -664,23 +615,20 @@ function populateForm(mainTask, allTasks, sizeData) {
     const tBody = sizeTable.querySelector("tbody");
     const tFootRow = sizeTable.querySelector("tfoot tr");
     
-    // Reset konten tabel
-    tHeadRow.innerHTML = ''; // Kosongkan header dulu
+    // Reset tabel
+    tHeadRow.innerHTML = '<th>Jenis</th>'; 
     tBody.innerHTML = ''; 
     tFootRow.innerHTML = '<td>Total</td>'; 
 
-    const firstTh = document.createElement('th');
-    firstTh.textContent = mainTask.size_title || 'Size'; 
-    tHeadRow.appendChild(firstTh);
-
+    // Bangun ulang Headers & Footer
     sizeData.headers.forEach(header => {
         tHeadRow.innerHTML += `<th>${header}</th>`;
         tFootRow.innerHTML += `<td class="column-total">0</td>`;
     });
-    
     tHeadRow.innerHTML += '<th>Jumlah</th>';
     tFootRow.innerHTML += '<td class="grand-total">0</td>';
-    
+
+    // Bangun ulang Body
     for (const jenis in sizeData.rows) {
         const rowData = sizeData.rows[jenis]; 
         
@@ -691,6 +639,7 @@ function populateForm(mainTask, allTasks, sizeData) {
 
         const qtyInputs = newTr.querySelectorAll('.quantity-input');
         sizeData.headers.forEach((header, index) => {
+            // 'rowData' adalah array dari objek size
             const sizeInfo = rowData.find(s => s.tipe === header);
             const jumlah = sizeInfo ? sizeInfo.jumlah : 0;
             if (qtyInputs[index]) {
@@ -700,18 +649,18 @@ function populateForm(mainTask, allTasks, sizeData) {
     }
     calculateTotals(); 
 
-    // 5. Isi Mockup (Data dari mainTask) 
+    // --- 5. Isi Mockup (Data dari mainTask) ---
     if (mainTask.mockups) { 
         mainTask.mockups.forEach(mockup => {
             const fileName = mockup.file_path.split('/').pop();
             mockupFiles.set(fileName, { 
                  name: fileName, 
                  is_existing: true, 
-                 path: mockup.file_path_url 
+                 path: mockup.file_path_url // <-- Ini sekarang akan ada
             }); 
         });
     }
-    updateMockupPreview(); 
+    updateMockupPreview(); // Update tampilan
 }
 
 
@@ -856,8 +805,8 @@ function showValidationErrors(popup, errors) {
                     }
                     
                     // Cek ukuran file (opsional, misal max 2MB)
-                    if (file.size > 5 * 1024 * 1024) {
-                        alert(`File "${file.name}" terlalu besar! Maksimal 5MB.`);
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert(`File "${file.name}" terlalu besar! Maksimal 2MB.`);
                         continue;
                     }
 
@@ -1314,21 +1263,6 @@ function showValidationErrors(popup, errors) {
       </div>
     `;
     lineContainer.appendChild(lineDiv);
-    updateLineNumbers();
-}
-
-function updateLineNumbers() {
-    const container = document.querySelector("#lineContainer");
-    if (!container) return;
-    
-    const lines = container.querySelectorAll(".border");
-    
-    lines.forEach((line, index) => {
-        const title = line.querySelector(".line-title");
-        if (title) {
-            title.textContent = `Line ${index + 1}`;
-        }
-    });
 }
 
 
@@ -1828,7 +1762,6 @@ const searchInput = document.getElementById("taskSearchInput");
   const bulkSelectCount = document.getElementById('bulkSelectCount');
   const bulkArchiveBtn = document.getElementById('bulkArchiveBtn');
   const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
-  const bulkExportBtn = document.getElementById('bulkExportBtn');
 
 /**
    * Helper untuk update tampilan bar aksi massal
@@ -1950,23 +1883,6 @@ const searchInput = document.getElementById("taskSearchInput");
           }
       });
   }
-
-  // Listener untuk tombol "Excel (import)"
-  if (bulkExportBtn) {
-    bulkExportBtn.addEventListener('click', () => {
-        const selectedIds = Array.from(document.querySelectorAll('.row-checkbox:checked'))
-                                 .map(cb => cb.dataset.id);
-        
-        if (selectedIds.length === 0) {
-            alert('Pilih minimal satu task untuk diexport!');
-            return;
-        }
-
-
-        const url = `/task/export?ids=${selectedIds.join(',')}`;
-        window.location.href = url;
-    });
-}
   
 
   // 3.Listener untuk KLIK (click) - GABUNGAN SEMUA DELEGASI

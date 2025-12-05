@@ -35,52 +35,31 @@ body {
 
 /* Kontainer Utama PO (Saat dibuka di tab baru) */
 .po-container {
-<<<<<<< HEAD
     max-width: 1000px;
     margin: 20px auto;
     padding: 30px 40px;
     background-color: #ffffff;
     border: 1px solid #dcdcdc;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-=======
-    width: 210mm;
-    margin: 30px auto;
-    padding: 8mm;
-    min-height: 297mm;
-    background-color: #ffffff;
-    border: 1px solid #dcdcdc;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
->>>>>>> task
 }
 
 /* Header */
 header {
-    text-align: left !important; 
-    padding-bottom: 15px;
+    text-align: center;
+    padding-bottom: 20px;
     border-bottom: 3px solid #000;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
 }
-.header-logo-img {
-    height: 100px; 
-    width: auto;
-    object-fit: contain;
-    display: block;
+header h1 {
+    margin: 0;
+    font-size: 28px;
+    letter-spacing: 1px;
+    color: #000;
 }
-
 header h2 {
-    margin: 30px 0 0 0;
-    padding: 0;
-    font-size: 25px;
-    font-weight: var(--font-bold);
-    color: #222;
-    text-transform: uppercase;
-    align-items: center;
-    
+    margin: 5px 0 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #555;
 }
 
 /* Detail Utama PO */
@@ -91,14 +70,10 @@ header h2 {
 }
 .po-details th,
 .po-details td {
-<<<<<<< HEAD
     padding: 10px 12px;
-=======
-    padding: 5px;
-    font-size: 12px;
->>>>>>> task
     text-align: left;
     border: 1px solid #e0e0e0;
+    font-size: 14px;
     vertical-align: top;
 }
 .po-details th {
@@ -111,7 +86,7 @@ header h2 {
 .main-content {
     display: flex;
     margin-top: 25px;
-    gap: 15px;
+    gap: 30px;
 }
 
 /* Kolom Kiri */
@@ -157,16 +132,6 @@ header h2 {
     width: 80px;
     font-weight: 600;
 }
-
-.notes {
-    overflow-wrap: break-word;  
-    word-wrap: break-word;    
-    
-    word-break: break-word; 
-    
-    white-space: pre-wrap; 
-}
-
 .logo-list ul {
     padding-left: 20px;
     display: grid;
@@ -193,9 +158,8 @@ header h2 {
 .size-table th,
 .size-table td {
     border: 1px solid #000;
-    padding: 5px 4px;
-    font-size: 11px;
-    white-space: nowrap;
+    padding: 10px;
+    font-size: 14px;
 }
 .size-table th {
     background-color: #333;
@@ -207,7 +171,6 @@ header h2 {
     font-weight: 700;
 }
 
-<<<<<<< HEAD
 /* Footer (Tanda Tangan) */
 footer {
     margin-top: 60px;
@@ -236,36 +199,6 @@ footer {
     border-top: 2px solid #000; 
     padding-top: 5px; 
     width: 150px;
-=======
-
-
-.signature-area-left {
-    margin-top: 50px; /* Jarak dari gambar di atasnya */
-    display: flex;
-    justify-content: space-between; /* Head di kiri, Vendor di kanan */
-    gap: 20px; /* Jarak antar tanda tangan */
-    width: 100%;
-}
-
-/* Style Per Item Tanda Tangan */
-.sign-wrapper {
-    flex: 1; /* Bagi ruang sama rata */
-    text-align: center;
-}
-
-.sign-title {
-    font-weight: bold;
-    font-size: 11px; /* Sedikit dikecilkan agar muat di kolom */
-    text-transform: uppercase;
-    
-    /* Garis di atas nama */
-    border-top: 2px solid #000; 
-    padding-top: 5px;
-    
-    /* Ruang untuk paraf */
-    margin-top: 80px; 
-    margin-bottom: 0;
->>>>>>> task
 }
 
 /* KOLASE MOCKUP */
@@ -353,15 +286,7 @@ footer {
     
     /* Mencegah footer terpotong */
     footer {
-<<<<<<< HEAD
         page-break-before: auto; /* Pindah ke halaman baru jika perlu */
-=======
-        width: 100%;
-        padding: 0; 
-        box-sizing: border-box;
-        margin-top: 10vh;
-        page-break-before: auto; 
->>>>>>> task
         page-break-inside: avoid;
     }
 }
