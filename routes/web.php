@@ -47,7 +47,6 @@ Route::middleware(['auth'])->group(function() {
     Route::post('/task/update/{id}', [TaskController::class, 'update'])->name('task.update');
     Route::get('/task/edit/{id}', [TaskController::class, 'edit'])->name('task.edit');
     Route::delete('/task/delete/{id}', [TaskController::class, 'destroy'])->name('task.destroy');
-    Route::get('/task/export', [TaskController::class, 'exportExcel'])->name('task.export');
     
     // Task Actions
     Route::post('/task/status/update/{id}', [TaskController::class, 'updateStatus'])->name('task.updateStatus');

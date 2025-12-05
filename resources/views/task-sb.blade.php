@@ -50,9 +50,6 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
 
     <div class="bulk-action-bar" id="bulkActionBar" style="display: none;">
         <span id="bulkSelectCount">0 Task terpilih</span>
-        <button id="bulkExportBtn" class="btn btn-success btn-sm" style="margin-right: 5px;">
-            <i class="bi bi-file-earmark-excel-fill"></i> Export Excel
-        </button>
         <button id="bulkArchiveBtn" class="btn btn-warning btn-sm">
             <i class="bi bi-archive-fill"></i> Arsipkan
         </button>

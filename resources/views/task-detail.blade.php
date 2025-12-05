@@ -11,17 +11,7 @@
   <div class="detail-task-container">
 
     <div class="task-header">
-      @php
-          $backUrl = route('task'); // Default ke Task
-          if (request('from') == 'archive') {
-              $backUrl = route('archive');
-          } elseif (request('from') == 'trash') {
-              $backUrl = route('trash');
-          }
-      @endphp
-      
-      <a href="{{ $backUrl }}" class="back-btn"><i class="bi bi-arrow-left"></i></a>
-      
+      <a href="{{ route('task') }}" class="back-btn"><i class="bi bi-arrow-left"></i></a>
       <h2>{{ $mainTask->judul }}</h2>
     </div>
 
@@ -85,7 +75,7 @@
             <table>
               <thead>
                 <tr>
-                  <th>{{ $mainTask->size_title ?? 'Size' }}</th>
+                    <th>SIZES</th>
                     @foreach($tipeHeaders as $tipe)
                         <th>{{ strtoupper($tipe) }}</th>
                     @endforeach
