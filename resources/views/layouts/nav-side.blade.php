@@ -4,15 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="csrf-token" content="{{ csrf_token() }}"> 
-  <meta name="user-id" content="{{ Auth::id() }}">
   <title>@yield('title', 'Default Title')</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="icon" href="{{ asset('assets/img/web-logo.ico') }}" type="image/x-icon">
   <link rel="stylesheet" href="{{ asset('css/dash.css') }}">
-
   @stack('styles')
-  @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
     <div id="page-preloader">
@@ -38,88 +35,72 @@
 <nav class="navbar">
     <div class="header-logo">
         <i class="bi bi-list icon-kanan" id="navbar-hamburger-btn"></i>
-        <a href="{{ route('dashboard') }}">
-            <img src="{{ asset('assets/img/web-logo.png') }}" alt="header logo">
-        </a>
-       
+        <img src="{{ asset('assets/img/web-logo.png') }}" alt="header logo">
     </div>
 
   <!-- Navbarkanan -->
   <div class="navbarkanan">
     
       <!-- Notifikasi -->
-  <div class="notification-wrapper" style="position: relative; display: inline-block;">
+      <i class="bi bi-bell-fill icon-kanan {{ $unreadNotificationsCount > 0 ? 'is-ringing' : '' }}" 
+        id="bell-icon" 
+        style="position: relative;">
           
-          <i class="bi bi-bell-fill icon-kanan {{ $unreadNotificationsCount > 0 ? 'is-ringing' : '' }}" 
-             id="bell-icon"></i>
-          
-          <span class="notification-badge" 
-                id="notification-badge" 
-                style="{{ $unreadNotificationsCount > 0 ? 'display: flex;' : 'display: none;' }}">
-              {{ $unreadNotificationsCount }}
-          </span>
-
-      </div>
+           @if($unreadNotificationsCount > 0)
+               <span class="notification-badge">
+                   {{ $unreadNotificationsCount }}
+               </span>
+           @endif
+     </i>
      
-      <div class="notification" id="notification">
-        
-        <div class="notification-header-top">
-            <span class="notif-title">Notifikasi</span>
-            @if(isset($unreadNotificationsCount) && ($unreadNotificationsCount > 0 || count($groupedNotifications) > 0))
-                <button id="clear-notif-btn" class="clear-btn">Clear All</button>
-            @endif
-        </div>
-
-        <div class="notification-list-container" id="notification-list">
+     <div class="notification" id="notification">
+          
+        @forelse($groupedNotifications as $groupName => $notifications)
             
-            @forelse($groupedNotifications as $groupName => $notifications)
-                
-                <div class="notification-group-header">
-                    {{ $groupName }}
-                </div>
-                
-                @foreach($notifications as $notification)
-                  <a href="{{ $notification->data['url'] ?? '#' }}" class="notification-item">
-                      
-                      <div class="pic pic-sm" 
-                           style="background-color: {{ $notification->data['creator_color'] ?? '#ccc' }};">
-                           {{ $notification->data['creator_initials'] ?? '??' }}
-                      </div>
-                      
-                      <div class="notification-content">
-                          <p>
-                              @if(isset($notification->data['creator_name']))
-                                  <strong>{{ $notification->data['creator_name'] }}</strong> 
-                                  
-                                  @if(isset($notification->data['comment_body']))
-                                      mengomentari <strong>{{ Str::limit($notification->data['task_title'], 20) }}</strong>: 
-                                      "{{ Str::limit($notification->data['comment_body'], 20) }}"
-                                  @else
-                                      telah membuat task: <strong>{{ Str::limit($notification->data['task_title'], 25) }}</strong>
-                                  @endif
+            <div class="notification-group-header">
+                {{ $groupName }}
+            </div>
+            
+            @foreach($notifications as $notification)
+              <a href="{{ $notification->data['url'] ?? '#' }}" class="notification-item">
+                  
+                  <div class="pic pic-sm" 
+                       style="background-color: {{ $notification->data['creator_color'] ?? '#ccc' }};">
+                       {{ $notification->data['creator_initials'] ?? '??' }}
+                  </div>
+                  
+                  <div class="notification-content">
+                      <p>
+                          @if(isset($notification->data['creator_name']))
+                              <strong>{{ $notification->data['creator_name'] }}</strong> 
+                              @if(isset($notification->data['comment_body']))
+                                  mengomentari <strong>{{ Str::limit($notification->data['task_title'], 20) }}</strong>: 
+                                  "{{ Str::limit($notification->data['comment_body'], 20) }}"
                               @else
-                                  {{ $notification->data['message'] }}
+                                  telah membuat task: <strong>{{ Str::limit($notification->data['task_title'], 25) }}</strong>
                               @endif
-                          </p>
-                          <small>{{ $notification->created_at->diffForHumans() }}</small>
-                      </div>
+                          @else
+                              {{ $notification->data['message'] }}
+                          @endif
+                      </p>
+                      <small>{{ $notification->created_at->diffForHumans() }}</small>
+                  </div>
 
-                      @if(isset($notification->data['first_mockup_url']) && $notification->data['first_mockup_url'])
-                          <img src="{{ $notification->data['first_mockup_url'] }}" class="notification-mockup">
-                      @else
-                          <div class="notification-mockup placeholder"></div>
-                      @endif
+                  @if(isset($notification->data['first_mockup_url']) && $notification->data['first_mockup_url'])
+                      <img src="{{ $notification->data['first_mockup_url'] }}" class="notification-mockup">
+                  @else
+                      <div class="notification-mockup placeholder"></div>
+                  @endif
 
-                  </a>
-                @endforeach
+              </a>
+            @endforeach
 
-            @empty
-              <div class="notification-empty">
-                  <p>No notification yet!</p>
-              </div>
-            @endforelse
-            
-        </div> </div>
+        @empty
+          <div class="notification-empty">
+              <p>No notification yet!</p>
+          </div>
+        @endforelse
+    </div>
 
       <!-- Profile Dropdown -->
       <div class="profile-dropdown">
@@ -154,7 +135,7 @@
           </a>
       </div>
 
-      <div class="sidebar-item {{ (request()->routeIs('task') || (request()->routeIs('task.show') && !request()->has('from'))) ? 'active' : '' }}">
+      <div class="sidebar-item {{ request()->routeIs('task*') ? 'active' : '' }}">
         <a class="sidebar-cell" href="{{ route('task') }}">
             <i class="bi bi-list-task" style="margin-right: 8px;"></i>
             Task
@@ -163,7 +144,7 @@
       
 
 
-    @if(Auth::user()->role == 'admin')
+
       <div class="sidebar-item {{ request()->routeIs('workline') ? 'active' : '' }}">
           <a class="sidebar-cell" href="{{ route('workline') }}">
               <i class="bi bi-wrench-adjustable" style="margin-right: 8px;"></i>
@@ -189,26 +170,25 @@
               User
           </a>
       </div>
-    <div class="sidebar-item {{ (request()->routeIs('archive') || (request()->routeIs('task.show') && request('from') == 'archive')) ? 'active' : '' }}">
-    <a class="sidebar-cell" href="{{ route('archive') }}">
-        <i class="bi bi-archive-fill" style="margin-right: 8px;"></i>
-        Archive
-    </a>
-</div>
-<div class="sidebar-item {{ (request()->routeIs('trash') || (request()->routeIs('task.show') && request('from') == 'trash')) ? 'active' : '' }}">
-    <a class="sidebar-cell" href="{{ route('trash') }}">
-        <i class="bi bi-trash-fill" style="margin-right: 8px;"></i>
-        Trash
-    </a>
-</div>
-      @endif
+      <div class="sidebar-item {{ request()->routeIs('archive') ? 'active' : '' }}">
+          <a class="sidebar-cell" href="{{ route('archive') }}">
+              <i class="bi bi-archive-fill" style="margin-right: 8px;"></i>
+              Archive
+          </a>
+      </div>
+      <div class="sidebar-item {{ request()->routeIs('trash') ? 'active' : '' }}">
+          <a class="sidebar-cell" href="{{ route('trash') }}">
+              <i class="bi bi-trash-fill" style="margin-right: 8px;"></i>
+              Trash
+          </a>
+      </div>
       {{-- <div class="setting">
         <a href=""><i class="bi bi-gear-wide-connected" style="margin-right: 8px;"></i>Setting</a>
     </div> --}}
   </div>
 
 </div>
-<div class="sidebar-toggle" id="sidebar-toggle-btn">
+</div> <div class="sidebar-toggle" id="sidebar-toggle-btn">
     <i class="bi bi-chevron-left"></i>
 </div>
 

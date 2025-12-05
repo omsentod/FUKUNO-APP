@@ -54,7 +54,7 @@ class CommentAdded extends Notification
             'creator_color' => $creator->avatar_color,
             
             'comment_body' => Str::limit($this->comment->body, 40),
-            'url' => route('task.show', $task->id) . '#comment-' . $this->comment->id,
+            'url' => route('task.show', $task->id) . '#content-activity',
             'first_mockup_url' => $mockupUrl
         ];
     }

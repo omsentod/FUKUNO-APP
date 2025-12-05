@@ -11,17 +11,7 @@
   <div class="detail-task-container">
 
     <div class="task-header">
-      @php
-          $backUrl = route('task'); // Default ke Task
-          if (request('from') == 'archive') {
-              $backUrl = route('archive');
-          } elseif (request('from') == 'trash') {
-              $backUrl = route('trash');
-          }
-      @endphp
-      
-      <a href="{{ $backUrl }}" class="back-btn"><i class="bi bi-arrow-left"></i></a>
-      
+      <a href="{{ route('task') }}" class="back-btn"><i class="bi bi-arrow-left"></i></a>
       <h2>{{ $mainTask->judul }}</h2>
     </div>
 
@@ -48,8 +38,12 @@
                 <th>Tanggal Selesai</th>
                 <td>{{ $latestDeadline ? Carbon::parse($latestDeadline)->format('j M Y') : '-' }}</td>
             </tr>
-       
-   
+            <tr>
+                <th>Article / Model</th><td colspan="3">{{ $mainTask->model ?? '-' }}</td>
+            </tr>
+            <tr>
+                <th>Material</th><td colspan="3">{{ $mainTask->bahan ?? '-' }}</td>
+            </tr>
             <tr>
                 <th>Line Pekerjaan</th>
                 <td colspan="3">
@@ -66,12 +60,8 @@
               <h4>Spesifikasi</h4>
               <table>
                 <tr><th>Warna</th><td>{{ $mainTask->warna ?? '-' }}</td></tr>
-                <tr>
-                  <th>Article / Model</th><td colspan="3">{{ $mainTask->model ?? '-' }}</td>
-              </tr>
-              <tr>
-                <th>Material</th><td colspan="3">{{ $mainTask->bahan ?? '-' }}</td>
-            </tr>
+                <tr><th>Printing</th><td>-</td></tr>
+                <tr><th>Bording</th><td>-</td></tr>
               </table>
             </div>
             <div class="note">
@@ -85,7 +75,7 @@
             <table>
               <thead>
                 <tr>
-                  <th>{{ $mainTask->size_title ?? 'Size' }}</th>
+                    <th>SIZES</th>
                     @foreach($tipeHeaders as $tipe)
                         <th>{{ strtoupper($tipe) }}</th>
                     @endforeach
@@ -132,55 +122,30 @@
                 <p class="text-muted">Tidak ada mockup.</p>
             @endforelse
           </div>
+          <!-- <div class="popup" id="image-popup">
+            <span id="close-popup">&times;</span>
+            <img id="popup-img" src="" alt="popup-image">
+          </div> -->
         </div>
       </div>
     </div>
 
     {{-- ===== TAB 2: ACTIVITY / TIMELINE ===== --}}
     <div id="content-activity" class="tab-content">
-      
-      <div class="bahan-section mb-4 p-3 border rounded bg-light">
-          <h5 class="mb-3" style="font-size: 16px; font-weight:600;">Laporan Bahan</h5>
-          <div class="row">
-              <div class="col-md-6">
-                  <label class="small fw-bold">Bahan Terpakai</label>
-                  <textarea class="form-control bahan-input" 
-                            id="bahan-terpakai" 
-                            data-task-id="{{ $mainTask->id }}"
-                            placeholder="Contoh: 5 Meter Kain..." rows="2">{{ $mainTask->bahan_terpakai }}</textarea>
-              </div>
-              <div class="col-md-6">
-                  <label class="small fw-bold text-danger">Bahan Reject</label>
-                  <textarea class="form-control bahan-input" 
-                            id="bahan-reject" 
-                            data-task-id="{{ $mainTask->id }}"
-                            placeholder="Contoh: 2 meter kain..." rows="2">{{ $mainTask->bahan_reject }}</textarea>
-              </div>
-          </div>
-          <small class="text-muted fst-italic mt-1 d-block">*Wajib diisi sebelum mencentang checklist terakhir.</small>
-      </div>
-
       <h4>Checklist Activity</h4>
 
       <div class="activity-section" id="activity-container">
-        @php
-            // Hitung total checklist di seluruh grup untuk tahu mana yang terakhir
-            $totalAllChecklists = $allTasksInGroup->flatMap->taskPekerjaans->flatMap->checklists->count();
-            $counter = 0;
-        @endphp
-
         @foreach($allTasksInGroup as $task)
             @php
-                $line = $task->taskPekerjaans->first();
+                $line = $task->taskPekerjaans->first(); // Ambil line tunggal dari task ini
             @endphp
             @if($line)
                 <div class="dropdown">
                   <button class="dropdown-btn">{{ $line->nama_pekerjaan }}<span class="dropdown-icon">▾</span></button>
-                  <div class="dropdown-content" style="display: block;"> @forelse($line->checklists as $checklist)
-                        @php $counter++; @endphp
+                  <div class="dropdown-content">
+                    @forelse($line->checklists as $checklist)
                         <label>
-                            <input type="checkbox" 
-                                   class="activity-box progress-check {{ $counter === $totalAllChecklists ? 'final-checklist' : '' }}" 
+                            <input type="checkbox" class="activity-box progress-check" 
                                    data-id="{{ $checklist->id }}" 
                                    {{ $checklist->is_completed ? 'checked' : '' }}>
                             {{ $checklist->nama_checklist }}
@@ -194,20 +159,18 @@
         @endforeach
       </div>
       
-     
       <div class="progress-bar-container">
         <div id="progress-bar-fill" style="width: {{ $progressPercentage }}%;"></div>
         <span id="progress-text">{{ $progressPercentage }}% complete</span>
-
-        
       </div>
-      
+
+    
 
       <div class="comment-section">
         <h4>Comments</h4>
         <div class="chat-container" id="chat-container">
             @forelse($comments as $comment)
-                  <div id="comment-{{ $comment->id }}" class="comment-bubble {{ $comment->user_id == Auth::id() ? 'own' : '' }}">
+                <div class="comment-bubble {{ $comment->user_id == Auth::id() ? 'own' : '' }}">
                     <div class="comment-meta">
                         @if($comment->user_id != Auth::id())
                             <strong>{{ $comment->user->name }}</strong>
@@ -237,11 +200,10 @@
   </div>
 </div>
 
-{{-- Pop Up image --}}
 <div class="popup" id="image-popup">
-  <span id="close-popup">&times;</span>
-  <img id="popup-img" src="" alt="popup-image">
-</div>
+            <span id="close-popup">&times;</span>
+            <img id="popup-img" src="" alt="popup-image">
+          </div>
 @endsection
 
 @push('styles')

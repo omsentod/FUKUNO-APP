@@ -240,3 +240,274 @@ body{
     font-size: 16px;
     color: #555;
   }
+
+
+
+/* MOBILE */
+#navbar-hamburger-btn {
+  display: none;
+  font-size: 1.8rem;
+  color: var(--main-color, #CF221B); 
+  cursor: pointer;
+  margin-left: 15px; 
+}
+
+/* Responsive Page */
+@media (max-width: 1200px) {
+
+
+}
+
+@media (max-width: 992px) {
+
+  .navbar{
+    height: 80px;
+  }
+
+  #navbar-hamburger-btn {
+    display: block; 
+  }
+
+  .navbarkanan {
+    margin-left: auto;
+}
+  .header-logo img{
+    width: 50%;
+  }
+  .sidebar-toggle {
+    display: none;
+  }
+
+  .sidebar {
+    position: fixed;
+    display: flex;
+    justify-content: space-between;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1040; 
+    transform: translateY(-100%); 
+    transition: transform 0.3s ease-in-out;
+    padding-top: 50px;
+    
+}
+
+.sidebar-menu {
+  width: 100%; 
+}
+
+.sidebar-item{
+  padding: 5px 0 0 10px ;
+}
+
+
+
+
+.sidebar-cell {
+  display: flex;
+  justify-content: flex-start ;
+  /* align-items: center; */
+  border-bottom: 1px solid #ddd;
+  height: 40px;
+  width: 98%;
+  text-decoration: none;
+  padding-left: 10px;
+  font-size: 12px;
+  color: var(--txt-color);
+  font-weight: var(--font-semibold);
+}
+
+.sidebar .sidebar-item .sidebar-cell:hover {
+  border-radius: 0%;
+  background-color: var(--ctn-color);
+  color: #c5c5c5;
+  font-weight: var(--font-semibold);
+}
+.sidebar-item.active a {
+  border-radius: 0%;
+}
+
+.sidebar-item.active a:hover {
+  border-radius: 0%;
+  background-color: var(--main-color);  
+  color: var(--txt-color);  
+}
+.sidebar-close-toggle {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    z-index: 2000;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color:var(--main-color);
+    color: var(--ctn-color);
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.sidebar-close-toggle:hover{
+  transform: translateY(-5px);
+}
+
+body.sidebar-open-mobile .sidebar {
+    transform: translateY(0); 
+}
+
+.setting{
+  display: none;
+  margin-top: 20px;
+  margin-left: 10px;
+  z-index: 1;
+}
+
+ .page{
+  left:0;
+  width: 100%;
+ }
+
+ .dashboard{
+  display: flex;
+  flex-direction: row;
+  gap: 20px; 
+  width: 100%; 
+ }
+
+
+ .task-category{
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 250px;
+  height: 70px;
+  background-color: var(--ctn-color);
+  outline: 0.5px solid rgb(88, 88, 88) ;
+  border-radius: 10px;
+  box-shadow: 2px 5px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.task-category:hover {
+  cursor: pointer;
+  transform: translateY(-10px);
+}
+
+.task-name{
+ display: flex;
+ justify-content: center;
+ font-weight: var(--font-semibold);
+ font-size: 12px;
+}
+
+.total-task{
+  color: var(--ctn-color);
+  font-weight: var(--font-semibold);
+}
+
+.task-clr{
+  width: 33px;
+  height: 33px;
+  margin-bottom: 10px;
+}
+
+
+}
+
+@media (max-width: 768px) {
+
+  /* Halaman utama agar tidak melebar */
+    .page {
+        position: relative;
+        left: 0;
+        top: 110px;
+        width: 100%;
+        padding: 15px;
+        z-index: 1 !important;
+    }
+
+    /* Title + tombol */
+    .title-page {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .title-page h2 {
+        font-size: 20px;
+    }
+
+    .btn-add {
+        padding: 6px 12px;
+        height: auto;
+        font-size: 13px;
+        margin-right: 0;
+    }
+
+    /* Container */
+    .team-container {
+        padding: 15px;
+        border-radius: 10px;
+    }
+
+    /* Bungkus table agar bisa scroll */
+    .team-table {
+        width: 100%;
+        font-size: 12px;
+    }
+
+    /* Agar tabel tidak melebihi layar */
+    .team-container table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        position: relative;
+        z-index:1 ;
+    }
+
+    /* Ukuran lingkaran inisial */
+    .circle {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+
+    /* Popup lebih kecil */
+    .popup-content {
+        width: 90%;
+        padding: 20px;
+    }
+
+    .popup-content h4 {
+        font-size: 18px;
+    }
+
+    .popup-content input,
+    .popup-content select {
+        font-size: 14px;
+        padding: 7px;
+    }
+
+}
+
+@media (max-width: 576px) {
+
+  .title-page h2 {
+        font-size: 18px;
+    }
+
+    .btn-add {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+
+    .team-table th,
+    .team-table td {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+}

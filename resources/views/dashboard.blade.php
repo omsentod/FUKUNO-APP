@@ -66,9 +66,7 @@
                   $linePekerjaan = $task->taskPekerjaans->first();
                   $deadline = $linePekerjaan ? $linePekerjaan->deadline : null;
               @endphp
-              <tr class="clickable-row" 
-              data-url="{{ route('task', ['highlight' => $task->id]) }}" 
-              style="cursor: pointer;">
+              <tr>
                   <td>{{ $task->judul }}</td>
                   <td>{{ $task->nama_pelanggan }}</td>
 
@@ -141,16 +139,16 @@
            <tbody>
              @forelse($upcomingDeadlines as $task)
                @php
+                  // (Kita perlu ambil line pekerjaan lagi karena ini task yang berbeda)
                   $linePekerjaan = $task->taskPekerjaans->firstWhere('deadline', '>=', now());
                   $deadline = $linePekerjaan ? $linePekerjaan->deadline : null;
   
+                  // Logika Inisial & Warna PIC
                   $picName = $task->user->name ?? 'A';
                   $initials = \App\Http\Controllers\TaskController::buatInisial($picName);
                   $bgColor = $colors[ord(strtoupper(substr($initials, 0, 1))) % count($colors)];
                @endphp
-              <tr class="clickable-row" 
-              data-url="{{ route('task', ['highlight' => $task->id]) }}" 
-              style="cursor: pointer;">
+               <tr>
                    <td>{{ $task->judul }}</td>
                    <td>{{ $task->nama_pelanggan }}</td>
                    <td>
@@ -175,12 +173,14 @@
                                 $timeClass = 'time-completed'; 
                             
                             } else {
-                        
+                                // ▼▼▼ PERBAIKAN DI SINI ▼▼▼
+                                // 1. Ambil string mentah (e.g., "5 jam dari sekarang")
                                 $rawTimeLeft = $deadline->diffForHumans();
                                 
+                                // 2. Ganti stringnya
                                 $timeLeftString = str_replace('dari sekarang', 'lagi', $rawTimeLeft);
-                                $timeLeftString = str_replace('sebelumnya', 'lalu', $timeLeftString);
-                    
+                                $timeLeftString = str_replace('sebelumnya', 'lalu', $timeLeftString); // (Untuk "5 jam lalu")
+                                // ▲▲▲ AKHIR PERBAIKAN ▲▲▲
     
                                 if ($deadline->isPast()) {
                                     $timeClass = 'time-overdue'; 
@@ -193,13 +193,20 @@
                         {{ $timeLeftString }}
                     </span>
                 </td>
-                <td>
-                  <button class="status-btn status-{{ Str::slug($task->status->name) }}" 
-                          type="button" 
-                          style="cursor: default; pointer-events: none;"> 
-                      <span class="status-text">{{ $task->status->name }}</span>
-                  </button>
-              </td>
+                   <td>
+                    <div class="dropdown">
+                        <button class="status-btn status-{{ Str::slug($task->status->name) }} dropdown-toggle" type="button" id="statusDropdown{{ $task->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="status-text">{{ $task->status->name }}</span>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="statusDropdown{{ $task->id }}">
+                            @if($task->status->name == 'Hold')
+                                <a class="dropdown-item" href="#" data-status="Resume Progress"><i class="bi bi-play-circle"></i> Resume Progress</a>
+                            @else
+                                <a class="dropdown-item" href="#" data-status="Hold"><i class="bi bi-pause-circle"></i> Set to Hold</a>
+                            @endif
+                        </div>
+                    </div>
+                </td>
                </tr>
              @empty
                <tr>
@@ -217,6 +224,5 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/dash.css') }}">
 @endpush
-
 
 

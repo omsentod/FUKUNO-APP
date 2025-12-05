@@ -50,9 +50,7 @@
         @php
             $linePekerjaan = $task->taskPekerjaans->first();
         @endphp
-        <tr class="clickable-row" 
-        data-url="{{ route('task.show', $task->id) }}" 
-        style="cursor: pointer;">
+        <tr>
           <td class="select-col"><input type="checkbox" class="row-select" data-id="{{ $task->id }}"></td>
           <td>{{ $task->no_invoice }}</td>
           <td>{{ $task->judul }}</td>
@@ -63,7 +61,7 @@
           <td>{{ $task->nama_pelanggan }}</td>
           <td> 
             <div class="action-icons"> <i class="bi bi-arrow-counterclockwise" title="Restore" data-id="{{ $task->id }}"></i>
-            {{-- <i class="bi bi-file-earmark-text" title="Detail" data-id="{{ $task->id }}"></i> --}}
+            <i class="bi bi-file-earmark-text" title="Detail" data-id="{{ $task->id }}"></i>
             <i class="bi bi-trash-fill" title="Delete" data-id="{{ $task->id }}"></i>
           </div>
           </td>
