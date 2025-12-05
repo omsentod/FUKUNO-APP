@@ -198,3 +198,188 @@ body{
     margin-top: 8px !important; /* Sesuaikan nilai 8px ini */
 }
 
+
+/* MOBILE */
+
+
+
+@media (max-width: 768px) {
+
+  /* ===== HEADER ===== */
+  .head-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 15px;
+  }
+
+  .header-logo img {
+    width: 120px;
+    height: auto;
+  }
+
+  /* Teks + tombol login sejajar */
+  .regis-whisp {
+    position: relative;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;             /* <=== BIAR SEJAJAR */
+    gap: 5px;
+  }
+
+  .regis-whisp p {
+    margin: 0;
+    font-size: 13px;
+  }
+
+  .regis-whisp button {
+    height: 33px;
+    width: 80px;
+    font-size: 13px;
+  }
+
+  /* ===== CONTAINER ===== */
+  /* .container {
+    position: relative;
+    top: 40px;
+    left: 0;
+    width: 100%;
+    padding: 0 20px;
+  } */
+
+  /* Fix container posisi */
+  .container {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    margin-top: 120px !important;
+    padding: 0 15px !important;
+  }
+
+  .regis-text {
+    font-size: 20px;
+    text-align: center;
+  }
+
+  /* ===== FORM BOX ===== */
+  .form-box.regis {
+    width: 100% !important;
+    /* min-height: auto; */
+    /* padding: 20px 15px; */
+    border-radius: 15px;
+
+    /* width: 100% !important; */
+    max-width: 100% !important;
+    padding: 20px !important;
+  }
+
+  .input-box {
+    margin: 20px 0;
+  }
+
+  .input-box p {
+    font-size: 14px;
+  }
+
+  /* Input full width */
+  .input-box input {
+    width: 100% !important;
+    height: 50px;
+    font-size: 14px;
+  }
+
+  /* Select field */
+  .input-box select.role-select {
+    width: 100% !important;
+    height: 50px;
+    font-size: 14px;
+  }
+
+  /* ===== BUTTON DAFTAR ===== */
+  .submit-regis {
+    width: 100%;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .regis-btn {
+    width: 100% !important;
+    height: 50px;
+    font-size: 18px;
+    margin-left: 0;
+  }
+
+  .role-select {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Supaya option dropdown tidak melebar keluar */
+  .role-select option {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  /* Input full width */
+  .input-box input,
+  .input-box select,
+  .regis-btn {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+
+@media (max-width: 480px) {
+
+  .header-logo img {
+    width: 95px;
+  }
+
+  .regis-whisp p {
+    font-size: 12px;
+  }
+
+  .regis-whisp button {
+    width: 75px;
+    height: 30px;
+    font-size: 12px;
+  }
+
+  .regis-text {
+    font-size: 18px;
+  }
+
+  .input-box {
+    margin: 15px 0;
+  }
+
+  .input-box input,
+  .input-box select {
+    height: 45px;
+    font-size: 13px;
+  }
+
+  .regis-btn {
+    height: 48px;
+    font-size: 17px;
+  }
+
+  .role-select {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Supaya option dropdown tidak melebar keluar */
+  .role-select option {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+}

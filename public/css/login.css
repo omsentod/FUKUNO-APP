@@ -264,3 +264,165 @@ body{
         opacity: 0;
     }
 }
+
+
+
+/* MOBILE */
+
+
+@media (max-width: 768px) {
+
+  /* Header */
+  .head-container {
+    padding: 10px 15px;
+    align-items: center;
+  }
+
+  .header-logo img {
+    width: 120px; 
+  }
+
+  .regis-whisp {
+    /* position: static; */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    gap: 5px;
+  }
+
+  .regis-whisp p {
+    margin: 0;
+    font-size: 14px;
+    /* line-height; */
+  }
+
+  .regis-whisp button {
+    width: 80px;
+    height: 32px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;   /* center isi button */
+    justify-content: center;
+    padding: 0 10px;
+  }
+
+  /* Container Login */
+  .container {
+    position: relative;
+    top: 120px;
+    left: 0;
+    padding: 0 20px;
+    width: 100%;
+  }
+
+  .login-text {
+    font-size: 24px;
+  }
+
+  .form-box.login {
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 20px;
+    height: auto;
+    margin-top: 15px;
+  }
+
+  .input-box {
+    margin: 20px 0;
+    width: 100%;
+  }
+
+  .input-box input {
+    width: 100% !important;
+    height: 50px;
+    font-size: 14px;
+  }
+
+  .btn {
+    width: 100%;
+    height: 55px;
+    font-size: 22px;
+  }
+
+  /* Flash message */
+  .flash-message-custom {
+    width: 90%;
+    font-size: 14px;
+    padding: 10px 15px;
+  }
+
+  /* Footer image */
+  .footer-image {
+    height: 25%;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  /* Header */
+  .header-logo img {
+    width: 90px;
+  }
+
+  .regis-whisp p {
+    font-size: 13px;
+  }
+
+  .regis-whisp button {
+    width: 70px;
+    height: 30px;
+    font-size: 12px;
+  }
+
+  /* Form */
+  .login-text {
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .form-box.login {
+    padding: 15px;
+    border-radius: 12px;
+  }
+  .input-box{
+    width: 50vw;
+  }
+  .input-box p {
+    font-size: 10px;
+  }
+
+  .input-box input {
+    width: 100%;
+    height: 45px;
+    font-size: 10px;
+  }
+
+  .btn {
+    height: 48px;
+    font-size: 20px;
+  }
+
+  /* Flash Message */
+  .flash-message-custom {
+    font-size: 13px;
+    padding: 8px 12px;
+    width: 85%;
+    top: 15px;
+  }
+
+  /* Footer */
+  .footer-image {
+    height: 20%;
+  }
+
+  .footer-image img {
+    object-fit: cover;
+  }
+}
