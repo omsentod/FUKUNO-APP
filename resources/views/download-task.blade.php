@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Purchase Order - {{ $task->no_invoice }}</title>
     <link rel="stylesheet" href="{{ asset('css/print.css') }}">
+    <link rel="icon" href="{{ asset('assets/img/print-logo.ico') }}" type="image/x-icon">
 </head>
 <body>
     <div class="po-container">
         <header>
-            <h1>APPAREL BERKAH SELALU</h1>
+            <img src="{{ asset('assets/img/web-logo.png') }}" alt="Logo" class="header-logo-img">
             <h2>PURCHASE ORDER</h2>
         </header>
 
@@ -23,22 +24,47 @@
                 </tr>
                 <tr>
                     <th>KLIEN</th>
+<<<<<<< HEAD
                     <td>{{ $task->nama_pelanggan }}</td> @php
                         // Ambil line pekerjaan (karena task sudah di-split, hanya ada 1)
                         $linePekerjaan = $task->taskPekerjaans->first();
                     @endphp
 
+=======
+                    <td>{{ $task->nama_pelanggan }}</td>
+                    
+>>>>>>> task
                     <th>TANGGAL SELESAI</th>
-                    <td>{{ $linePekerjaan && $linePekerjaan->deadline ? \Carbon\Carbon::parse($linePekerjaan->deadline)->format('j-M-Y') : '-' }}</td>
+                    <td>
+                        {{ $projectFinishDate ? \Carbon\Carbon::parse($projectFinishDate)->format('j-M-Y') : '-' }}
+                    </td>
                 </tr>
                 <tr>
                     <th>ARTICLE / MODEL</th>
                     <td colspan="3">{{ $task->judul }} / {{ $task->model }}</td>
                 </tr>
+                
                 <tr>
                     <th>LINE PEKERJAAN</th>
-                    <td colspan="3">{{ $linePekerjaan ? $linePekerjaan->nama_pekerjaan : 'N/A' }}</td>
+                    <td colspan="3" style="padding: 5px 10px;">
+                        <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                            @foreach($lineList as $item)
+                                <span style="background: #eee; padding: 2px 8px; border-radius: 4px; font-size: 13px; border: 1px solid #ddd;">
+                                    <b>{{ $item->name }}</b> 
+                                    <span style="color: #000; font-size: 12px;">({{ $item->date }})</span>
+                                </span>
+                            @endforeach
+                        </div>
+                    </td>
                 </tr>
+
+                {{-- <tr>
+                    <th>LINE PEKERJAAN</th>
+                    <td colspan="3" style="text-transform: capitalize;">
+                        {{ $lineListString ?: 'N/A' }}
+                    </td>
+                </tr> --}}
+
             </tbody>
         </table>
 
@@ -63,11 +89,25 @@
                         <img src="{{ Storage::url($mockup->file_path) }}" alt="Mockup Gambar">
                     </div>
                 @endforeach
+<<<<<<< HEAD
             </div>             
                  <div class="signature-box">
                     <p class="sign">HEAD PRODUCTION</p>
                     <p class="sign">Vendor</p>
                 </div>
+=======
+            </div>
+
+                <div class="signature-area-left">
+                    <div class="sign-wrapper">
+                        <p class="sign-title">HEAD PRODUCTION</p>
+                    </div>
+                    <div class="sign-wrapper">
+                        <p class="sign-title">VENDOR</p>
+                    </div>
+                </div>
+
+>>>>>>> task
             </section>
             
             <section class="order-details">
@@ -91,7 +131,7 @@
                     <table class="size-table">
                         <thead class="table-danger">
                             <tr>
-                                <th>SIZES</th>
+                                <th>{{ $task->size_title ?? 'Size' }}</th>
                                 @foreach($tipeHeaders as $tipe)
                                     <th>{{ strtoupper($tipe) }}</th>
                                 @endforeach
@@ -132,8 +172,20 @@
                         </tfoot>
                     </table>
                 </div>
+<<<<<<< HEAD
             </section>
         </main>
+=======
+
+                   
+                <div class="notes">
+                    <h3>Note</h3>
+                    {{ $task->catatan ?? 'Tidak ada catatan.' }}
+                </div>
+            </section>
+        </main>
+
+>>>>>>> task
     </div>
     
     @php

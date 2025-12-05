@@ -49,7 +49,13 @@
           @php
               $linePekerjaan = $task->taskPekerjaans->first();
           @endphp
+<<<<<<< HEAD
           <tr>
+=======
+          <tr class="clickable-row" 
+          data-url="{{ route('task.show', $task->id) }}?from=trash" 
+          style="cursor: pointer;">
+>>>>>>> task
             <td class="select-col">
                 <input type="checkbox" class="row-select-trash" data-id="{{ $task->id }}">
             </td>
