@@ -166,23 +166,34 @@ body{
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   }
 
-  .archive-header {
+  .archive-header{
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+  }
+
+  .archive-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
   }
   
   .archive-header h3 {
     font-weight: var(--font-bold);
   }
   
-  .archive-actions button {
-    border: none;
-    background: none;
-    margin-left: 15px;
+  .archive-actions {
+    display: none;
+  
     font-weight: var(--font-semibold);
     cursor: pointer;
+  }
+
+  .archive-actions button{
+    margin-left: 15px;
+    border: none;
+    background: none;
   }
   
   .restore-all i {
@@ -198,11 +209,7 @@ body{
   }
   
     /* === Header Action tambahan === */
-    .archive-header-actions {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
+ 
     
     .select-toggle {
       border: none;

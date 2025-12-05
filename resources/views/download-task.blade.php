@@ -96,7 +96,7 @@
                         <p class="sign-title">HEAD PRODUCTION</p>
                     </div>
                     <div class="sign-wrapper">
-                        <p class="sign-title">VENDOR</p>
+                        <p class="sign-title">ADMIN</p>
                     </div>
                 </div>
 

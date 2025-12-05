@@ -229,46 +229,41 @@ header h2 {
 
 /* KOLASE MOCKUP */
 .mockup-collage-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display:flex;
+   flex-direction: column;
     gap: 5px; 
     width: 300px;
-    max-height: 300px; 
+    height: auto; 
     
-    border: 1px solid #eee;
+    border:none;
     padding: 5px;
     box-sizing: border-box;
-    overflow-y: auto; 
+    overflow: visible;
 }
 
 .collage-item {
     width: 100%;
-    aspect-ratio: 1 / 1; 
-    position: relative; 
+    margin-bottom: 10px;
 }
 
 .collage-item img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 80%;
-    height: 80%;
+    position: static; 
+    
+    width: 100%;
+    height: auto; 
+    
     object-fit: contain; 
+    border: 1px solid #eee; 
 }
 
 
-/* Jika hanya 1 gambar */
-.mockup-collage-container.image-count-1 {
-    grid-template-columns: 1fr;
-    max-height: 400px;
-}
-
-/* Jika hanya 2 gambar */
+.mockup-collage-container.image-count-1,
 .mockup-collage-container.image-count-2 {
-    grid-template-columns: 1fr 1fr; 
-    width: 500px;
-    max-height: 400px;
+    grid-template-columns: none;
+    width: 100%;
+    max-height: none;
 }
+
 /* ===  PRINT (A4) === */
 
 @media print {

@@ -1097,6 +1097,7 @@ function showValidationErrors(popup, errors) {
             if (removeLineBtn) {
                 event.preventDefault();
                 removeLineBtn.closest('.border.p-3.mb-3.rounded')?.remove();
+                updateLineNumbers();
             }
 
             // B. Tambah checklist (membuat widget baru)
@@ -1365,7 +1366,7 @@ function updateLineNumbers() {
     const container = document.querySelector("#lineContainer");
     if (!container) return;
     
-    const lines = container.querySelectorAll(".border");
+    const lines = container.querySelectorAll(".border.p-3.mb-3.rounded");
     
     lines.forEach((line, index) => {
         const title = line.querySelector(".line-title");

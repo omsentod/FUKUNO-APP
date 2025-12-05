@@ -407,8 +407,8 @@ body.sidebar-open-mobile .sidebar {
 
   /* Header content jadi vertikal */
   .header-content {
-      flex-direction: column;
-      align-items: flex-start;
+    display: flex;
+     justify-content: center;
       gap: 10px;
   }
 
@@ -419,16 +419,12 @@ body.sidebar-open-mobile .sidebar {
 
   /* Tombol Add New full width */
   .btn-add {
-      width: 100%;
-      padding: 10px 0;
-      font-size: 14px;
-      border-radius: 10px !important;
-      text-align: center;
+    display: none !important;
   }
 
   /* Tabel — tetap tabel, hanya scroll horizontal */
   .table-checklist {
-      display: block;
+      /* display: block; */
       width: 100%;
       overflow-x: auto;
       white-space: nowrap;

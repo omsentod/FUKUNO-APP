@@ -9,9 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     
     const selectToggleBtn = document.querySelector(".select-toggle");
-    const trashTable = document.getElementById('trashTable');
     const selectAllCheckbox = document.getElementById('selectAllTrash');
-    const rowCheckboxes = document.querySelectorAll('.row-select-trash');
     const bulkActionBar = document.querySelector('.trash-actions'); 
     const restoreAllBtn = document.querySelector(".restore-all");
     const deleteAllBtn = document.querySelector(".delete-all");
@@ -19,7 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let selectMode = false; 
   
     // === 2. FUNGSI HELPER ===
-  
     function toggleSelectMode() {
         selectMode = !selectMode;
         const table = document.querySelector(".trash-table");
@@ -27,17 +24,23 @@ document.addEventListener("DOMContentLoaded", () => {
         table.classList.toggle("checkbox-mode", selectMode);
         table.classList.toggle("selection-mode", selectMode); 
   
-        const rows = table.querySelectorAll("tbody tr");
   
         if (selectMode) {
-            selectToggleBtn.textContent = "Batal Pilih";
+            selectToggleBtn.innerHTML = '<i class="bi bi-x-lg"></i> Batal';
             selectToggleBtn.classList.add("active");
+           
+            if(bulkActionBar) bulkActionBar.style.display = 'flex'; 
+
+  
         } else {
-            selectToggleBtn.textContent = "Pilih";
+            selectToggleBtn.innerHTML = '<i class="bi bi-check-square"></i> Pilih';
+          
             selectToggleBtn.classList.remove("active");
             
-            // Uncheck semua & Sembunyikan Bar
+            // Sembunyikan Bar
             if(bulkActionBar) bulkActionBar.style.display = 'none';
+            
+            // Reset checkbox
             if(selectAllCheckbox) selectAllCheckbox.checked = false;
             document.querySelectorAll('.row-select-trash').forEach(cb => cb.checked = false);
         }
@@ -45,12 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
     function updateBulkActionBar() {
         const selectedCount = document.querySelectorAll('.row-select-trash:checked').length;
-        
-        if (selectedCount > 0) {
-            if(bulkActionBar) bulkActionBar.style.display = 'flex'; 
-        } else {
-            if(bulkActionBar) bulkActionBar.style.display = 'none'; 
-        }
+  
         
         if(selectAllCheckbox) {
             const totalRows = document.querySelectorAll('.row-select-trash').length;

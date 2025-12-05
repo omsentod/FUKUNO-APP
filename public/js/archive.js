@@ -1,3 +1,7 @@
+// ==========================================================
+// === FILE ARCHIVE.JS (VERSI FINAL & SINKRON DENGAN TRASH)
+// ==========================================================
+
 document.addEventListener("DOMContentLoaded", () => {
     
     // === 1. PILIH ELEMEN UTAMA ===
@@ -5,53 +9,45 @@ document.addEventListener("DOMContentLoaded", () => {
     const archiveTable = document.getElementById('archiveTable');
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     
-    // Tombol Aksi Header
     const selectToggleBtn = document.querySelector(".select-toggle");
     const bulkActionBar = document.querySelector('.archive-actions'); 
-    const selectAllCheckbox = document.getElementById('selectAll');
     const restoreAllBtn = document.querySelector(".restore-all");
     const deleteAllBtn = document.querySelector(".delete-all");
+    const selectAllCheckbox = document.getElementById('selectAll');
   
     let selectMode = false;
   
     // === 2. FUNGSI HELPER ===
   
-    // A. Mengatur Mode Pilih (Toggle UI)
     function toggleSelectMode() {
         selectMode = !selectMode;
-        
         if (!archiveTable) return;
+        
         archiveTable.classList.toggle("selection-mode", selectMode);
   
         if (selectMode) {
-            // Masuk Mode Pilih
+            // Gunakan innerHTML agar ikon tidak hilang
             selectToggleBtn.innerHTML = '<i class="bi bi-x-lg"></i> Batal';
             selectToggleBtn.classList.add("active");
+            
+            // Langsung tampilkan tombol aksi massal
+            if(bulkActionBar) bulkActionBar.style.display = 'flex'; 
         } else {
-            // Keluar Mode Pilih (Reset Semua)
             selectToggleBtn.innerHTML = '<i class="bi bi-check-square"></i> Pilih';
             selectToggleBtn.classList.remove("active");
             
-            // Uncheck semua checkbox
-            const checkboxes = document.querySelectorAll('.row-select');
-            checkboxes.forEach(cb => cb.checked = false);
-            if (selectAllCheckbox) selectAllCheckbox.checked = false;
-            
-            // Sembunyikan tombol aksi massal
-            if (bulkActionBar) bulkActionBar.style.display = 'none';
+            // Reset
+            if(bulkActionBar) bulkActionBar.style.display = 'none';
+            if(selectAllCheckbox) selectAllCheckbox.checked = false;
+            document.querySelectorAll('.row-select').forEach(cb => cb.checked = false);
         }
     }
   
-    // B. Update Tombol Aksi Massal (Muncul jika ada yang dicentang)
     function updateBulkActionBar() {
         const selectedCount = document.querySelectorAll('.row-select:checked').length;
         
-        if (bulkActionBar) {
-            // Tampilkan jika ada >= 1 item dipilih, Sembunyikan jika 0
-            bulkActionBar.style.display = (selectedCount > 0) ? 'flex' : 'none';
-        }
-        
-        // Update status checkbox "Select All"
+        // Kita tidak perlu menyembunyikan bar di sini lagi (agar tombol tetap ada)
+        // Cukup update checkbox Select All
         if (selectAllCheckbox) {
             const totalRows = document.querySelectorAll('.row-select').length;
             selectAllCheckbox.checked = (selectedCount > 0 && selectedCount === totalRows);
@@ -59,7 +55,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
   
-    // C. Eksekusi Aksi Massal
     async function performBulkAction(action) {
         const selectedIds = Array.from(document.querySelectorAll(".row-select:checked"))
                                  .map(cb => cb.dataset.id);
@@ -97,12 +92,10 @@ document.addEventListener("DOMContentLoaded", () => {
   
     // === 3. EVENT LISTENERS ===
   
-    // Tombol Pilih
     if (selectToggleBtn) {
         selectToggleBtn.addEventListener("click", toggleSelectMode);
     }
   
-    // Select All
     if (selectAllCheckbox) {
         selectAllCheckbox.addEventListener('change', (e) => {
             document.querySelectorAll('.row-select').forEach(cb => {
@@ -112,7 +105,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
   
-    // Checkbox per Baris (Delegasi)
     if (archiveTableBody) {
         archiveTableBody.addEventListener('change', (e) => {
             if (e.target.classList.contains('row-select')) {
@@ -121,9 +113,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
   
-    // --- TOMBOL MASSAL ---
     if (restoreAllBtn) {
         restoreAllBtn.addEventListener('click', () => {
+            if (!selectMode) return alert("Aktifkan mode pilih dulu!");
             if (confirm("Pulihkan semua task yang dipilih?")) {
                 performBulkAction('unarchive_all');
             }
@@ -131,29 +123,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (deleteAllBtn) {
         deleteAllBtn.addEventListener('click', () => {
-            // Kirim aksi 'delete' (Soft Delete) ke Bulk Action
-            if (confirm("Pindahkan task yang dipilih ke Sampah?")) {
+            if (!selectMode) return alert("Aktifkan mode pilih dulu!");
+            if (confirm("Pindahkan task terpilih ke Sampah?")) {
                 performBulkAction('delete'); 
             }
         });
     }
   
-    // --- INTERAKSI TABEL (KLIK BARIS & TOMBOL) ---
+    // Listener Klik Tabel
     if (archiveTableBody) {
         archiveTableBody.addEventListener('click', (e) => {
             const target = e.target;
             const row = target.closest('tr');
             
-            if (!row) return;
+            if (!row || (selectMode && target.type !== 'checkbox')) return; 
   
-            // Ambil ID dari data-id (bisa di checkbox atau tombol)
             let id = target.dataset.id;
             if (!id) {
-               const elWithId = target.closest('[data-id]');
-               if (elWithId) id = elWithId.dataset.id;
+                const iconWithId = row.querySelector('.action-icons [data-id]') || target.closest('[data-id]');
+                if (iconWithId) id = iconWithId.dataset.id;
             }
   
-            // 1. AKSI RESTORE SATUAN (Unarchive)
+            // 1. RESTORE SATUAN
             if (target.classList.contains('bi-arrow-counterclockwise') || target.closest('.restore-icon')) { 
                 if (confirm('Pulihkan task ini?')) {
                     fetch(`/task/unarchive/${id}`, { 
@@ -163,18 +154,18 @@ document.addEventListener("DOMContentLoaded", () => {
                     .then(res => res.json())
                     .then(result => {
                         if (result.success) {
-                            row.remove(); // Hapus baris visual
+                            row.remove();
                             alert('Task berhasil dipulihkan.');
                         } else { alert('Gagal: ' + result.message); }
-                    });
+                    })
+                    .catch(err => console.error(err));
                 }
-                return; // Stop
+                return; 
             }
             
-            // 2. AKSI DELETE SATUAN (Soft Delete)
+            // 2. DELETE SATUAN
             if (target.classList.contains('bi-trash-fill') || target.closest('.delete-icon')) {
                  if (confirm('Pindahkan ke Sampah?')) {
-                    // Panggil route DELETE satuan
                     fetch(`/task/delete/${id}`, { 
                         method: 'DELETE', 
                         headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
@@ -182,30 +173,29 @@ document.addEventListener("DOMContentLoaded", () => {
                     .then(res => res.json())
                     .then(result => {
                         if (result.success) {
-                            row.remove(); // Hapus baris visual
+                            row.remove();
                             alert('Task dipindahkan ke sampah.');
-                        } else { alert('Gagal: ' + result.message); }
-                    });
+                        } else { alert('Gagal menghapus: ' + result.message); }
+                    })
+                    .catch(err => alert("Terjadi kesalahan server."));
                  }
-                 return; // Stop
+                 return;
             }
   
-            // 3. AKSI DETAIL (Tombol Mata/File)
-            if (target.classList.contains('bi-file-earmark-text') || target.closest('.detail-icon')) {
-            }
-  
-            // 4. CEGAH PINDAH HALAMAN (Jika klik checkbox/input)
+            // 3. CEGAH KLIK CHECKBOX/INPUT
             if (target.closest('.select-col') || target.tagName === 'INPUT') {
-                return; 
+                return;
             }
   
-            // 5. KLIK BARIS (Pindah ke Detail)
+            // 4. PINDAH KE DETAIL
             if (row.classList.contains('clickable-row')) {
-                // Pastikan tidak sedang klik tombol aksi
-                if (!target.closest('.action-icons')) {
+                 // Pastikan tidak klik area action
+                 if (!target.closest('.action-icons')) {
                     const url = row.dataset.url;
-                    if (url) window.location.href = url + '?from=archive';
-                }
+                    if (url) {
+                        window.location.href = url + '?from=archive';
+                    }
+                 }
             }
         });
     }

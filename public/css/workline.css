@@ -427,7 +427,10 @@ body.sidebar-open-mobile .sidebar {
 }
 
 @media (max-width: 768px) {
-
+  
+ .btn-add{
+    display: none !important;
+}
 
 }
 
@@ -440,6 +443,7 @@ body.sidebar-open-mobile .sidebar {
         left: 0;
         width: 100%;
     }
+    
 
     /* Card putih utama */
     .line-pekerjaan {
@@ -450,7 +454,7 @@ body.sidebar-open-mobile .sidebar {
     /* Header (Judul + Add New button) */
     .header-content {
         flex-direction: row;      /* tetap sejajar */
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
         margin-bottom: 15px;
     }

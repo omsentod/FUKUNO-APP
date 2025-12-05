@@ -431,9 +431,8 @@ body.sidebar-open-mobile .sidebar {
     /* Title + tombol */
     .title-page {
         width: 100%;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
+        justify-content: center;
+        
     }
 
     .title-page h2 {
@@ -441,10 +440,7 @@ body.sidebar-open-mobile .sidebar {
     }
 
     .btn-add {
-        padding: 6px 12px;
-        height: auto;
-        font-size: 13px;
-        margin-right: 0;
+       display: none!important;
     }
 
     /* Container */
