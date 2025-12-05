@@ -151,7 +151,7 @@
                 </div>
 
                    
-                <div class="specs-list">
+                <div class="notes">
                     <h3>Note</h3>
                     {{ $task->catatan ?? 'Tidak ada catatan.' }}
                 </div>
