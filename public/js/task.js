@@ -565,6 +565,67 @@ function getSizeTableData(popup) {
 
 
 
+ function resetForm() {
+    const popup = document.querySelector(".popup");
+    const taskForm = popup.querySelector("#taskForm");
+    
+    // 1. Reset Input Standar (Text, Select)
+    taskForm.reset();
+    
+    // 2. Hapus ID Editing (PENTING: Agar tidak dianggap update)
+    delete taskForm.dataset.editingId;
+    
+    // 3. Reset Input Readonly (No Invoice)
+    const noInvoiceInput = popup.querySelector("#noInvoice");
+    noInvoiceInput.disabled = false;
+    noInvoiceInput.style.backgroundColor = "";
+    
+    // 4. Bersihkan Line Pekerjaan (Hapus semua, lalu tambah 1 kosong)
+    const lineContainer = popup.querySelector("#lineContainer");
+    lineContainer.innerHTML = '';
+    addLine(); 
+    
+    // 5. Bersihkan Mockup
+    mockupFiles.clear();
+    mockupsToDelete = [];
+    document.querySelector("#mockup-preview-area").innerHTML = '';
+    
+    // 6. Reset Tabel Size ke Default
+    const sizeTable = popup.querySelector("#sizeTable");
+    const tHeadRow = sizeTable.querySelector("thead tr");
+    const tBody = sizeTable.querySelector("tbody");
+    const tFootRow = sizeTable.querySelector("tfoot tr");
+
+    // Kembalikan Header Standar
+    tHeadRow.innerHTML = `
+        <th>Size</th>
+        <th>Panjang</th>
+        <th>Pendek</th>
+        <th>Jumlah</th>
+    `;
+    
+    // Kembalikan Body Kosong (1 Baris)
+    tBody.innerHTML = `
+        <tr>
+            <td><input type="text" class="form-control" placeholder="Input size"></td>
+            <td><input type="text" class="form-control quantity-input" placeholder="0"></td>
+            <td><input type="text" class="form-control quantity-input" placeholder="0"></td>
+            <td class="row-total">0</td>
+        </tr>
+    `;
+
+    // Kembalikan Footer
+    tFootRow.innerHTML = `
+        <td>Total</td>
+        <td class="column-total">0</td>
+        <td class="column-total">0</td>
+        <td class="grand-total">0</td>
+    `;
+
+    // 7. Hapus Pesan Error (Validasi)
+    popup.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    popup.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+}
 
 
 
@@ -789,12 +850,8 @@ function showValidationErrors(popup, errors) {
     const mockupInput = popup.querySelector("#mockups");
     const previewArea = popup.querySelector("#mockup-preview-area");
 
-    // Variabel untuk file hapus (direset setiap kali)
     let mockupsToDelete = [];
 
-    // --- 3. PASANG LISTENER (Menggunakan .onclick = ... untuk MENCEGAH DUPLIKAT) ---
-
-    // Hapus ID Edit lama (jika ada) saat "Add New"
     if (taskForm && taskForm.dataset.editingId) {
         delete taskForm.dataset.editingId;
     }
@@ -804,7 +861,10 @@ function showValidationErrors(popup, errors) {
     } else { console.error("Tombol #addLine tidak ditemukan!"); }
 
     if (cancelBtn) {
-        cancelBtn.onclick = () => { overlay.style.display = "none"; actionHistory = []; mockupFiles.clear(); };
+        cancelBtn.onclick = () => { 
+            overlay.style.display = "none"; 
+            resetForm();
+        };
     }
 
     if (addSizeRowBtn) {
@@ -1673,7 +1733,12 @@ function updateProgress(checkbox) {
   }
 
   // Tombol "Add Task" utama
-  if (addBtn) addBtn.addEventListener("click", showPopup);
+if (addBtn) {
+    addBtn.addEventListener("click", () => {
+        resetForm(); 
+        showPopup();
+    });
+}
 
 // Inisialisasi progress bar & galeri untuk baris yang sudah ada
 document.querySelectorAll('.task table tbody tr').forEach(row => {
@@ -1755,29 +1820,20 @@ document.body.addEventListener('change', function(event) {
 
 const searchInput = document.getElementById("taskSearchInput");
   
-  // Pastikan 'mainTableBody' sudah didefinisikan di Bagian 1 file Anda
   if (searchInput && mainTableBody) {
       
-      // 'input' akan berjalan setiap kali Anda mengetik, menghapus, atau paste
       searchInput.addEventListener("input", function() {
           
-          // 1. Ambil kata kunci pencarian (dan ubah ke huruf kecil)
           const searchTerm = searchInput.value.toLowerCase();
           
-          // 2. Ambil semua baris (tr) yang ada di dalam <tbody>
           const rows = mainTableBody.querySelectorAll("tr");
 
-          // 3. Loop setiap baris
           rows.forEach(row => {
-              // Ambil semua teks dari baris itu (dan ubah ke huruf kecil)
               const rowText = row.textContent.toLowerCase();
               
-              // 4. Cek apakah teks baris mengandung kata kunci pencarian
               if (rowText.includes(searchTerm)) {
-                  // Jika ya, tampilkan barisnya
-                  row.style.display = ""; // Mengembalikan ke display default (table-row)
+                  row.style.display = ""; 
               } else {
-                  // Jika tidak, sembunyikan barisnya
                   row.style.display = "none";
               }
           });
@@ -1803,9 +1859,8 @@ const searchInput = document.getElementById("taskSearchInput");
   const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
   const bulkExportBtn = document.getElementById('bulkExportBtn');
 
-/**
-   * Helper untuk update tampilan bar aksi massal
-   */
+
+
   function updateBulkActionBar() {
       const selectedCount = document.querySelectorAll('.row-checkbox:checked').length;
       
@@ -1816,16 +1871,14 @@ const searchInput = document.getElementById("taskSearchInput");
           if(bulkActionBar) bulkActionBar.style.display = 'none';
       }
       
-      // Update checkbox "Select All"
       if(selectAllCheckbox) {
           selectAllCheckbox.checked = (selectedCount > 0 && selectedCount === rowCheckboxes.length);
           selectAllCheckbox.indeterminate = (selectedCount > 0 && selectedCount < rowCheckboxes.length);
       }
   }
 
-  /**
-   * Helper untuk mengirim 'fetch' aksi massal
-   */
+
+
   async function performBulkAction(action) {
       const selectedIds = Array.from(document.querySelectorAll('.row-checkbox:checked'))
                                .map(cb => cb.dataset.id);
@@ -1840,7 +1893,7 @@ const searchInput = document.getElementById("taskSearchInput");
       const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
       try {
-          const response = await fetch('/tasks/bulk-action', { // Rute yang kita buat
+          const response = await fetch('/tasks/bulk-action', { 
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json',
@@ -1848,7 +1901,7 @@ const searchInput = document.getElementById("taskSearchInput");
                   'Accept': 'application/json'
               },
               body: JSON.stringify({
-                  action: action, // 'archive' or 'delete'
+                  action: action,
                   task_ids: selectedIds
               })
           });
@@ -1857,7 +1910,7 @@ const searchInput = document.getElementById("taskSearchInput");
 
           if (result.success) {
               showNotif(result.message);
-              location.reload(); // Muat ulang halaman
+              location.reload(); 
           } else {
               throw new Error(result.message || 'Aksi massal gagal.');
           }
@@ -1946,11 +1999,9 @@ const searchInput = document.getElementById("taskSearchInput");
 document.body.addEventListener('click', function(event) {
     const target = event.target;
     
-    // 1. Abaikan jika klik di dalam popup overlay
     if (target.closest('.popup-overlay')) return; 
 
-    // 2. Cek Aksi Tombol (Edit, Print, Delete)
-    // Gunakan .closest() agar aman jika user klik ikon <i> di dalam tombol
+
     if (target.closest('.icon-edit')) {
         event.preventDefault();
         handleEdit(target.closest('.icon-edit')); 
@@ -1967,17 +2018,16 @@ document.body.addEventListener('click', function(event) {
         return; 
     }
 
-    // 3. Cek Elemen Interaktif Lain (Dropdown, Mockup, Checkbox)
-    // Jika user klik ini, kita stop, jangan sampai kode pindah halaman jalan
+
     if (target.closest('.mockup-wrapper') || 
         target.closest('.dropdown-toggle') || 
         target.closest('.dropdown-menu') || 
         target.closest('.line-btn') || 
-        target.closest('input') ||           // Input & Checkbox
-        target.closest('label') ||           // Label Checkbox
-        target.closest('.select-col')) {     // Kolom Select All
+        target.closest('input') ||           
+        target.closest('label') ||           
+        target.closest('.select-col')) {     
         
-        // Jalankan logika spesifik (jika ada)
+        
         const wrapper = target.closest('.mockup-wrapper');
         if (wrapper) {
             event.preventDefault();
@@ -1990,11 +2040,9 @@ document.body.addEventListener('click', function(event) {
             handleStatusChange(statusItem);
         }
 
-        return; // BERHENTI DI SINI (Jangan lanjut ke kode pindah halaman)
+        return; 
     }
-    
-    // 4. Aksi Pindah Halaman (Klik Baris)
-    // Kode ini hanya akan jalan jika user klik area KOSONG di baris
+
     const row = target.closest('tr.clickable-row');
     if (row) {
         const url = row.dataset.url;
@@ -2003,7 +2051,6 @@ document.body.addEventListener('click', function(event) {
         }
     }
 });
-
 
 
 }); // END DOC
