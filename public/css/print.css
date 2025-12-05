@@ -17,11 +17,11 @@
     --ctn-color:#ffff;
     --bg-color:#FAFBFC;
     --main-color: #CF221B;
-    --font-light: 300;   
-    --font-regular: 500; 
-    --font-semibold: 600; 
-    --font-bold: 700;    
-    --font-extrabold: 900; 
+    --font-light: 300;
+    --font-regular: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    --font-extrabold: 900;
 }
 
 /* Pengaturan Halaman (Saat dibuka di tab baru) */
@@ -35,9 +35,10 @@ body {
 
 /* Kontainer Utama PO (Saat dibuka di tab baru) */
 .po-container {
-    max-width: 1000px;
-    margin: 20px auto;
-    padding: 30px 40px;
+    width: 210mm;
+    margin: 30px auto;
+    padding: 8mm;
+    min-height: 297mm;
     background-color: #ffffff;
     border: 1px solid #dcdcdc;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -70,10 +71,10 @@ header h2 {
 }
 .po-details th,
 .po-details td {
-    padding: 10px 12px;
+    padding: 5px;
+    font-size: 12px;
     text-align: left;
     border: 1px solid #e0e0e0;
-    font-size: 14px;
     vertical-align: top;
 }
 .po-details th {
@@ -86,7 +87,7 @@ header h2 {
 .main-content {
     display: flex;
     margin-top: 25px;
-    gap: 30px;
+    gap: 15px;
 }
 
 /* Kolom Kiri */
@@ -132,6 +133,16 @@ header h2 {
     width: 80px;
     font-weight: 600;
 }
+
+.notes {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+
+    word-break: break-word;
+
+    white-space: pre-wrap;
+}
+
 .logo-list ul {
     padding-left: 20px;
     display: grid;
@@ -158,8 +169,9 @@ header h2 {
 .size-table th,
 .size-table td {
     border: 1px solid #000;
-    padding: 10px;
-    font-size: 14px;
+    padding: 5px 4px;
+    font-size: 11px;
+    white-space: nowrap;
 }
 .size-table th {
     background-color: #333;
@@ -192,12 +204,12 @@ footer {
 }
 
 .signature-box p{
-    white-space: nowrap; 
+    white-space: nowrap;
     margin: 0 100px 0 0;
 }
 .sign {
-    border-top: 2px solid #000; 
-    padding-top: 5px; 
+    border-top: 2px solid #000;
+    padding-top: 5px;
     width: 150px;
 }
 
@@ -205,20 +217,20 @@ footer {
 .mockup-collage-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 5px; 
+    gap: 5px;
     width: 400px;
-    max-height: 400px; 
-    
+    max-height: 400px;
+
     border: 1px solid #eee;
     padding: 5px;
     box-sizing: border-box;
-    overflow-y: auto; 
+    overflow-y: auto;
 }
 
 .collage-item {
     width: 100%;
-    aspect-ratio: 1 / 1; 
-    position: relative; 
+    aspect-ratio: 1 / 1;
+    position: relative;
 }
 
 .collage-item img {
@@ -227,7 +239,7 @@ footer {
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain; 
+    object-fit: contain;
 }
 
 
@@ -239,14 +251,14 @@ footer {
 
 /* Jika hanya 2 gambar */
 .mockup-collage-container.image-count-2 {
-    grid-template-columns: 1fr 1fr; 
+    grid-template-columns: 1fr 1fr;
     width: 500px;
     max-height: 400px;
 }
 /* ===  PRINT (A4) === */
 
 @media print {
-    
+
     /* Mengatur halaman cetak menjadi A4 dan memberi margin */
     @page {
         size: A4;
@@ -283,7 +295,7 @@ footer {
     .size-table {
         page-break-inside: avoid;
     }
-    
+
     /* Mencegah footer terpotong */
     footer {
         page-break-before: auto; /* Pindah ke halaman baru jika perlu */

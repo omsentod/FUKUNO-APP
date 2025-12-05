@@ -47,7 +47,7 @@
                 @php
                 // 1. Hitung jumlah mockup
                 $mockupCount = $task->mockups->count();
-                
+
                 // 2. Siapkan class dinamis
                 $collageClass = 'mockup-collage-container';
                 if ($mockupCount === 1) {
@@ -63,15 +63,15 @@
                         <img src="{{ Storage::url($mockup->file_path) }}" alt="Mockup Gambar">
                     </div>
                 @endforeach
-            </div>             
+            </div>
                  <div class="signature-box">
                     <p class="sign">HEAD PRODUCTION</p>
                     <p class="sign">Vendor</p>
                 </div>
             </section>
-            
+
             <section class="order-details">
-                
+
                 <div class="specs-list">
                     <h3>Spesifikasi</h3>
                     <ul>
@@ -80,12 +80,12 @@
                         <li><strong>MODEL</strong>: {{ $task->model ?? '-' }}</li>
                     </ul>
                 </div>
-                
+
                 <div class="specs-list">
                     <h3>Note</h3>
                     {{ $task->catatan ?? 'Tidak ada catatan.' }}
                 </div>
-                 
+
                  <div class="size-table-container">
                     <h3>Rincian Ukuran</h3>
                     <table class="size-table">
@@ -101,9 +101,9 @@
                             @foreach($jenisRows as $jenis => $sizes)
                                 <tr>
                                     <td>{{ $jenis }}</td>
-                                    
+
                                     @php $rowTotal = 0; @endphp
-                                    
+
                                     @foreach($tipeHeaders as $tipe)
                                         @php
                                             // Cari jumlah untuk (Jenis, Tipe) ini
@@ -113,7 +113,7 @@
                                         @endphp
                                         <td>{{ $jumlah }}</td>
                                     @endforeach
-                                    
+
                                     <td class="row-total-print">{{ $rowTotal }}</td>
                                 </tr>
                             @endforeach
@@ -126,16 +126,22 @@
                                         {{ $task->taskSizes->where('tipe', $tipe)->sum('jumlah') }}
                                     </td>
                                 @endforeach
-                                
+
                                 <td class="grand-total-print">{{ $task->total_jumlah }}</td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
+
+
+                <div class="notes">
+                    <h3>Note</h3>
+                    {{ $task->catatan ?? 'Tidak ada catatan.' }}
+                </div>
             </section>
         </main>
     </div>
-    
+
     @php
         use Illuminate\Support\Facades\Storage;
         use Carbon\Carbon;
