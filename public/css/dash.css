@@ -560,7 +560,7 @@ body.sidebar-closed .sidebar-toggle i {
       .deadline{
         margin: 100px 0 0 40px;
         height: min-content;
-        width: 450px;
+        width: 480px;
         box-shadow: 2px 4px 6px rgba(0,0,0,0.1);
 
         background-color: #c73636;
@@ -614,7 +614,7 @@ body.sidebar-closed .sidebar-toggle i {
       }
 
       .dltable-tittle{
-        font-size: 24px;
+        font-size: 20px;
         font-weight: var(--font-regular);
         margin-top: 10px;
         text-align: center;
@@ -965,7 +965,6 @@ body.sidebar-open-mobile .sidebar {
 @media (max-width: 768px) {
   /* Page agar tidak tersangkut sidebar */
     .page {
-        left: 0;
         width: 100%;
         padding: 15px;
         top: 110px;
