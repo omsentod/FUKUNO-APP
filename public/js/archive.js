@@ -199,4 +199,28 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    const searchInput = document.getElementById('archiveSearchInput');
+  const tableRows = document.querySelectorAll("#archiveTable tbody tr");
+
+  if (searchInput) {
+      searchInput.addEventListener('keyup', function(e) {
+          const searchTerm = e.target.value.toLowerCase();
+
+          tableRows.forEach(row => {
+              // Abaikan baris pesan "Tidak ada data"
+              if (row.querySelector('td.text-center')) return;
+
+              // Ambil seluruh teks dalam satu baris
+              const rowText = row.textContent.toLowerCase();
+
+              // Cek apakah kata kunci ada di dalam teks baris
+              if (rowText.includes(searchTerm)) {
+                  row.style.display = ""; // Tampilkan
+              } else {
+                  row.style.display = "none"; // Sembunyikan
+              }
+          });
+      });
+  }
   });

@@ -26,6 +26,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Tambahkan event edit/delete ke setiap baris pekerjaan
     document.querySelectorAll("#tableBody tr").forEach(row => attachActions(row));
+
+    const searchInput = document.getElementById('worklineSearchInput');
+
+    if (searchInput && tableBody) {
+        searchInput.addEventListener('keyup', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = tableBody.querySelectorAll("tr");
+
+            rows.forEach(row => {
+                // Ambil teks dari seluruh sel di baris tersebut
+                const rowText = row.textContent.toLowerCase();
+
+                if (rowText.includes(searchTerm)) {
+                    row.style.display = ""; // Tampilkan
+                } else {
+                    row.style.display = "none"; // Sembunyikan
+                }
+            });
+        });
+    }
 });
 
 // === FUNCTION: Tampilkan popup form tambah/edit ===

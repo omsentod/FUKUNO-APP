@@ -43,11 +43,59 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-  }
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.header-content h2 {
+  font-weight: var(--font-bold);
+}
+
+.left-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.left-section h2 {
+    margin: 0;
+    white-space: nowrap;
+}
+
+/* Input Search */
+.search-container {
+    margin-bottom: 0 !important;
+}
+
+.input-with-icon {
+    position: relative;
+    width: 250px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    font-size: 14px;
+}
+
+#worklineSearchInput {
+    padding-left: 35px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    height: 35px;
+}
+
+#worklineSearchInput:focus {
+    border-color: var(--main-color);
+    box-shadow: 0 0 0 2px rgba(207, 34, 27, 0.2);
+    outline: none;
+}
   
-  .header-content h2 {
-    font-weight: var(--font-bold);
-  }
+
   
   .btn-add {
     background-color: var(--main-color);
@@ -432,6 +480,8 @@ body.sidebar-open-mobile .sidebar {
     display: none !important;
 }
 
+
+
 }
 
 @media (max-width: 576px) {
@@ -451,16 +501,25 @@ body.sidebar-open-mobile .sidebar {
         border-radius: 10px;
     }
 
-    /* Header (Judul + Add New button) */
     .header-content {
-        flex-direction: row;      /* tetap sejajar */
-        justify-content: center;
-        align-items: center;
-        margin-bottom: 15px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+    }
+    
+    .left-section {
+      width: 100%;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .input-with-icon {
+      width: 90%;
     }
 
     .header-content h2 {
-        font-size: 18px;
+        font-size: 15px;
     }
 
     .btn-add {

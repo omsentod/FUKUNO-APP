@@ -58,11 +58,59 @@ body{
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-  }
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.header-content h2 {
+  font-weight: var(--font-bold);
+}
+
+.left-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.left-section h2 {
+    margin: 0;
+    white-space: nowrap;
+}
+
+/* Input Search Cantik */
+.search-container {
+    margin-bottom: 0 !important;
+}
+
+.input-with-icon {
+    position: relative;
+    width: 250px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    font-size: 14px;
+}
+
+#checklistSearchInput {
+    padding-left: 35px; /* Ruang untuk ikon */
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    height: 35px;
+}
+
+#checklistSearchInput:focus {
+    border-color: var(--main-color);
+    box-shadow: 0 0 0 2px rgba(207, 34, 27, 0.2);
+    outline: none;
+}
   
-  .header-content h2 {
-    font-weight: var(--font-bold);
-  }
+
   
   .btn-add {
     background-color: var(--main-color);
@@ -407,15 +455,26 @@ body.sidebar-open-mobile .sidebar {
 
   /* Header content jadi vertikal */
   .header-content {
-    display: flex;
-     justify-content: center;
-      gap: 10px;
-  }
+    flex-direction: column;
+    align-items: flex-start;
+}
+ /* Judul tetap tapi lebih kecil */
+ .header-content h2 {
+  font-size: 20px;
+}
 
-  /* Judul tetap tapi lebih kecil */
-  .header-content h2 {
-      font-size: 20px;
-  }
+.left-section {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.input-with-icon {
+    width: 100%;
+}
+
+ 
 
   /* Tombol Add New full width */
   .btn-add {

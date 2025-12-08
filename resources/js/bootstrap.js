@@ -26,6 +26,7 @@ window.Echo = new Echo({
 
 const userId = document.querySelector('meta[name="user-id"]')?.getAttribute('content');
 const notificationSound = new Audio('/assets/audio/notif.mp3');
+const chatContainer = document.getElementById('chat-container');
 
 if (userId) {
     console.log("Mendengarkan notifikasi untuk user:", userId);
@@ -131,6 +132,39 @@ if (userId) {
                 .catch(err => console.error("Gagal update tabel task:", err));
         }
         
+        if (chatContainer && dataNotif.type === 'new_comment' && chatContainer.dataset.taskId == dataNotif.task_id) {
+            
+            console.log("Komentar baru masuk di task ini!");
+
+            // 1. Hapus pesan "Belum ada komentar" jika ada
+            const noComments = document.getElementById('no-comments');
+            if (noComments) noComments.remove();
+
+            // 2. Buat Elemen Bubble Baru
+            const bubble = document.createElement('div');
+            // Karena ini dari Pusher (orang lain), pasti posisinya di KIRI (bukan 'own')
+            bubble.className = 'comment-bubble'; 
+            
+            // Format isi (ganti enter jadi <br>)
+            const formattedBody = dataNotif.comment_body.replace(/\n/g, '<br>');
+            
+            // Susun HTML (Sesuaikan dengan struktur blade Anda)
+            bubble.innerHTML = `
+                <div class="comment-header" style="font-size: 12px; margin-bottom: 2px; color: #666;">
+                    <strong>${dataNotif.creator_name}</strong>
+                </div>
+                <div class="comment-body">${formattedBody}</div>
+                <div class="comment-time" style="font-size: 10px; color: #999; text-align: right; margin-top: 5px;">
+                    Baru saja
+                </div>
+            `;
+            
+            // 3. Masukkan ke Container
+            chatContainer.appendChild(bubble);
+            
+            // 4. Scroll ke paling bawah
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
         // 6. TAMPILKAN TOAST
         showToast(dataNotif.message); 
     });

@@ -79,6 +79,7 @@ body.sidebar-closed .page {
   /* 1. Wrapper untuk input dan ikon */
 .input-with-icon {
     position: relative; 
+    width: 250px;
 }
 
 /* 2. Style untuk ikon "loop" (search) */
@@ -92,10 +93,17 @@ body.sidebar-closed .page {
 }
 
 #taskSearchInput {
-    padding-left: 40px !important; /* Beri ruang ekstra di kiri untuk ikon */
-}
-
-/* === INPUT DENGAN TOGGLE DI DALAM === */
+    padding-left: 35px;
+    border-radius: 20px; 
+    border: 1px solid #ddd;
+    font-size: 14px;
+    height: 35px;
+  }
+  
+  #taskSearchInput:focus {
+    border-color: var(--main-color);
+    box-shadow: 0 0 0 2px rgba(207, 34, 27, 0.2);
+  }
 
 .input-with-toggle {
     position: relative; 
@@ -1007,16 +1015,16 @@ thead th a i.bi {
   
       /* ==== TITLE + SEARCH + ACTION BUTTON ==== */
       .title-page {
-          flex-direction: column;
-          align-items: flex-start;
+          justify-content: space-around;
+          align-items: center;
           gap: 10px;
           width: 100%;
       }
   
       .tp-1 {
+        align-items: center;
           width: 100% !important;
-          flex-direction: column;
-          gap: 10px !important;
+          gap: 20px !important;
       }
   
       .search-container {
@@ -1025,15 +1033,20 @@ thead th a i.bi {
   
       /* Input search */
       #taskSearchInput {
-          font-size: 13px;
+          font-size: 10px;
           padding-left: 35px !important;
+          height: 25px;
+         margin-top: 10px;
       }
   
       .search-icon {
           left: 10px;
-          font-size: 14px;
+          font-size: 10px;
       }
-  
+      .input-with-icon {
+        width: 150px;
+
+    }
       .title-page-actions {
           width: 100%;
           display: flex;
@@ -1057,6 +1070,11 @@ thead th a i.bi {
       }
       #addBtn {
         display: none !important;
+    }
+
+    .icon-edit{
+        display: none !important;
+
     }
 
       #taskTable {

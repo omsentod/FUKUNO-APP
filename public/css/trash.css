@@ -54,16 +54,63 @@ body{
     border-radius: 10px;
   }
   
-  .trash-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .trash-header h3 {
-    font-weight: var(--font-bold);
-  }
+/* === HEADER TRASH (JUDUL & SEARCH) === */
+.trash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap; /* Agar responsif di HP */
+  gap: 15px;
+}
+
+/* Wrapper Kiri (Judul + Search) */
+.tp-1 {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Jarak antara tulisan "Trashed" dan kotak search */
+}
+
+.tp-1 h3 {
+  margin: 0;
+  font-weight: var(--font-bold);
+  white-space: nowrap; /* Agar judul tidak turun baris */
+}
+
+/* Container Search */
+.search-container {
+  margin-bottom: 0 !important; 
+}
+
+.input-with-icon {
+  position: relative;
+  width: 250px; 
+}
+
+/* Icon Kaca Pembesar */
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 14px;
+}
+
+/* Input Field */
+#taskSearchInput {
+  padding-left: 35px;
+  border-radius: 20px; 
+  border: 1px solid #ddd;
+  font-size: 14px;
+  height: 35px;
+}
+
+#taskSearchInput:focus {
+  border-color: var(--main-color);
+  box-shadow: 0 0 0 2px rgba(207, 34, 27, 0.2);
+}
+
   
   .trash-actions {
     display: none;
@@ -247,3 +294,21 @@ body{
       font-size: 13px;
       text-align: center;
     }
+
+    /* MOBILE */
+    @media (max-width: 768px) {
+      .trash-header {
+          flex-direction: column;
+          align-items: flex-start;
+      }
+      
+      .tp-1 {
+          width: 100%;
+          justify-content: space-between;
+          flex-wrap: wrap;
+      }
+      
+      .input-with-icon {
+          width: 100%; /* Full width di HP */
+      }
+  }

@@ -10,9 +10,25 @@
 <div class="page">
   
     <div class="checklist-container">
-      <div class="header-content">
-        <h2>Checklist</h2>
-        <button class="btn-add" id="addBtn"><i class="bi bi-plus-lg"></i> Add new</button>
+  <div class="header-content">
+        
+        {{-- Bagian Kiri: Judul & Search --}}
+        <div class="left-section">
+            <h2>Checklist</h2>
+            
+            {{-- SEARCH BOX --}}
+            <div class="search-container">
+                <div class="input-with-icon">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" id="checklistSearchInput" class="form-control" placeholder="Cari Checklist...">
+                </div>
+            </div>
+        </div>
+
+        {{-- Bagian Kanan: Tombol Add --}}
+        <button class="btn-add" id="addBtn">
+            <i class="bi bi-plus-lg"></i> Add new
+        </button>
       </div>
         <table class="table-checklist">
         <thead>

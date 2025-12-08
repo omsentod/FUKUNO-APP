@@ -15,7 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteAllBtn = document.querySelector(".delete-all");
   
     let selectMode = false; 
-  
+    
+    
     // === 2. FUNGSI HELPER ===
     function toggleSelectMode() {
         selectMode = !selectMode;
@@ -209,4 +210,28 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    const searchInput = document.getElementById('taskSearchInput');
+    const tableRows = document.querySelectorAll("#trashTable tbody tr");
+
+  if (searchInput) {
+      searchInput.addEventListener('keyup', function(e) {
+          const searchTerm = e.target.value.toLowerCase();
+
+          tableRows.forEach(row => {
+              // Abaikan baris pesan "Tidak ada data"
+              if (row.querySelector('td.text-center')) return;
+
+              // Ambil seluruh teks dalam satu baris
+              const rowText = row.textContent.toLowerCase();
+
+              // Cek apakah kata kunci ada di dalam teks baris
+              if (rowText.includes(searchTerm)) {
+                  row.style.display = ""; // Tampilkan
+              } else {
+                  row.style.display = "none"; // Sembunyikan
+              }
+          });
+      });
+  }
   });

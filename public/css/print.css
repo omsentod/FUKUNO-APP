@@ -1,11 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
-/* ========================================================== */
-/* === GAYA DEFAULT (UNTUK LAYAR) === */
-/* ========================================================== */
-
-*{
-    font-family:"Poppins", sans-serif ;
+* {
+    font-family: "Poppins", sans-serif;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -13,304 +9,246 @@
     list-style: none;
 }
 
-:root{
-    --ctn-color:#ffff;
-    --bg-color:#FAFBFC;
-    --main-color: #CF221B;
-    --font-light: 300;   
-    --font-regular: 500; 
-    --font-semibold: 600; 
-    --font-bold: 700;    
-    --font-extrabold: 900; 
-}
-
-/* Pengaturan Halaman (Saat dibuka di tab baru) */
 body {
-    /* Biarkan 'font-family' dari '*' yang mengambil alih */
     margin: 0;
     padding: 0;
-    background-color: #f4f7f6;
+    background-color: #525659;
     color: #333;
 }
 
-/* Kontainer Utama PO (Saat dibuka di tab baru) */
 .po-container {
     width: 210mm;
-    margin: 30px auto;
-    padding: 8mm;
     min-height: 297mm;
+    margin: 30px auto;
+    padding: 15mm;
     background-color: #ffffff;
-    border: 1px solid #dcdcdc;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
+    position: relative;
     display: flex;
     flex-direction: column;
 }
 
-/* Header */
 header {
-    text-align: left !important; 
-    padding-bottom: 15px;
-    border-bottom: 3px solid #000;
-    margin-bottom: 20px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+     border-bottom: 3px solid #000;
+    margin-bottom: 20px;
 }
+
 .header-logo-img {
-    height: 100px; 
+    height: 80px;
     width: auto;
     object-fit: contain;
     display: block;
 }
 
 header h2 {
-    margin: 30px 0 0 0;
+    margin: 0;
     padding: 0;
-    font-size: 25px;
-    font-weight: var(--font-bold);
+    font-size: 24px;
+    font-weight: 800;
     color: #222;
+    letter-spacing: 1px;
     text-transform: uppercase;
-    align-items: center;
-    
 }
 
-/* Detail Utama PO */
 .po-details {
     width: 100%;
-    margin-top: 25px;
     border-collapse: collapse;
+    margin-bottom: 25px;
 }
+
 .po-details th,
 .po-details td {
-    padding: 5px;
-    font-size: 12px;
+    padding: 6px 10px;
     text-align: left;
     border: 1px solid #e0e0e0;
+    font-size: 12px;
     vertical-align: top;
 }
+
 .po-details th {
     background-color: #f9f9f9;
     font-weight: 600;
     width: 18%;
+    white-space: nowrap;
 }
 
-/* Konten Utama (2 kolom) */
 .main-content {
     display: flex;
-    margin-top: 25px;
-    gap: 15px;
+    flex-direction: column;
+    gap: 25px;
+    flex: 1;
 }
 
-/* Kolom Kiri */
-.product-info {
+.row-section {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.half-column {
+    flex: 1;
+    width: 50%;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    flex: 1;
-}
-.product-image {
-    width: 50%; 
-    height: 50%;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
 }
 
-/* Kolom Kanan */
-.order-details {
-    flex: 1;
-}
-
-/* Spesifikasi & Daftar Logo */
-.specs-list, .logo-list {
-    margin-top: 20px;
-    padding: 10px;
+.specs-list, .notes-box {
+    padding: 12px;
     background-color: #fdfdfd;
-    border: 1px solid #e0e0e0;
+    border: 1px solid #ccc;
     border-radius: 4px;
+    height: 100%;
+    font-size: 12px;
 }
-.specs-list h3, .logo-list h3 {
+
+.specs-list h3, .notes-box h3 {
     margin-top: 0;
     border-bottom: 1px solid #eee;
-    padding-bottom: 8px;
-}
-.specs-list ul, .logo-list ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-.specs-list li {
-    font-size: 15px;
+    padding-bottom: 5px;
     margin-bottom: 8px;
-}
-.specs-list li strong {
-    display: inline-block;
-    width: 80px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 700;
 }
 
-.notes {
-    overflow-wrap: break-word;  
-    word-wrap: break-word;    
-    
-    word-break: break-word; 
-    
-    white-space: pre-wrap; 
+.specs-list ul { margin: 0; padding: 0; }
+.specs-list li { margin-bottom: 5px; list-style: none; }
+.specs-list li strong { display: inline-block; width: 70px; font-weight: 600; }
+
+.notes-content {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
-.logo-list ul {
-    padding-left: 20px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 5px;
+.signature-box {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    height: 100%;
+    padding: 10px;
 }
-.logo-list li {
+
+.sign-wrapper {
+    text-align: center;
+    width: 120px;
+}
+
+.sign-title {
+    font-weight: 800;
+    font-size: 11px;
+    text-transform: uppercase;
+    border-top: 2px solid #000; 
+    padding-top: 5px;
+    margin-top: 70px; 
+    margin-bottom: 0;
+}
+
+.size-table-container h3 {
+    margin: 0 0 5px 0;
     font-size: 14px;
 }
 
-/* Tabel Ukuran */
-.size-table-container {
-    margin-top: 20px;
-}
-.size-table-container h3 {
-    margin-top: 0;
-    margin-bottom: 10px;
-}
 .size-table {
     width: 100%;
     border-collapse: collapse;
     text-align: center;
+    font-size: 11px;
 }
+
 .size-table th,
 .size-table td {
     border: 1px solid #000;
-    padding: 5px 4px;
-    font-size: 11px;
+    padding: 4px;
     white-space: nowrap;
 }
+
 .size-table th {
     background-color: #333;
     color: #ffffff;
     font-weight: 600;
 }
-.size-table .total-row {
+
+.size-table .total-row td {
     background-color: #f0f0f0;
     font-weight: 700;
 }
 
+.full-width-section {
+    width: 100%;
+    margin-top: 10px;
+    border-top: 2px dashed #ccc;
+    padding-top: 20px;
+}
 
+.full-width-section h3 {
+    font-size: 16px;
+    margin-bottom: 15px;
+    text-decoration: underline;
+}
 
-.signature-area-left {
-    margin-top: 50px; /* Jarak dari gambar di atasnya */
+.mockup-gallery {
     display: flex;
-    justify-content: space-between; /* Head di kiri, Vendor di kanan */
-    gap: 20px; /* Jarak antar tanda tangan */
+    flex-direction: column;
+    gap: 20px;
     width: 100%;
 }
 
-/* Style Per Item Tanda Tangan */
-.sign-wrapper {
-    flex: 1; /* Bagi ruang sama rata */
+.mockup-item {
+    width: 100%;
     text-align: center;
+    border: 1px solid #eee;
+    padding: 10px;
+    border-radius: 5px;
+    page-break-inside: avoid; 
 }
 
-.sign-title {
-    font-weight: bold;
-    font-size: 11px; /* Sedikit dikecilkan agar muat di kolom */
-    text-transform: uppercase;
-    
-    /* Garis di atas nama */
-    border-top: 2px solid #000; 
-    padding-top: 5px;
-    
-    /* Ruang untuk paraf */
-    margin-top: 80px; 
-    margin-bottom: 0;
+.mockup-item img {
+    max-width: 100%;
+    height: auto;
+    max-height: 900px;
+    object-fit: contain;
 }
-
-/* KOLASE MOCKUP */
-.mockup-collage-container {
-    display:flex;
-   flex-direction: column;
-    gap: 5px; 
-    width: 300px;
-    height: auto; 
-    
-    border:none;
-    padding: 5px;
-    box-sizing: border-box;
-    overflow: visible;
-}
-
-.collage-item {
-    width: 100%;
-    margin-bottom: 10px;
-}
-
-.collage-item img {
-    position: static; 
-    
-    width: 100%;
-    height: auto; 
-    
-    object-fit: contain; 
-    border: 1px solid #eee; 
-}
-
-
-.mockup-collage-container.image-count-1,
-.mockup-collage-container.image-count-2 {
-    grid-template-columns: none;
-    width: 100%;
-    max-height: none;
-}
-
-/* ===  PRINT (A4) === */
 
 @media print {
-    
-    /* Mengatur halaman cetak menjadi A4 dan memberi margin */
     @page {
         size: A4;
-        margin: 15mm 15mm 0 15mm; /* 1.5cm margin di semua sisi */
+        margin: 15mm;
     }
 
-    /* Menghilangkan gaya web-only */
     body {
         background-color: #ffffff;
         margin: 0;
-        padding: 0;
-        /* Memaksa browser mencetak warna latar belakang */
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
     }
 
-    /* Memaksa kontainer agar pas dengan area cetak */
     .po-container {
         width: 100%;
-        max-width: none; 
+        min-height: auto;
         margin: 0;
         padding: 0;
         border: none;
         box-shadow: none;
     }
 
-    /* Memastikan gambar tidak meluap */
-    .product-image {
-        width: 100%;
-        height: auto;
-    }
-
-    /* Mencegah tabel terpotong di antara halaman */
-    .size-table {
-        page-break-inside: avoid;
+    * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
     
-    footer {
-        width: 100%;
-        padding: 0; 
-        box-sizing: border-box;
-        margin-top: 10vh;
-        page-break-before: auto; 
+    .mockup-item, .size-table {
         page-break-inside: avoid;
+    }
+
+    .row-section, .notes-box, .notes-content {
+        page-break-inside: auto;
+        display: block;
+    }
+    
+    
+    .row-section {
+        display: flex; 
     }
 }

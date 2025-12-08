@@ -205,7 +205,7 @@
 
       <div class="comment-section">
         <h4>Comments</h4>
-        <div class="chat-container" id="chat-container">
+        <div class="chat-container" id="chat-container" data-task-id="{{ $mainTask->id }}">
             @forelse($comments as $comment)
                   <div id="comment-{{ $comment->id }}" class="comment-bubble {{ $comment->user_id == Auth::id() ? 'own' : '' }}">
                     <div class="comment-meta">

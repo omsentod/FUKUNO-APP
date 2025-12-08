@@ -7,12 +7,25 @@
 
 
   <div class="line-pekerjaan">
+
     <div class="header-content">
-      <h2>Line Pekerjaan</h2>
+
+      <div class="left-section">
+          <h2>Line Pekerjaan</h2>
+          
+          <div class="search-container">
+              <div class="input-with-icon">
+                  <i class="bi bi-search search-icon"></i>
+                  <input type="text" id="worklineSearchInput" class="form-control" placeholder="Cari Line Pekerjaan...">
+              </div>
+          </div>
+      </div>
+
       <button type="button" class="btn-add">
         <i class="bi bi-plus-lg"></i> Add new
       </button>
     </div>
+
     <table class="table-line">
       <thead>
         <tr>

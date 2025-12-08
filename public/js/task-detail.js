@@ -258,67 +258,97 @@ document.addEventListener("DOMContentLoaded", () => {
         if (progressBarFill) progressBarFill.style.width = percentage + '%';
         if (progressText) progressText.textContent = percentage + '% complete';
     }
-
-    // =========================================
-    // 6. LOGIKA KOMENTAR
-    // =========================================
+    // 6. LOGIKA KOMENTAR (ENTER = KIRIM, SHIFT+ENTER = BARIS BARU)
+  
     const commentBox = document.getElementById('comment');
     const submitBtn = document.getElementById('submit-btn');
 
-    if (submitBtn) {
-        submitBtn.addEventListener('click', () => {
-            const text = commentBox.value.trim();
-            const taskId = submitBtn.dataset.taskId;
-            
-            if (!text) {
-                alert('Tulis komentar terlebih dahulu!');
-                return;
-            }
+   
+    function postComment() {
+        const text = commentBox.value.trim();
+        // Pastikan submitBtn ada sebelum akses dataset
+        if (!submitBtn) return;
+        
+        const taskId = submitBtn.dataset.taskId;
+        
+        if (!text) return; // Jangan kirim jika kosong
 
-            fetch(`/task/comment/${taskId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
-                body: JSON.stringify({ body: text })
-            })
-            .then(res => res.json())
-            .then(result => {
-                if (result.success) {
-                    addCommentBubble(result.comment);
-                    commentBox.value = ''; 
-                } else {
-                    alert('Gagal mengirim komentar: ' + result.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error koneksi.');
-            });
+        // Matikan tombol sementara agar tidak double submit
+        submitBtn.disabled = true;
+
+        fetch(`/task/comment/${taskId}`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json', 
+                'X-CSRF-TOKEN': csrfToken, // Pastikan variabel ini ada di scope atas (DOMContentLoaded)
+                'Accept': 'application/json' 
+            },
+            body: JSON.stringify({ body: text })
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result.success) {
+                addCommentBubble(result.comment);
+                commentBox.value = ''; // Kosongkan textarea
+                commentBox.focus();    // Kembalikan fokus ke textarea
+            } else {
+                alert('Gagal mengirim komentar: ' + result.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error koneksi.');
+        })
+        .finally(() => {
+            submitBtn.disabled = false; // Hidupkan tombol kembali
         });
     }
 
-    // Fungsi membuat bubble chat baru
+    // --- B. Listener Klik Tombol Pesawat ---
+    if (submitBtn) {
+        submitBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            postComment();
+        });
+    }
+
+    // --- C. Listener Keyboard (Enter vs Shift+Enter) ---
+    if (commentBox) {
+        commentBox.addEventListener('keydown', (e) => {
+            // Cek jika tombol adalah ENTER
+            if (e.key === 'Enter') {
+                // Cek jika SHIFT TIDAK ditekan
+                if (!e.shiftKey) {
+                    e.preventDefault(); // Cegah enter membuat baris baru
+                    postComment();      // Kirim komentar
+                }
+                // Jika Shift+Enter, biarkan default browser (buat baris baru)
+            }
+        });
+    }
+
+    // Fungsi helper bubble (Sama seperti sebelumnya)
     function addCommentBubble(comment) {
         const noComments = document.getElementById('no-comments');
         if (noComments) noComments.remove();
 
-        // Format waktu sederhana
         const dateObj = new Date(comment.created_at);
         const time = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
         
         const bubble = document.createElement('div');
-        // Komentar baru pasti milik user yang login ('own')
         bubble.className = 'comment-bubble own';
-        // Beri ID untuk deep linking di masa depan
         bubble.id = `comment-${comment.id}`; 
         
+        // Ganti newline (\n) menjadi <br> agar baris baru terlihat di bubble
+        const formattedBody = comment.body.replace(/\n/g, '<br>');
+
         bubble.innerHTML = `
-            <div class="comment-body">${comment.body}</div>
+            <div class="comment-body">${formattedBody}</div>
             <div class="comment-time">${time}</div>
         `;
         
         chatContainer.appendChild(bubble);
         scrollToBottom();
     }
-
    
 });

@@ -10,15 +10,24 @@
 
 
     <div class="team-container">
-        <div class="title-page">
-            <h2>User</h2>
-            <button class="btn-add" id="addBtn">      
-            <a href="javascript:void(0);" onclick="showPopup('create')">
-            <i class="bi bi-plus-lg"> </i>Add New
-            </a>
+        <div class="title-page user-header">
+            <div class="left-section">
+                <h2>User</h2>
+                
+                {{-- SEARCH BOX --}}
+                <div class="search-container">
+                    <div class="input-with-icon">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" id="userSearchInput" class="form-control" placeholder="Cari User...">
+                    </div>
+                </div>
+            </div>
+            
+            <button class="btn-add" id="addBtn" onclick="showPopup('create')">      
+                <i class="bi bi-plus-lg"></i> Add New
             </button>
-        
         </div>
+
         <table class="team-table">
             <thead>
                 <tr>
@@ -32,45 +41,44 @@
             </thead>
             <tbody id="userTableBody">
                 @foreach($users as $user)
-        @php
-        // Dapatkan nama user
-        $fullName = $user->name ?? '';
-        
-        // 1. Pecah nama menjadi kata-kata
-        $words = explode(' ', trim($fullName));
-        
-        // 2. Ambil huruf pertama dari kata pertama dan kata kedua (jika ada)
-        $initials = strtoupper(substr($words[0], 0, 1) . 
-                               (isset($words[1]) ? substr($words[1], 0, 1) : ''));
-        
-        // --- Logika Warna HSL BARU (menggunakan $initials yang benar) ---
-        $picName = $initials ?: 'A'; // Gunakan inisial baru untuk warna
-        $firstLetter = strtoupper(substr($picName, 0, 1)); 
-        $letterValue = ord($firstLetter) - ord('A'); 
-        $hue = ($letterValue * 14) % 360;
-        $bgColor = "hsl({$hue}, 65%, 40%)";
-        @endphp
+                    @php
+                        // Logika Warna Avatar
+                        $fullName = $user->name ?? '';
+                        $words = explode(' ', trim($fullName));
+                        $initials = strtoupper(substr($words[0], 0, 1) . (isset($words[1]) ? substr($words[1], 0, 1) : ''));
+                        
+                        $picName = $initials ?: 'A'; 
+                        $hue = ((ord(strtoupper(substr($picName, 0, 1))) - ord('A')) * 14) % 360;
+                        $bgColor = "hsl({$hue}, 65%, 40%)";
+                    @endphp
 
-                <tr data-id="{{ $user->id }}" data-name="{{ $user->name }}" data-email="{{ $user->email }}" data-role="{{ $user->role }}">
-                    <td>
-                        <div class="member-info">
-                            <div class="circle" style="background-color: {{ $bgColor }};">
-                                {{ $initials }}
+                    <tr data-id="{{ $user->id }}" 
+                        data-name="{{ $user->name }}" 
+                        data-email="{{ $user->email }}" 
+                        data-role="{{ $user->role }}">
+                        
+                        <td>
+                            <div class="member-info">
+                                <div class="circle" style="background-color: {{ $bgColor }};">
+                                    {{ $initials }}
+                                </div>
+                                {{ $user->name }}
                             </div>
-                            {{ $user->name }}
-                        </div>
-                    </td>
+                        </td>
 
-                    <td><a href="mailto:{{ $user->email }}">{{ $user->email }}</a></td>
-                    <td>{{ ucfirst($user->role) }}</td>
-                    <td>
-                        <a href="#" class="edit">Edit</a>
-                        <a href="#" class="delete" data-id="{{ $user->id }}">Delete</a>
-                    </td> 
-                </tr>
+                        <td><a href="mailto:{{ $user->email }}">{{ $user->email }}</a></td>
+                        <td>{{ ucfirst($user->role) }}</td>
+                        
+                        <td>
+                            <a href="#" class="edit" onclick="event.preventDefault(); editUser(this)">Edit</a>
+                            
+                            <a href="#" class="delete" onclick="event.preventDefault(); deleteUser({{ $user->id }})">Delete</a>
+                            
+                            </td> 
+                    </tr>
                 @endforeach
             </tbody>
-        </table>
+            </table>
     </div>
 </div>
 

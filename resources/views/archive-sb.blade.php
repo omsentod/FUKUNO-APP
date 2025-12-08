@@ -8,7 +8,16 @@
 <div class="page">
     <div class="archive-container">
       <div class="archive-header">
-        <h3>Archive</h3>
+        <div class="ap-1">
+
+          <h3>Archive</h3>
+          <div class="search-container">
+              <div class="input-with-icon">
+                  <i class="bi bi-search search-icon"></i>
+                  <input type="text" id="archiveSearchInput" class="form-control" placeholder="Cari">
+              </div>
+          </div>
+      </div>
 
         <div class="archive-header-actions">
           <button class="select-toggle">

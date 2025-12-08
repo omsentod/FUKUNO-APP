@@ -166,13 +166,61 @@ body{
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   }
 
-  .archive-header{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
+/* === HEADER ARCHIVE (JUDUL & SEARCH) === */
+.archive-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
 
+/* Wrapper Kiri (Judul + Search) */
+.ap-1 {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.ap-1 h3 {
+  margin: 0;
+  font-weight: var(--font-bold);
+  white-space: nowrap;
+}
+
+/* Input Search Cantik */
+.search-container {
+  margin-bottom: 0 !important;
+}
+
+.input-with-icon {
+  position: relative;
+  width: 250px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 14px;
+}
+
+#archiveSearchInput {
+  padding-left: 35px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  height: 35px;
+}
+
+#archiveSearchInput:focus {
+  border-color: var(--main-color);
+  box-shadow: 0 0 0 2px rgba(207, 34, 27, 0.2);
+  outline: none;
+}
   .archive-header-actions {
     display: flex;
     align-items: center;
@@ -508,6 +556,17 @@ body.sidebar-open-mobile .sidebar {
         align-items: flex-start;
         gap: 10px;
     }
+
+    .ap-1 {
+      width: 100%;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+  }
+  
+  .input-with-icon {
+      width: 100%;
+  }
 
     .archive-header h3 {
         font-size: 20px;

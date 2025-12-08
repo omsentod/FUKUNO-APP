@@ -448,7 +448,9 @@ public function storeComment(Request $request, $task_id)
                 'time'             => 'Baru saja',
                 'creator_name'     => Auth::user()->name,
                 'task_title'       => $task->judul,
-                'comment_body'     => $comment->body
+                'comment_body'     => $comment->body,
+                'type'             => 'new_comment', 
+                'task_id'          => $task->id
             ];
 
             event(new NewNotification($notifData, $targetUser->id));

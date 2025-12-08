@@ -226,4 +226,33 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("click", (e) => {
     if (e.target.classList.contains("popup")) e.target.style.display = "none";
   });
+
+
+  // fungsi search
+  const searchInput = document.getElementById('checklistSearchInput');
+  const tableBody = document.getElementById('checklistsTable'); 
+
+  if (searchInput && tableBody) {
+      searchInput.addEventListener('keyup', function(e) {
+          const searchTerm = e.target.value.toLowerCase();
+          const rows = tableBody.querySelectorAll("tr");
+
+          rows.forEach(row => {
+              // Abaikan baris pesan "Tidak ada data" / Loading
+              if (row.querySelector('td[colspan]')) return;
+
+              // Ambil teks dari seluruh baris (ID + Nama Checklist + Item)
+              const rowText = row.textContent.toLowerCase();
+
+              // Tampilkan jika cocok, sembunyikan jika tidak
+              if (rowText.includes(searchTerm)) {
+                  row.style.display = ""; 
+              } else {
+                  row.style.display = "none"; 
+              }
+          });
+      });
+  }
+
+
 });
