@@ -581,6 +581,7 @@ document.addEventListener("DOMContentLoaded", () => {
     lineContainer.innerHTML = ''; 
     
     allTasks.forEach(task => {
+        
         // ▼▼▼ PERBAIKAN DI SINI ▼▼▼
         // Ambil line pertama (dan satu-satunya) menggunakan [0]
         const line = (task.task_pekerjaans && task.task_pekerjaans.length > 0) ? task.task_pekerjaans[0] : null;
@@ -663,6 +664,41 @@ document.addEventListener("DOMContentLoaded", () => {
     updateMockupPreview(); // Update tampilan
 }
 
+function globalClickHandler(event) {
+    const target = event.target;
+
+    if (target.closest('.icon-cell')) {
+        // Edit
+        if (target.classList.contains('icon-edit')) {
+            event.preventDefault();
+            handleEdit(target);
+            return;
+        }
+
+        // Print
+        if (target.classList.contains('icon-download')) {
+            event.preventDefault();
+            handlePrint(target);
+            return;
+        }
+
+        // Delete
+        if (target.classList.contains('icon-trash')) {
+            event.preventDefault();
+            handleDelete(target);
+            return;
+        }
+
+        // Duplicate (BARU)
+        if (target.classList.contains('icon-duplicate')) {
+            event.preventDefault();
+            handleDuplicate(target);
+            return;
+        }
+    }
+}
+
+
 // --- FUNGSI DUPLICATE TASK ---
 async function handleDuplicate(icon) {
     const taskId = icon.dataset.id;
@@ -675,33 +711,20 @@ async function handleDuplicate(icon) {
     if (preloader) preloader.classList.remove('loaded');
 
     try {
-        // 1. Ambil data task asli
         const response = await fetch(`/task/edit/${taskId}`);
         if (!response.ok) throw new Error("Gagal mengambil data task untuk duplicate.");
 
         const result = await response.json();
+        if (!result.success) throw new Error(result.message || "Gagal memuat data duplicate.");
 
-        if (!result.success) {
-            throw new Error(result.message || "Gagal memuat data duplicate.");
-        }
+        // 1. reset mockup agar tidak hilang
+        mockupFiles.clear();
 
-        // 2. Tampilkan popup (segar)
+        // 2. tampilkan popup
         showPopup();
 
-        // 3. Isi form seperti edit
-        populateForm(result.task, result.allTasks, result.sizeData);    
-
-        // 4. UBAH NO INVOICE menjadi duplikat
-        const newInvoice = generateDuplicateInvoice(result.task.no_invoice);
-        const invoiceInput = document.querySelector("#noInvoice");
-
-        invoiceInput.value = newInvoice;
-        invoiceInput.disabled = false; 
-        invoiceInput.style.backgroundColor = ""; 
-
-        // 5. Pastikan form dianggap "CREATE", bukan edit
-        const taskForm = document.querySelector("#taskForm");
-        delete taskForm.dataset.editingId;  
+        // 3. gunakan populate DUPLICATE
+        populateFormDuplicate(result.task, result.allTasks, result.sizeData);
 
         showNotif("Task berhasil disalin. Silakan perbarui sebelum menyimpan.");
 
@@ -713,15 +736,37 @@ async function handleDuplicate(icon) {
     }
 }
 
+
 function generateDuplicateInvoice(original) {
-    // Jika belum ada "-angka" → tambahkan "-1"
     if (!original.match(/-\d+$/)) {
         return original + "-1";
     }
 
-    // Jika sudah ada, tingkatkan angkanya
     return original.replace(/-(\d+)$/, (_, num) => `-${parseInt(num) + 1}`);
 }
+
+
+function populateFormDuplicate(mainTask, allTasks, sizeData) {
+    populateForm(mainTask, allTasks, sizeData);
+
+    const invoiceInput = document.querySelector("#noInvoice");
+
+    // Pastikan invoice old tidak hilang
+    invoiceInput.value = generateDuplicateInvoice(mainTask.no_invoice);
+
+    // Tetap nonaktif agar tidak kena autofill random
+    invoiceInput.disabled = true;
+    invoiceInput.style.backgroundColor = "#e9ecef";
+
+    // anggap sebagai task baru
+    const taskForm = document.querySelector("#taskForm");
+    delete taskForm.dataset.editingId;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("click", globalClickHandler);
+});
+
 
 
 

@@ -94,6 +94,7 @@ class TaskController extends Controller
 
 public function store(Request $request)
     {
+
         // 1. Validasi
         $validatedData = $request->validate([
             'noInvoice' => 'required|string',
@@ -188,8 +189,12 @@ public function store(Request $request)
                     $task->mockups()->createMany($mockupPaths);
                 }
                 
+                
                 $createdTasks[] = Task::with('user', 'status', 'mockups', 'taskPekerjaans.checklists')->find($task->id);
+                
             }
+
+
 
             // Notifikasi
             $usersToNotify = User::where('id', '!=', auth()->id())->get();
@@ -203,6 +208,7 @@ public function store(Request $request)
                 'success' => true, 
                 'message' => 'Task berhasil disimpan!',
                 'tasks' => $createdTasks
+                
             ]);
 
         } catch (\Exception $e) {
@@ -404,6 +410,8 @@ public function updateChecklistStatus(Request $request, $id)
 
     public function edit($id)
     {
+        $admins = User::where('role', 'admin')->get(['id', 'name']);
+
         // 1. Temukan task utama yang diklik
         $mainTask = Task::findOrFail($id);
     
@@ -440,8 +448,11 @@ public function updateChecklistStatus(Request $request, $id)
             'success' => true,
             'task' => $mainTaskData, // ← Data mockup sekarang punya URL
             'allTasks' => $allTasksInGroup,
-            'sizeData' => $sizeData
+            'sizeData' => $sizeData,
+            'admins' => $admins,     // ← KIRIM KE FRONTEND
         ]);
+
+        
     }
 
 
