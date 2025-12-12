@@ -246,7 +246,8 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
                     <td class="icon-cell">
                         <i class="bi bi-pencil-square icon-edit" data-id="{{ $task->id }}"></i>
                         <i class="bi bi-cloud-download-fill icon-download" data-id="{{ $task->id }}"></i>
-                        <i class="bi bi-trash3-fill icon-trash" data-id="{{ $task->id }}"></i>
+                        <i class="bi bi-files icon-duplicate" data-id="{{ $task->id }}"></i>
+                        {{-- <i class="bi bi-trash3-fill icon-trash" data-id="{{ $task->id }}"></i> --}}
                     </td>
                 </tr>
 

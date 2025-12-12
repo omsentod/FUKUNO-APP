@@ -663,45 +663,106 @@ document.addEventListener("DOMContentLoaded", () => {
     updateMockupPreview(); // Update tampilan
 }
 
-
-
- function handleDelete(icon) {
-    const row = icon.closest('tr');
+// --- FUNGSI DUPLICATE TASK ---
+async function handleDuplicate(icon) {
     const taskId = icon.dataset.id;
-    
-    if (!taskId || !row) {
-        alert('Error: Task ID tidak ditemukan.');
+    if (!taskId) {
+        alert("Task ID tidak ditemukan untuk duplicate!");
         return;
     }
-    
-    const taskName = row.querySelector('td:nth-child(2)')?.textContent || 'task ini'; 
-    
-    if (confirm(`Apakah Anda yakin ingin menghapus task: "${taskName}"?`)) {
-        
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        fetch(`/task/delete/${taskId}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                row.remove();
-                showNotif(result.message || 'Task berhasil dihapus.');
-            } else {
-                alert('Gagal menghapus task: ' + result.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan. Gagal menghapus task.');
-        });
+    const preloader = document.getElementById('page-preloader');
+    if (preloader) preloader.classList.remove('loaded');
+
+    try {
+        // 1. Ambil data task asli
+        const response = await fetch(`/task/edit/${taskId}`);
+        if (!response.ok) throw new Error("Gagal mengambil data task untuk duplicate.");
+
+        const result = await response.json();
+
+        if (!result.success) {
+            throw new Error(result.message || "Gagal memuat data duplicate.");
+        }
+
+        // 2. Tampilkan popup (segar)
+        showPopup();
+
+        // 3. Isi form seperti edit
+        populateForm(result.task, result.allTasks, result.sizeData);    
+
+        // 4. UBAH NO INVOICE menjadi duplikat
+        const newInvoice = generateDuplicateInvoice(result.task.no_invoice);
+        const invoiceInput = document.querySelector("#noInvoice");
+
+        invoiceInput.value = newInvoice;
+        invoiceInput.disabled = false; 
+        invoiceInput.style.backgroundColor = ""; 
+
+        // 5. Pastikan form dianggap "CREATE", bukan edit
+        const taskForm = document.querySelector("#taskForm");
+        delete taskForm.dataset.editingId;  
+
+        showNotif("Task berhasil disalin. Silakan perbarui sebelum menyimpan.");
+
+    } catch (error) {
+        console.error("Error Duplicate:", error);
+        alert(error.message);
+    } finally {
+        if (preloader) preloader.classList.add('loaded');
     }
 }
+
+function generateDuplicateInvoice(original) {
+    // Jika belum ada "-angka" → tambahkan "-1"
+    if (!original.match(/-\d+$/)) {
+        return original + "-1";
+    }
+
+    // Jika sudah ada, tingkatkan angkanya
+    return original.replace(/-(\d+)$/, (_, num) => `-${parseInt(num) + 1}`);
+}
+
+
+
+// --- FUNGSI DELETE TASK (DENGAN KONFIRMASI) ---
+//  function handleDelete(icon) {
+//     const row = icon.closest('tr');
+//     const taskId = icon.dataset.id;
+    
+//     if (!taskId || !row) {
+//         alert('Error: Task ID tidak ditemukan.');
+//         return;
+//     }
+    
+//     const taskName = row.querySelector('td:nth-child(2)')?.textContent || 'task ini'; 
+    
+//     if (confirm(`Apakah Anda yakin ingin menghapus task: "${taskName}"?`)) {
+        
+//         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+//         fetch(`/task/delete/${taskId}`, {
+//             method: 'DELETE',
+//             headers: {
+//                 'X-CSRF-TOKEN': csrfToken,
+//                 'Accept': 'application/json'
+//             }
+//         })
+//         .then(response => response.json())
+//         .then(result => {
+//             if (result.success) {
+//                 row.remove();
+//                 showNotif(result.message || 'Task berhasil dihapus.');
+//             } else {
+//                 alert('Gagal menghapus task: ' + result.message);
+//             }
+//         })
+//         .catch(error => {
+//             console.error('Error:', error);
+//             alert('Terjadi kesalahan. Gagal menghapus task.');
+//         });
+//     }
+// }
 
 
 
@@ -1908,12 +1969,18 @@ const searchInput = document.getElementById("taskSearchInput");
             handlePrint(target); // Panggil fungsi print
             return; // Berhenti di sini
         }
-        // Aksi Hapus (Fetch Delete)
-        if (target.classList.contains('icon-trash')) {
-            event.preventDefault();
-            handleDelete(target); // Panggil fungsi delete
-            return; // Berhenti di sini
+        if (target.classList.contains('icon-duplicate')) {
+        event.preventDefault();
+        handleDuplicate(target);
+        return;
         }
+
+        // // Aksi Hapus (Fetch Delete)
+        // if (target.classList.contains('icon-trash')) {
+        //     event.preventDefault();
+        //     handleDelete(target); // Panggil fungsi delete
+        //     return; // Berhenti di sini
+        // }
     }
 
     // 3. Cek Aksi Prioritas Sedang (Elemen Interaktif Lain)
