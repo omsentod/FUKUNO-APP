@@ -403,6 +403,8 @@ body.sidebar-open-mobile .sidebar {
   .checklist-container {
       padding: 15px;
       border-radius: 10px;
+      width: 100%;
+      box-sizing: border-box;
   }
 
   /* Header content jadi vertikal */
@@ -428,17 +430,17 @@ body.sidebar-open-mobile .sidebar {
 
   /* Tabel — tetap tabel, hanya scroll horizontal */
   .table-checklist {
-      display: block;
+      display: table;
       width: 100%;
-      overflow-x: auto;
-      white-space: nowrap;
+      overflow-x: hidden;
+      white-space: normal;
   }
 
   .table-checklist th,
   .table-checklist td {
       font-size: 12px;
       padding: 10px;
-      white-space: nowrap;
+      white-space: normal;
       text-align: center;
   }
 
