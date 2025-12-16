@@ -7,10 +7,9 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithDrawings;
-use Maatwebsite\Excel\Concerns\WithEvents; 
-use Maatwebsite\Excel\Events\AfterSheet; 
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
-use PhpOffice\PhpSpreadsheet\Style\Alignment; 
 use Carbon\Carbon;
 
 class TasksExport implements FromCollection, WithHeadings, WithMapping, WithDrawings, WithEvents
@@ -21,10 +20,41 @@ class TasksExport implements FromCollection, WithHeadings, WithMapping, WithDraw
     public function __construct($ids)
     {
         $this->ids = $ids;
-        $this->tasks = Task::with('user', 'status', 'taskPekerjaans.checklists', 'mockups')
-                   ->whereIn('id', $this->ids)
-                   ->orderBy('created_at', 'desc')
-                   ->get();
+
+        $this->tasks = Task::with([
+            'user',
+            'status',
+            'taskPekerjaans',
+            'mockups',
+            'taskSizes',
+            'comments'
+        ])
+        ->whereIn('id', $ids)
+        ->orderBy('no_invoice')
+        ->orderBy('id')
+        ->get();
+    }
+
+    public function headings(): array
+    {
+        return [
+            'No. PO',
+            'Task Title',
+            'Customer',
+            'PIC',
+            'Catatan Task',
+
+            'Total Jumlah',
+            'Warna',
+            'Model',
+            'Bahan',
+
+            'Line Pekerjaan',
+            'Deadline Pekerjaan',
+
+            'Size Detail',
+            'Mockup'
+        ];
     }
 
     public function collection()
@@ -32,101 +62,126 @@ class TasksExport implements FromCollection, WithHeadings, WithMapping, WithDraw
         return $this->tasks;
     }
 
-    public function headings(): array
-    {
-        return [
-            'No. PO', 'Tasks Title', 'Jumlah', 'Line Pekerjaan', 
-            'Urgent', 'Status', 'Time Left', 'Mockup', 'Klien', 'Progress (%)'
-        ];
-    }
-
     public function map($task): array
     {
-        // ... (Isi fungsi map SAMA PERSIS seperti sebelumnya) ...
-        // Saya singkat agar tidak kepanjangan, salin logika map Anda yang tadi di sini
-        $line = $task->taskPekerjaans->first();
-        $checklists = $line ? $line->checklists : collect();
-        $completed = $checklists->where('is_completed', true)->count();
-        $total = $checklists->count();
-        $percentage = ($total > 0) ? round(($completed / $total) * 100) : 0;
-        
-        $timeLeftString = '-';
-        $isDone = ($task->status->name == 'Done and Ready' || $task->status->name == 'Delivered' || $percentage == 100);
-        if ($isDone) {
-            $timeLeftString = ($task->status->name == 'Delivered') ? 'Terkirim' : 'Selesai';
-        } elseif ($line && $line->deadline) {
-            $timeLeftString = Carbon::parse($line->deadline)->diffForHumans();
-        }
+        // ============ CATATAN TASK ============
+        $taskNote = ($task->catatan !== null && trim((string)$task->catatan) !== '')
+            ? (string)$task->catatan
+            : '-';
 
+        // ============ LINE PEKERJAAN ============
+        $linesText = $task->taskPekerjaans->pluck('nama_pekerjaan')->filter()->implode(" | ");
+        if ($linesText === '') $linesText = '-';
+
+        // ============ DEADLINE PEKERJAAN ============
+        $deadlineText = $task->taskPekerjaans->map(function($l){
+            return $l->deadline
+                ? Carbon::parse($l->deadline)->format("Y-m-d H:i")
+                : '-';
+        })->implode(" | ");
+        if ($deadlineText === '') $deadlineText = '-';
+
+        // ============ SIZE DETAIL ============
+        $sizeText = $task->taskSizes->groupBy('jenis')->map(function($group){
+            $jenis = $group->first()->jenis ?? '';
+            $items = $group->map(fn($s) => ($s->tipe ?? '') . "=" . ($s->jumlah ?? 0))->implode(", ");
+            return trim($jenis) !== '' ? "{$jenis}: {$items}" : $items;
+        })->filter()->implode(" | ");
+        if ($sizeText === '') $sizeText = '-';
+
+        // ============ RETURN ROW (tanpa catatan pekerjaan) ============
         return [
-            $task->no_invoice, $task->judul, $task->total_jumlah,
-            $line ? $line->nama_pekerjaan : 'N/A',
-            $task->urgensi, $task->status->name, $timeLeftString,
-            '', // Kosong untuk tempat gambar
-            $task->nama_pelanggan, $percentage . '%'
+            $task->no_invoice,
+            $task->judul,
+            $task->nama_pelanggan,
+            $task->user?->name ?? '-',
+            $taskNote,
+
+            $task->total_jumlah,
+            $task->warna ?? '-',
+            $task->model ?? '-',
+            $task->bahan ?? '-',
+
+            $linesText,
+            $deadlineText,
+
+            $sizeText,
+            ''
         ];
     }
 
     public function drawings()
     {
         $drawings = [];
+        $row = 2;
 
-        foreach ($this->tasks as $taskIndex => $task) {
-            // Loop semua mockup di task ini
-            foreach ($task->mockups as $mockupIndex => $mockup) {
-                
-                $imagePath = storage_path('app/public/' . $mockup->file_path);
+        foreach ($this->tasks as $task) {
+            foreach ($task->mockups as $i => $mock) {
+                $file = storage_path('app/public/' . ($mock->file_path ?? ''));
+                if (!file_exists($file)) continue;
 
-                if (file_exists($imagePath)) {
-                    $drawing = new Drawing();
-                    $drawing->setName('Mockup ' . ($mockupIndex + 1));
-                    $drawing->setPath($imagePath);
-                    $drawing->setHeight(50); // Tinggi tetap 50px
-                    
-                    // Koordinat tetap di baris task tersebut (Kolom H)
-                    $drawing->setCoordinates('H' . ($taskIndex + 2));
-                    
-                    // ▼▼▼ LOGIKA GESER KE SAMPING ▼▼▼
-                    // Setiap gambar digeser 55px ke kanan dari gambar sebelumnya
-                    // (Lebar gambar 50px + Jarak 5px)
-                    $offsetX = 5 + ($mockupIndex * 55); 
-                    
-                    $drawing->setOffsetX($offsetX);
-                    $drawing->setOffsetY(5); // Jarak dari atas
-                    // ▲▲▲ ▲▲▲ ▲▲▲
-                    
-                    $drawings[] = $drawing;
-                }
+                $drawing = new Drawing();
+                $drawing->setName('Mockup');
+                $drawing->setPath($file);
+                $drawing->setHeight(60);
+
+                $drawing->setCoordinates('N' . $row);
+                $drawing->setOffsetX($i * 65);
+
+                $drawings[] = $drawing;
             }
+            $row++;
         }
 
         return $drawings;
     }
 
-
     public function registerEvents(): array
     {
         return [
             AfterSheet::class => function(AfterSheet $event) {
-                $sheet = $event->sheet->getDelegate();
-                
-                // Hitung total baris data
-                $rowCount = $this->tasks->count() + 1; // +1 Header
 
-                // Loop setiap baris data
+                $sheet = $event->sheet->getDelegate();
+                $rowCount = $this->tasks->count() + 1;
+
                 for ($i = 2; $i <= $rowCount; $i++) {
-                    // Set tinggi baris jadi 60px (sedikit lebih besar dari gambar 50px)
-                    // Supaya gambar punya ruang napas
-                    $sheet->getRowDimension($i)->setRowHeight(60); 
+                    $sheet->getRowDimension($i)->setRowHeight(65);
                 }
 
-                // Atur Lebar Kolom Mockup (H) biar lega
-                $sheet->getColumnDimension('H')->setWidth(40);
-                // (Opsional) Rata Tengah Vertikal Semua Tulisan
-                $sheet->getStyle('A1:J' . $rowCount)
-                      ->getAlignment()
-                      ->setVertical(Alignment::VERTICAL_CENTER);
-            },
+                // MERGE No PO
+                $current = null;
+                $start = 2;
+                for ($row = 2; $row <= $rowCount; $row++) {
+                    $po = $sheet->getCell("A{$row}")->getValue();
+                    if ($current === null) {
+                        $current = $po;
+                        $start = $row;
+                        continue;
+                    }
+                    if ($po != $current) {
+                        if ($start < $row - 1) {
+                            $sheet->mergeCells("A{$start}:A" . ($row - 1));
+                        }
+                        $current = $po;
+                        $start = $row;
+                    }
+                }
+                if ($start < $rowCount) {
+                    $sheet->mergeCells("A{$start}:A{$rowCount}");
+                }
+
+                // Wrap teks catatan task
+                $sheet->getStyle('E2:E' . $rowCount)->getAlignment()->setWrapText(true);
+                $sheet->getColumnDimension('E')->setWidth(60);
+
+                $sheet->getStyle('A1:N1')->getFont()->setBold(true);
+
+                $sheet->getStyle('J2:J' . $rowCount)->getAlignment()->setWrapText(true);
+                $sheet->getColumnDimension('J')->setWidth(30);
+
+                $sheet->getStyle('K2:K' . $rowCount)->getAlignment()->setWrapText(true);
+                $sheet->getColumnDimension('K')->setWidth(40);
+            }
         ];
     }
 }
