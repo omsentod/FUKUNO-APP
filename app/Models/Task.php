@@ -21,6 +21,7 @@ class Task extends Model
         'no_invoice',
         'nama_pelanggan',
         'judul',
+        'penanggung_jawab',
         'catatan',
         'urgensi',
         'total_jumlah',

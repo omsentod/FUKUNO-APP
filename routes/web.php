@@ -81,6 +81,9 @@ Route::middleware(['auth', 'admin'])->group(function() {
     Route::post('/tasks/bulk-action', [TaskController::class, 'bulkAction'])->name('task.bulkAction');
     Route::post('/trash/bulk-action', [TaskController::class, 'trashBulkAction'])->name('trash.bulkAction'); 
 
+    // -- SEARCH --
+    Route::get('/users/search', [App\Http\Controllers\TaskController::class, 'searchUsers'])->name('users.search');
+
     // --- MASTER DATA: CHECKLISTS ---
     Route::get('/checklist', function () { return view('checklist-sb'); })->name('checklist');
     Route::get('/checklist/all', [ChecklistController::class, 'index'])->name('checklist.all');

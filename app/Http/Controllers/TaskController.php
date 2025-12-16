@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Models\Comment;
 use App\Events\NewNotification;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use App\Notifications\TaskCreated; 
 use App\Notifications\CommentAdded;
@@ -98,158 +99,198 @@ class TaskController extends Controller
 
 
 public function store(Request $request)
-    {
-        // 1. Validasi
-        $validatedData = $request->validate([
-            'noInvoice' => 'required|string',
-            'namaPelanggan' => 'required|string|max:255',
-            'judul' => 'required|string|max:255',
-            'urgensi' => 'required|string',
-            'jumlah' => 'required|integer',
-            'lines' => 'required|json',
-            'sizes' => 'nullable|json',
-            'mockups.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120'
-        ]);
-        
+{
+    // 1. Validasi
+    $validatedData = $request->validate([
+        'noInvoice' => [
+            'required',
+            'string',
+            Rule::unique('tasks', 'no_invoice')->whereNull('deleted_at')
+        ],
+        'namaPelanggan' => 'required|string|max:255',
+        'judul' => 'required|string|max:255',
+        'urgensi' => 'required|string',
+        'jumlah' => 'required|integer',
+        'lines' => 'required|json',
+        'sizes' => 'nullable|json',
+        'penanggung_jawab' => 'nullable|string|max:100', 
+        'mockups.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120'
+    ], [
+        'noInvoice.unique' => 'Gagal! No. PO ini sudah terdaftar di database.',
+        'noInvoice.required' => 'No. PO wajib diisi.'
+    ]);
+    
+    $taskData = $request->except(['lines', 'sizes', 'mockups']);
+    $lineData = json_decode($request->input('lines'), true);
+    $sizeData = json_decode($request->input('sizes'), true);
+    
+    if (empty($lineData)) {
+        return response()->json(['success' => false, 'message' => 'Harap tambahkan setidaknya satu line pekerjaan.'], 422);
+    }
 
-        $taskData = $request->except(['lines', 'sizes', 'mockups']);
-        $lineData = json_decode($request->input('lines'), true);
-        $sizeData = json_decode($request->input('sizes'), true);
-        
-        if (empty($lineData)) {
-            return response()->json(['success' => false, 'message' => 'Harap tambahkan setidaknya satu line pekerjaan.'], 422);
+    $createdTasks = []; 
+
+    try {
+        DB::beginTransaction();
+
+        // ==========================================================
+        // TAHAP 1: PERSIAPAN GAMBAR (DILAKUKAN SEKALI SAJA)
+        // ==========================================================
+        $allMockupPaths = [];
+
+        // A. Handle Gambar Baru (Upload Manual)
+        if ($request->hasFile('mockups')) {
+            foreach ($request->file('mockups') as $file) {
+                $path = $file->store('mockups', 'public'); 
+                $allMockupPaths[] = ['file_path' => $path];
+            }
         }
 
-        $createdTasks = []; 
+        // B. Handle Gambar Duplikat (Copy Fisik dari Task Lama) - PERBAIKAN UTAMA
+        if ($request->has('existing_mockup_urls')) {
+            $existingUrls = json_decode($request->input('existing_mockup_urls'), true);
 
-        try {
-            DB::beginTransaction();
+            if (!empty($existingUrls)) {
+                foreach ($existingUrls as $url) {
+                    // --- LOGIKA BARU: LEBIH PINTAR DETEKSI PATH ---
+                    // Pecah string berdasarkan '/storage/' dan ambil bagian belakangnya
+                    $parts = explode('/storage/', $url);
+                    
+                    if (count($parts) > 1) {
+                        // Jika URL adalah "http://web.com/storage/mockups/gambar.jpg"
+                        // Maka $relativePath jadi "mockups/gambar.jpg"
+                        $relativePath = urldecode($parts[1]); // urldecode untuk menangani spasi (%20)
+                    } else {
+                        // Fallback jika format URL tidak standar, coba pakai URL aslinya
+                        $relativePath = urldecode($url);
+                    }
 
-            // 2. Simpan Mockup Files
-            $mockupPaths = [];
-            if ($request->hasFile('mockups')) {
-                foreach ($request->file('mockups') as $index => $file) {
-                    $path = $file->store('mockups', 'public'); 
-                    $mockupPaths[] = ['file_path' => $path, 'order' => $index];
+                    // Cek apakah file aslinya ada di storage
+                    if (Storage::disk('public')->exists($relativePath)) {
+                        // Buat nama file baru yang unik (Cloning)
+                        $extension = pathinfo($relativePath, PATHINFO_EXTENSION);
+                        $newFileName = 'mockups/' . Str::random(40) . '.' . $extension;
+
+                        // COPY FILE FISIK
+                        Storage::disk('public')->copy($relativePath, $newFileName);
+
+                        // Masukkan ke array antrian simpan
+                        $allMockupPaths[] = ['file_path' => $newFileName];
+                    } 
                 }
             }
+        }
 
-            // 3. Loop untuk setiap Line Pekerjaan
-            foreach ($lineData as $line) {
-                
-                $task = new Task();
-                $task->no_invoice = $taskData['noInvoice'];
-                $task->nama_pelanggan = $taskData['namaPelanggan'];
-                $task->judul = $taskData['judul'];
-                $task->catatan = $taskData['catatan'] ?? null;
-                $task->user_id = auth()->id();
-                $task->urgensi = $taskData['urgensi'];
-                $task->size_title = $sizeData['size_title'] ?? 'Size';
-                $task->total_jumlah = $taskData['jumlah'];
-                $task->warna = $taskData['warna'] ?? null;
-                $task->model = $taskData['model'] ?? null;
-                $task->bahan = $taskData['bahan'] ?? null;
-                $task->status_id = 1; 
-                $task->save(); 
+        // ==========================================================
+        // TAHAP 2: LOOPING PEMBUATAN TASK
+        // ==========================================================
+        foreach ($lineData as $line) {
+            
+            $task = new Task();
+            $task->no_invoice = $taskData['noInvoice'];
+            $task->nama_pelanggan = $taskData['namaPelanggan'];
+            $task->judul = $taskData['judul'];
+            $task->penanggung_jawab = $request->input('penanggung_jawab');
+            $task->catatan = $taskData['catatan'] ?? null;
+            $task->user_id = auth()->id();
+            $task->urgensi = $taskData['urgensi'];
+            $task->size_title = $sizeData['size_title'] ?? 'Size';
+            $task->total_jumlah = $taskData['jumlah'];
+            $task->warna = $taskData['warna'] ?? null;
+            $task->model = $taskData['model'] ?? null;
+            $task->bahan = $taskData['bahan'] ?? null;
+            $task->status_id = 1; 
+            $task->save(); 
 
-                // Simpan Line Pekerjaan
-                $taskLine = $task->taskPekerjaans()->create([ 
-                    'nama_pekerjaan' => $line['nama'],
-                    'deadline' => $line['deadline']
-                ]);
-                
-                if (!empty($line['checklists'])) {
-                    $checklists = [];
-                    
-                    foreach ($line['checklists'] as $index => $checkData) {
-                        
-                        $name = is_array($checkData) ? $checkData['name'] : $checkData;
-                        
-                        $checklists[] = [
-                            'nama_checklist' => $name,
-                            'is_completed' => false, 
-                            'position' => $index + 1 
-                        ];
-                    }
-                    
-                    $taskLine->checklists()->createMany($checklists);
+            // Simpan Line Pekerjaan
+            $taskLine = $task->taskPekerjaans()->create([ 
+                'nama_pekerjaan' => $line['nama'],
+                'deadline' => $line['deadline']
+            ]);
+            
+            // Simpan Checklist
+            if (!empty($line['checklists'])) {
+                $checklists = [];
+                foreach ($line['checklists'] as $index => $checkData) {
+                    $name = is_array($checkData) ? $checkData['name'] : $checkData;
+                    $checklists[] = [
+                        'nama_checklist' => $name,
+                        'is_completed' => false, 
+                        'position' => $index + 1 
+                    ];
                 }
+                $taskLine->checklists()->createMany($checklists);
+            }
 
-                // Simpan Data Size (GUNAKAN CREATE)
-                if (!empty($sizeData) && !empty($sizeData['headers']) && !empty($sizeData['rows'])) {
-                    $headers = $sizeData['headers'];
-                    foreach ($sizeData['rows'] as $rowData) {
-                        $jenis = $rowData['jenis'];
-                        foreach ($headers as $tipe) {
-                            $jumlah = $rowData['quantities'][$tipe] ?? 0;
-                            if ($jumlah > 0) {
-                                // ▼▼▼ FIX: Gunakan create() agar aman ▼▼▼
-                                TaskSize::create([
-                                    'task_id' => $task->id,
-                                    'jenis' => $jenis,
-                                    'tipe' => $tipe,
-                                    'jumlah' => (int) $jumlah
-                                ]);
-                            }
+            // Simpan Data Size
+            if (!empty($sizeData) && !empty($sizeData['headers']) && !empty($sizeData['rows'])) {
+                $headers = $sizeData['headers'];
+                foreach ($sizeData['rows'] as $rowData) {
+                    $jenis = $rowData['jenis'];
+                    foreach ($headers as $tipe) {
+                        $jumlah = $rowData['quantities'][$tipe] ?? 0;
+                        if ($jumlah > 0) {
+                            TaskSize::create([
+                                'task_id' => $task->id,
+                                'jenis' => $jenis,
+                                'tipe' => $tipe,
+                                'jumlah' => (int) $jumlah
+                            ]);
                         }
                     }
                 }
-                
-                // Simpan Mockup Files
-                if (!empty($mockupPaths)) {
-                    $task->mockups()->createMany($mockupPaths);
-                }
-                
-                
-                $createdTasks[] = Task::with('user', 'status', 'mockups', 'taskPekerjaans.checklists')->find($task->id);
             }
-
-            // Notifikasi
-            $usersToNotify = User::where('id', '!=', auth()->id())->get();
-        
-            if (count($createdTasks) > 0) {
-                $firstTask = $createdTasks[0]; // Ambil task pertama sebagai referensi
-    
-                Notification::send($usersToNotify, new TaskCreated($firstTask, auth()->user()));
-    
-                foreach ($usersToNotify as $targetUser) {
-                
-                    // Siapkan Data Lengkap untuk JS
-                    $notifData = [
-                        'message'          => auth()->user()->name . " membuat task baru: " . Str::limit($firstTask->judul, 20),
-                        'url'              => route('task', ['highlight' => $firstTask->id]),
-                        'creator_initials' => auth()->user()->initials,    
-                        'creator_color'    => auth()->user()->avatar_color, 
-                        'first_mockup_url' => $firstTask->mockups->first() ? Storage::url($firstTask->mockups->first()->file_path) : null,
-                        'time'             => 'Baru saja',
-                        'creator_name'     => Auth::user()->name,
-                        'task_title'       => $task->judul,
-                        'comment_body'     => null,
-
-                        'type'             => 'new_task',    
-                        'task_id'          => $firstTask->id,
-                    ];
-                    
-                    // Kirim Data Array
-                    event(new NewNotification($notifData, $targetUser->id));
-                }
+            
+            // ▼▼▼ SIMPAN RELASI MOCKUP (Memakai array yang sudah disiapkan di atas) ▼▼▼
+            if (!empty($allMockupPaths)) {
+                $task->mockups()->createMany($allMockupPaths);
             }
-
             
-
-            DB::commit();
-            
-            return response()->json([
-                'success' => true, 
-                'message' => 'Task berhasil disimpan!',
-                'tasks' => $createdTasks
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Gagal menyimpan task: ' . $e->getMessage()], 500);
+            $createdTasks[] = Task::with('user', 'status', 'mockups', 'taskPekerjaans.checklists')->find($task->id);
         }
+
+        // ==========================================================
+        // TAHAP 3: NOTIFIKASI
+        // ==========================================================
+        $usersToNotify = User::where('id', '!=', auth()->id())->get();
+    
+        if (count($createdTasks) > 0) {
+            $firstTask = $createdTasks[0]; 
+
+            Notification::send($usersToNotify, new TaskCreated($firstTask, auth()->user()));
+ 
+            foreach ($usersToNotify as $targetUser) {
+                $notifData = [
+                    'message'          => auth()->user()->name . " membuat task baru: " . Str::limit($firstTask->judul, 20),
+                    'url'              => route('task', ['highlight' => $firstTask->id]),
+                    'creator_initials' => auth()->user()->initials,     
+                    'creator_color'    => auth()->user()->avatar_color, 
+                    'first_mockup_url' => $firstTask->mockups->first() ? Storage::url($firstTask->mockups->first()->file_path) : null,
+                    'time'             => 'Baru saja',
+                    'creator_name'     => Auth::user()->name,
+                    'task_title'       => $task->judul, 
+                    'comment_body'     => null,
+                    'type'             => 'new_task',     
+                    'task_id'          => $firstTask->id,
+                ];
+                
+                event(new NewNotification($notifData, $targetUser->id));
+            }
+        }
+
+        DB::commit();
+        
+        return response()->json([
+            'success' => true, 
+            'message' => 'Task berhasil disimpan!',
+            'tasks' => $createdTasks
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json(['success' => false, 'message' => 'Gagal menyimpan task: ' . $e->getMessage()], 500);
     }
+}
 
     
     
@@ -640,6 +681,7 @@ public function storeComment(Request $request, $task_id)
                 $task->no_invoice = $request->input('noInvoice'); 
                 $task->nama_pelanggan = $request->input('namaPelanggan');
                 $task->judul = $request->input('judul');
+                $task->penanggung_jawab = $request->input('penanggung_jawab');
                 $task->catatan = $request->input('catatan') ?? null;
                 $task->urgensi = $request->input('urgensi');
                 $task->total_jumlah = $request->input('jumlah');
@@ -868,7 +910,7 @@ public function storeComment(Request $request, $task_id)
             foreach ($taskIds as $tid) {
                 foreach ($usersToNotify as $targetUser) {
                     $notifData = [
-                        'message' => Auth::user()->name . " menghapus task.",
+                        'message' => 'silent_update',
                         'type'    => 'task_deleted',
                         'task_id' => $tid,
                         'url' => '#', 'creator_initials' => '??', 'creator_color' => '#ccc', 'first_mockup_url' => null, 'time' => 'Baru saja', 'creator_name' => Auth::user()->name, 'task_title' => 'Bulk Action', 'comment_body' => null
@@ -940,46 +982,78 @@ public function storeComment(Request $request, $task_id)
 
 
     public function trashBulkAction(Request $request)
-    {
-        $request->validate([
-            'action' => 'required|string|in:restore_all,delete_permanent_all',
-            'task_ids' => 'required|array',
-            'task_ids.*' => 'integer'
-        ]);
+{
+    $request->validate([
+        'action' => 'required|string|in:restore_all,delete_permanent_all',
+        'task_ids' => 'required|array',
+        'task_ids.*' => 'integer'
+    ]);
 
-        $taskIds = $request->input('task_ids');
-        $action = $request->input('action');
+    $taskIds = $request->input('task_ids');
+    $action = $request->input('action');
+    
+    // Siapkan user yang akan menerima update real-time
+    $usersToNotify = User::where('id', '!=', Auth::id())->get();
 
-        if ($action == 'restore_all') {
-            
-            // 1. Pulihkan (Restore)
-            Task::onlyTrashed()->whereIn('id', $taskIds)->restore();
-            
-            return response()->json(['success' => true, 'message' => 'Task yang dipilih berhasil dipulihkan.']);
+    if ($action == 'restore_all') {
         
-        } elseif ($action == 'delete_permanent_all') {
-            
-            // 2. Hapus Permanen (Force Delete)
-            $tasks = Task::onlyTrashed()->with('mockups')->whereIn('id', $taskIds)->get();
-            
-            foreach ($tasks as $task) {
-                // A. Hapus file fisik dari storage
-                foreach ($task->mockups as $mockup) {
-                    Storage::disk('public')->delete($mockup->file_path);
-                }
+        // 1. Eksekusi Restore di Database (Massal)
+        Task::onlyTrashed()->whereIn('id', $taskIds)->restore();
+        
 
-                DB::table('notifications')
-                    ->whereJsonContains('data->task_id', $task->id)
-                    ->delete();
+        $restoredTasks = Task::whereIn('id', $taskIds)->with('mockups')->get();
 
-                // C. Hapus permanen dari database
-                $task->forceDelete();
+        foreach ($restoredTasks as $task) {
+            foreach ($usersToNotify as $targetUser) {
+                $notifData = [
+                    'message'          => 'silent_update',
+                    'type'             => 'task_restored', // Sinyal ke JS untuk "Tambah Baris"
+                    'task_id'          => $task->id,
+                    'url'              => route('task', ['highlight' => $task->id]),
+                    
+                    // Data Lengkap untuk merender baris tabel di sisi Client
+                    'creator_initials' => Auth::user()->initials ?? '??',
+                    'creator_color'    => Auth::user()->avatar_color ?? '#ccc',
+                    'first_mockup_url' => $task->mockups->first() ? Storage::url($task->mockups->first()->file_path) : null,
+                    'time'             => 'Baru saja',
+                    'creator_name'     => Auth::user()->name,
+                    'task_title'       => $task->judul,
+                    'comment_body'     => null
+                ];
+                
+                // Kirim Event Real-time
+                event(new NewNotification($notifData, $targetUser->id));
             }
-            
-            return response()->json(['success' => true, 'message' => 'Task dan notifikasi terkait berhasil dihapus permanen.']);
+        }
+        
+        return response()->json(['success' => true, 'message' => 'Task yang dipilih berhasil dipulihkan.']);
+    
+    } elseif ($action == 'delete_permanent_all') {
+        
+        // 2. Hapus Permanen (Force Delete)
+        // Kita perlu get dulu sebelum hapus untuk membersihkan file fisik
+        $tasks = Task::onlyTrashed()->with('mockups')->whereIn('id', $taskIds)->get();
+        
+        foreach ($tasks as $task) {
+            // A. Hapus file fisik dari storage
+            foreach ($task->mockups as $mockup) {
+                Storage::disk('public')->delete($mockup->file_path);
+            }
+
+            // B. Hapus notifikasi terkait di DB agar bersih
+            DB::table('notifications')
+                ->whereJsonContains('data->task_id', $task->id)
+                ->delete();
+
+            // C. Hapus permanen dari database
+            $task->forceDelete();
         }
 
-        return response()->json(['success' => false, 'message' => 'Aksi tidak valid.'], 400);
+        
+        return response()->json(['success' => true, 'message' => 'Task dan notifikasi terkait berhasil dihapus permanen.']);
+    }
+
+    return response()->json(['success' => false, 'message' => 'Aksi tidak valid.'], 400);
     }
 
     public function unarchive($id)
@@ -1063,4 +1137,24 @@ public function storeComment(Request $request, $task_id)
             event(new NewNotification($notifData, $targetUser->id));
         }
     }
+
+    public function searchUsers(Request $request)
+    {
+        $query = $request->get('query');
+    
+        if (empty($query)) {
+            
+            $users = User::select('id', 'name') 
+                         ->limit(10)
+                         ->get();
+        } else {
+            $users = User::where('name', 'LIKE', "%{$query}%")
+                         ->select('id', 'name') // <--- Di sini juga diubah
+                         ->limit(10)
+                         ->get();
+        }
+    
+        return response()->json($users);
+    }
+
 }

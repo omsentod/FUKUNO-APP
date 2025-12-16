@@ -57,8 +57,9 @@
                 </td>
             </tr>
             <tr>
-                <th>Penanggung Jawab</th><td colspan="3">{{ $mainTask->user->name }}</td>
-            </tr>
+              <th>Penanggung Jawab</th>
+              <td colspan="3">{{ $mainTask->penanggung_jawab ?? '-' }}</td>
+          </tr>
           </table>
 
           <div class="spec-note">

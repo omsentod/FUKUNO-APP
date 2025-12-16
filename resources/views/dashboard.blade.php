@@ -2,12 +2,7 @@
 
 @section('title', 'Home Page')
 
-@php
-    use Illuminate\Support\Str;
-    use Carbon\Carbon;
-    // Definisikan $colors untuk PIC
-    $colors = ['#2ecc71', '#3498db', '#9b59b6', '#e67e22', '#e74c3c'];
-@endphp
+
 @section('content')
   <div class="page">
     <div class="dashboard">
@@ -144,9 +139,14 @@
                   $linePekerjaan = $task->taskPekerjaans->firstWhere('deadline', '>=', now());
                   $deadline = $linePekerjaan ? $linePekerjaan->deadline : null;
   
-                  $picName = $task->user->name ?? 'A';
-                  $initials = \App\Http\Controllers\TaskController::buatInisial($picName);
-                  $bgColor = $colors[ord(strtoupper(substr($initials, 0, 1))) % count($colors)];
+                  // $picName = $task->user->name ?? 'A';
+                  // $words = explode(' ', $picName);
+                  // $initials = strtoupper(substr($words[0], 0, 1));
+                  // if (count($words) > 1) {
+                  //     $initials .= strtoupper(substr($words[1], 0, 1));
+                  // }
+                  // $firstChar = substr($initials, 0, 1) ?: 'A'; 
+                  // $bgColor = $colors[ord($firstChar) % count($colors)];
                @endphp
               <tr class="clickable-row" 
               data-url="{{ route('task', ['highlight' => $task->id]) }}" 

@@ -170,7 +170,6 @@ table {
  .table-bg tr:hover{
     background-color:#fbefbc;
     color: var(--txt-color);
-    transform: scale(1.02);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
     position: relative;
     z-index: 3;
@@ -677,6 +676,67 @@ min-width: 120px;
 /* (Opsional) Highlight saat fokus */
 #sizeTable thead th input.form-control:focus {
     background-color: rgba(0, 0, 0, 0.05); 
+}
+
+.pj-results {
+    max-height: 200px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    position: absolute;
+    width: 100%;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Container Utama: Paksa Rata Kiri */
+.autocomplete-item.pj-item {
+    display: flex !important;            /* Paksa mode Flexbox */
+    align-items: center !important;      /* Vertikal: Tengah */
+    justify-content: flex-start !important; /* Horizontal: MENTOK KIRI (Kunci Masalahnya) */
+    text-align: left !important;         /* Pastikan teks tidak centered */
+    gap: 12px;                           /* Jarak Foto ke Nama */
+    padding: 9px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    width: 100%;                         /* Pastikan lebar penuh */
+}
+
+/* Efek Hover */
+.autocomplete-item.pj-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Lingkaran Avatar */
+.autocomplete-item.pj-item .pic {
+    /* Ukuran Fix */
+    width: 32px;
+    height: 32px;
+    min-width: 32px;      /* PENTING: Agar tidak gepeng */
+    
+    /* Bentuk & Warna */
+    border-radius: 50%;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    
+    /* Posisi Huruf di DALAM Lingkaran (Tetap Center) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* Reset Margin */
+    margin: 0;
+}
+
+/* Teks Nama User */
+.autocomplete-item.pj-item span {
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Style sort */

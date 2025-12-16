@@ -155,12 +155,12 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
             @forelse($tasks as $task)
                 @include('partials.task-row', ['task' => $task])
             @empty
-                <tr>
-                    <td colspan="12" class="text-center py-4 text-muted">
-                        <i class="bi bi-inbox display-6 d-block mb-2"></i>
-                        Belum ada task yang tersedia.
-                    </td>
-                </tr>
+            <tr id="emptyRow"> 
+                <td colspan="12" class="text-center py-4 text-muted">
+                    <i class="bi bi-inbox display-6 d-block mb-2"></i>
+                    Belum ada task yang tersedia.
+                </td>
+            </tr>
             @endforelse
         
         </tbody>
@@ -183,10 +183,26 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
                     <label>Nama Pelanggan</label>
                     <input type="text" id="namaPelanggan" class="form-control" placeholder="Nama Pelanggan" required>
                 </div>
+                
+               
 
                 <div class="mb-2">
                     <label>Judul</label>
                     <input type="text" id="judul" class="form-control" placeholder="Judul" required>
+                </div>
+
+                <div class="mb-2 position-relative pj-wrapper">
+                    <label for="penanggungJawabInput">Penanggung Jawab</label>
+                    
+                    <div class="position-relative input-with-toggle">
+                        <input type="text" id="penanggungJawabInput" class="form-control pj-input" placeholder="Ketik nama user..." autocomplete="off">
+                        
+                        <button class="toggle-search-btn" type="button" id="togglePjBtn">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                
+                        <div class="autocomplete-results pj-results" id="pjSearchResults"></div>
+                    </div>
                 </div>
 
                 <div class="mb-2">

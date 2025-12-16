@@ -679,6 +679,10 @@ function populateForm(mainTask, allTasks, sizeData) {
     popup.querySelector("#noInvoice").value = mainTask.no_invoice;
     popup.querySelector("#namaPelanggan").value = mainTask.nama_pelanggan;
     popup.querySelector("#judul").value = mainTask.judul;
+    const pjInput = popup.querySelector("#penanggungJawabInput");
+    if (pjInput) {
+        pjInput.value = mainTask.penanggung_jawab || ''; 
+    }
     popup.querySelector("#catatan").value = mainTask.catatan;
     popup.querySelector("#urgensi").value = mainTask.urgensi;
     popup.querySelector("#warna").value = mainTask.warna;
@@ -939,9 +943,94 @@ function showPopup() {
     const sizeTableBody = popup.querySelector("#sizeTable tbody");
     const mockupInput = popup.querySelector("#mockups");
     const previewArea = popup.querySelector("#mockup-preview-area");
+    const pjInput = popup.querySelector("#penanggungJawabInput");
+    const pjToggle = popup.querySelector("#togglePjBtn");
+    const pjResults = popup.querySelector("#pjSearchResults");
 
     let mockupsToDelete = [];
 
+    const renderUserList = (users) => {
+        if (users.length === 0) {
+            pjResults.innerHTML = '<div class="p-2 text-muted small">User tidak ditemukan.</div>';
+            return;
+        }
+
+        let html = '';
+        users.forEach(user => {
+   
+            const initials = user.name.substring(0, 2).toUpperCase();
+
+          
+            let hash = 0;
+            for (let i = 0; i < user.name.length; i++) {
+                hash = user.name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+            const color = '#' + "00000".substring(0, 6 - c.length) + c; 
+            html += `
+            <div class="autocomplete-item pj-item" data-name="${user.name}">
+                
+                <div class="pic" style="background-color: ${color};">
+                    ${initials}
+                </div>
+                
+                <span>${user.name}</span>
+            </div>
+        `;
+        });
+        pjResults.innerHTML = html;
+    };
+
+    // Fungsi Helper: Fetch Data User
+    const fetchUsers = async (query = '') => {
+        try {
+            const response = await fetch(`/users/search?query=${query}`);
+            const users = await response.json();
+            renderUserList(users);
+        } catch (error) {
+            console.error("Gagal cari user:", error);
+        }
+    };
+
+    if (pjInput && pjResults && pjToggle) {
+        // 1. Saat mengetik (Input)
+        pjInput.onkeyup = (e) => {
+            const query = e.target.value.trim();
+            if (query.length > 0) {
+                fetchUsers(query);
+            } else {
+                pjResults.innerHTML = '';
+            }
+        };
+
+        // 2. Saat klik tombol panah (Toggle)
+        if (pjToggle) {
+            pjToggle.onclick = (e) => {
+                e.preventDefault();
+                // Jika kosong, load semua/populer user (query kosong)
+                if (pjResults.innerHTML.trim() === '') {
+                    fetchUsers(''); 
+                } else {
+                    pjResults.innerHTML = ''; // Tutup jika sudah terbuka
+                }
+            };
+        }
+
+        // 3. Saat memilih item (Klik user)
+        pjResults.onclick = (e) => {
+            const item = e.target.closest('.pj-item');
+            if (item) {
+                pjInput.value = item.dataset.name; // Isi input dengan nama
+                pjResults.innerHTML = ''; // Tutup dropdown
+            }
+        };
+
+        // 4. Tutup dropdown jika klik di luar (Focus Out)
+        pjInput.onblur = () => {
+            // Beri delay agar klik item sempat tereksekusi sebelum list hilang
+            setTimeout(() => { pjResults.innerHTML = ''; }, 200);
+        };
+    }
     // Reset dataset editing jika ada sisa
     if (taskForm && taskForm.dataset.editingId) {
         delete taskForm.dataset.editingId;
@@ -1004,9 +1093,7 @@ function showPopup() {
         };
     }
 
-    // ============================================================
     // ▼▼▼ LOGIKA SUBMIT FORM (BARU) ▼▼▼
-    // ============================================================
     if (taskForm) {
         taskForm.onsubmit = async (e) => { 
             e.preventDefault();
@@ -1033,8 +1120,8 @@ function showPopup() {
                 formData.append('noInvoice', popup.querySelector("#noInvoice")?.value || '');
                 formData.append('namaPelanggan', popup.querySelector("#namaPelanggan")?.value || '');
                 formData.append('judul', popup.querySelector("#judul")?.value || '');
+                formData.append('penanggung_jawab', popup.querySelector("#penanggungJawabInput")?.value || '');
                 formData.append('catatan', popup.querySelector("#catatan")?.value || '');
-                formData.append('penanggungJawab', loggedInUserName);
                 formData.append('urgensi', popup.querySelector("#urgensi")?.value || '');
                 formData.append('jumlah', grandTotalValue);
                 formData.append('warna', popup.querySelector("#warna")?.value || '');
@@ -1297,7 +1384,7 @@ function showPopup() {
                                     <button class="toggle-search-btn" type="button"><i class="bi bi-chevron-down"></i></button>
                                     <div class="autocomplete-results checklist-results"></div>
                                  </div>
-                                 <span class="btn-remove-checklist text-danger" style="cursor:pointer;"><i class="bi bi-x-lg"></i></span>
+                                 <span class="btn-remove-checklist" style="cursor:pointer;">x</span>
                             `;
                             checklistContainer.insertBefore(newWidget, currentWidget);
                         });
@@ -1469,15 +1556,22 @@ function updateLineNumbers() {
     });
 }
 
-
+const emptyRowHTML = `
+    <tr id="emptyRow">
+        <td colspan="12" class="text-center py-4 text-muted">
+            <i class="bi bi-inbox display-6 d-block mb-2"></i>
+            Belum ada task yang tersedia.
+        </td>
+    </tr>
+`;
 
 function addTaskToTable(task) {
     const mainTableBody = document.querySelector(".task table tbody");
     if (!mainTableBody) return;
 
-    const emptyRow = mainTableBody.querySelector('tr td.text-center');
-    if (emptyRow && emptyRow.textContent.includes('Belum ada task')) {
-        emptyRow.closest('tr').remove();
+    const emptyRow = document.getElementById('emptyRow');
+    if (emptyRow) {
+        emptyRow.remove();
     }
 
     fetch(`/task/get-row/${task.id}`)
