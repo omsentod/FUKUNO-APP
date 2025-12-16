@@ -161,7 +161,8 @@
         @endif
         <i class="bi bi-file-earmark-arrow-down icon-download" data-id="{{ $task->id }}"></i>
         @if(Auth::user()->role == 'admin')
-            <i class="bi bi-trash3-fill icon-trash" data-id="{{ $task->id }}"></i>
+        <i class="bi bi-files icon-duplicate" data-id="{{ $task->id }}"></i>
         @endif
     </td>
 </tr>
+
