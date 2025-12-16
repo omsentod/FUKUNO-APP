@@ -158,14 +158,20 @@ public function store(Request $request)
                     'deadline' => $line['deadline']
                 ]);
                 
-                // Simpan Checklists (Handle String atau Object dari JS)
                 if (!empty($line['checklists'])) {
                     $checklists = [];
-                    foreach ($line['checklists'] as $checkData) {
-                        // Cek apakah data string (input manual) atau object (dari getLineData)
+                    
+                    foreach ($line['checklists'] as $index => $checkData) {
+                        
                         $name = is_array($checkData) ? $checkData['name'] : $checkData;
-                        $checklists[] = ['nama_checklist' => $name];
+                        
+                        $checklists[] = [
+                            'nama_checklist' => $name,
+                            'is_completed' => false, 
+                            'position' => $index + 1 
+                        ];
                     }
+                    
                     $taskLine->checklists()->createMany($checklists);
                 }
 
@@ -461,7 +467,6 @@ public function storeComment(Request $request, $task_id)
     
     public function updateStatus(Request $request, $id)
     {
-        // 1. Validasi input
         $request->validate(['status_name' => 'required|string']);
     
         $task = Task::find($id);
@@ -469,22 +474,24 @@ public function storeComment(Request $request, $task_id)
             return response()->json(['success' => false, 'message' => 'Task not found.'], 404);
         }
     
-        $newStatusName = $request->status_name; 
+        $statusNameInput = $request->status_name;
     
-        // 2. Cari ID status baru
-        $newStatus = Status::where('name', $newStatusName)->first();
-        if (!$newStatus) {
-            return response()->json(['success' => false, 'message' => 'Status name not found.'], 404);
+
+        if ($statusNameInput == 'Resume Progress') {
+            $statusNameInput = 'In Progress'; // Sesuaikan dengan nama di DB kamu
         }
     
-        // 3. Update status_id
-        $task->status_id = $newStatus->id;
+        $newStatus = Status::where('name', $statusNameInput)->first();
+        
+        if (!$newStatus) {
+            return response()->json(['success' => false, 'message' => "Status '$statusNameInput' not found in database."], 404);
+        }
     
-        if ($newStatusName == 'Done and Ready' || $newStatusName == 'Delivered') {
+        $task->status_id = $newStatus->id;
+        if (in_array($statusNameInput, ['Done and Ready', 'Delivered'])) {
             $task->completed_at = now();
         } 
-        // Jika status lain (Hold/In Progress/Needs Work), reset waktu selesai
-        else if ($newStatusName != 'Hold') { 
+        else if ($statusNameInput != 'Hold') { 
             $task->completed_at = null; 
         }
         
@@ -635,22 +642,32 @@ public function storeComment(Request $request, $task_id)
                 // 2. Checklist & Status
                 $totalCheck = 0;
                 $totalCompleted = 0;
+
                 if (!empty($line['checklists'])) {
-                    $checklists = [];
-                    foreach ($line['checklists'] as $checkData) {
-                        // Handle format data dari JS
-                        if (is_array($checkData)) {
-                            $name = $checkData['name'];
-                            $isCompleted = $checkData['is_completed'] ?? 0;
-                        } else {
-                            $name = $checkData;
-                            $isCompleted = 0;
-                        }
-                        $checklists[] = [ 'nama_checklist' => $name, 'is_completed' => $isCompleted ];
-                        $totalCheck++;
-                        if ($isCompleted) $totalCompleted++;
-                    }
-                    $taskLine->checklists()->createMany($checklists);
+                $checklists = [];
+    
+                foreach ($line['checklists'] as $index => $checkData) {
+        
+                if (is_array($checkData)) {
+                $name = $checkData['name'];
+                $isCompleted = $checkData['is_completed'] ?? 0;
+                } else {
+                $name = $checkData;
+                $isCompleted = 0;
+                }
+
+                $checklists[] = [ 
+                'nama_checklist' => $name, 
+                'is_completed' => $isCompleted,
+                'position' => $index + 1 
+                ];
+
+                 $totalCheck++;
+                if ($isCompleted) $totalCompleted++;
+        }
+    
+    // Simpan semua checklist beserta posisi barunya
+    $taskLine->checklists()->createMany($checklists);
                 }
                 
                 // Hitung ulang status otomatis

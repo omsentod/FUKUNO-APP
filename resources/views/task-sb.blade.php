@@ -304,4 +304,5 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
 
 @push('scripts')
     <script src="{{ asset('js/task.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 @endpush

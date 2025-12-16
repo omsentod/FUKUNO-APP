@@ -738,6 +738,20 @@ thead th a i.bi {
     width: 10px;
 }
 
+.checklist-drag-handle {
+    cursor: move;
+    color: #aaa;
+    padding-right: 8px;
+}
+.checklist-drag-handle:hover {
+    color: #333;
+}
+.sortable-ghost {
+    opacity: 0.4;
+    background-color: #f0f0f0;
+    border: 1px dashed #ccc;
+}
+
 
 
 /* CSS untuk hasil Autocomplete Checklist */

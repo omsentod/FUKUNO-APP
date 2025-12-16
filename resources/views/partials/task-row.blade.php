@@ -92,8 +92,8 @@
 
         if ($isFinished) {
             if ($task->status->name == 'Delivered') {
-                $timeLeftString = 'Terkirim';
-                $timeClass = 'time-delivered';
+                $dateObj = $task->completed_at ?? $task->updated_at ?? now();
+                $timeLeftString = \Carbon\Carbon::parse($dateObj)->format('d M Y');   $timeClass = 'time-delivered';
             } else {
                 $timeLeftString = 'Selesai';
                 $timeClass = 'time-completed';
@@ -112,8 +112,11 @@
         }
     @endphp
     
-    <span id="time-left-{{ $task->id }}" class="{{ $timeClass }}" data-deadline="{{ $deadlineISO }}">
-        {{ $timeLeftString }}
+    <span 
+    id="time-left-{{ $task->id }}" 
+    class="{{ $timeClass }}" 
+    data-deadline="{{ $deadlineISO }}">
+    {{ $timeLeftString }}
     </span>
     </td>
 
@@ -134,8 +137,7 @@
     {{-- Kolom Progress --}}
     <td>
         @php
-            // Tentukan warna progress secara manual di PHP agar langsung berwarna saat load
-            $progressClass = 'status-yellow'; // Default (1-99%)
+            $progressClass = 'status-yellow'; 
             if ($percentage == 0) {
                 $progressClass = 'status-red';
             } elseif ($percentage == 100) {

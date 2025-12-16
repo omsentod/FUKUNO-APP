@@ -100,37 +100,43 @@ if (userId) {
             if(clearBtn) clearBtn.style.display = 'block';
         }
 
-        // 5. UPDATE TABEL TASK SECARA REAL-TIME 
-        const taskTableBody = document.querySelector("#taskTable tbody");
-        
-        if (taskTableBody && dataNotif.type === 'new_task' && dataNotif.task_id) {
-            
-            fetch(`/task/get-row/${dataNotif.task_id}`)
-                .then(response => response.json())
-                .then(result => {
-                    if (result.html) {
-                        const emptyRow = taskTableBody.querySelector('tr td.text-center');
-                        if (emptyRow && emptyRow.textContent.includes('Belum ada task')) {
-                            emptyRow.closest('tr').remove();
-                        }
 
-                        taskTableBody.insertAdjacentHTML('afterbegin', result.html);
-                        
-                        const newRow = taskTableBody.firstElementChild;
-                        newRow.style.backgroundColor = '#fff3cd'; 
-                        
-                        if (typeof window.initGalleryIndicator === 'function') {
-                             window.initGalleryIndicator(newRow);
-                        }
 
-                        setTimeout(() => { 
-                            newRow.style.transition = 'background-color 2s';
-                            newRow.style.backgroundColor = 'transparent'; 
-                        }, 2000);
-                    }
-                })
-                .catch(err => console.error("Gagal update tabel task:", err));
-        }
+// 5. UPDATE TABEL TASK SECARA REAL-TIME 
+const taskTableBody = document.querySelector("#taskTable tbody");
+
+if (taskTableBody && dataNotif.type === 'new_task' && dataNotif.task_id) {
+    
+    fetch(`/task/get-row/${dataNotif.task_id}`)
+        .then(response => response.json())
+        .then(result => {
+            if (result.html) {
+                const emptyRow = taskTableBody.querySelector('tr td.text-center');
+                if (emptyRow && emptyRow.textContent.includes('Belum ada task')) {
+                    emptyRow.closest('tr').remove();
+                }
+
+                taskTableBody.insertAdjacentHTML('beforeend', result.html);
+                
+                const newRow = taskTableBody.lastElementChild; 
+                
+                newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                newRow.style.transition = 'background-color 2s ease-out';
+                newRow.style.backgroundColor = '#fff3cd'; 
+                
+                if (typeof window.initGalleryIndicator === 'function') {
+                     window.initGalleryIndicator(newRow);
+                }
+
+                setTimeout(() => { 
+                    newRow.style.backgroundColor = ''; 
+                }, 2000);
+            }
+        })
+        .catch(err => console.error("Gagal update tabel task:", err));
+}
+
         
         if (chatContainer && dataNotif.type === 'new_comment' && chatContainer.dataset.taskId == dataNotif.task_id) {
             

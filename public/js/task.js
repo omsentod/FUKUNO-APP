@@ -26,6 +26,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================================================
 
   // --- FUNGSI TABEL SIZE (VERTIKAL) ---
+  function initSortableChecklist(containerElement) {
+    if (!containerElement || containerElement.classList.contains('sortable-initialized')) return;
+
+    new Sortable(containerElement, {
+        animation: 150,
+        handle: '.checklist-drag-handle', // Hanya bisa geser kalau pegang icon
+        ghostClass: 'sortable-ghost',
+    });
+
+    containerElement.classList.add('sortable-initialized');
+}
+
   function calculateTotals() {
       const sizeTable = document.querySelector("#sizeTable");
       if (!sizeTable) return;
@@ -405,8 +417,8 @@ function getSizeTableData(popup) {
 
 
 /**
- * @param {string} taskId - ID dari task yang akan diupdate.
- * @param {string} newStatusName - Nama status baru (e.g., "In Progress").
+ * @param {string|number} taskId 
+ * @param {string} newStatusName 
  */
  function updateTaskStatus(taskId, newStatusName) {
     const statusButton = document.querySelector(`#statusDropdown${taskId}`);
@@ -415,92 +427,108 @@ function getSizeTableData(popup) {
     const statusTextSpan = statusButton.querySelector('.status-text');
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    // 2. Update Tampilan Tombol
-    statusTextSpan.textContent = newStatusName;
+    // --- 1. HANDLING RESUME PROGRESS ---
+    // Jika user klik "Resume Progress", tampilan tombol harusnya "In Progress" (atau sesuai DB)
+    let displayStatusName = newStatusName;
+    if (newStatusName === 'Resume Progress') {
+        displayStatusName = 'In Progress'; // Sesuaikan tampilan tombol
+    }
+
+    // --- 2. UPDATE TAMPILAN TOMBOL ---
+    statusTextSpan.textContent = displayStatusName;
+    
+    // Hapus class warna lama
     statusButton.classList.forEach(className => {
         if (className.startsWith('status-') && className !== 'status-btn') {
             statusButton.classList.remove(className);
         }
     });
-    const newClass = 'status-' + newStatusName.toLowerCase().replace(/\s+/g, '-');
+    // Tambah class warna baru (ganti spasi jadi dash & lowercase)
+    const newClass = 'status-' + displayStatusName.toLowerCase().replace(/\s+/g, '-');
     statusButton.classList.add(newClass);
 
-    // 3. Update Tampilan Dropdown Menu
+    // --- 3. UPDATE DROPDOWN MENU ---
     const dropdownMenu = statusButton.nextElementSibling;
     if (dropdownMenu) {
         let newMenuHTML = '';
-
-        if (newStatusName === 'Hold' || newStatusName === 'Delivered') {
-            newMenuHTML += `<a class="dropdown-item" href="#" data-status="Resume Progress"><i class="bi bi-play-circle"></i> Resume Progress</a>`;
+        
+        // Logika Dropdown
+        if (displayStatusName === 'Hold' || displayStatusName === 'Delivered') {
+            // Perhatikan: data-status tetap dikirim sebagai 'Resume Progress' agar Controller menangkap logic-nya
+            newMenuHTML += `<a class="dropdown-item status-action" href="#" data-id="${taskId}" data-status="Resume Progress"><i class="bi bi-play-circle"></i> Resume Progress</a>`;
         }
 
-        if (newStatusName !== 'Hold') {
-            newMenuHTML += `<a class="dropdown-item" href="#" data-status="Hold"><i class="bi bi-pause-circle"></i> Set to Hold</a>`;
+        if (displayStatusName !== 'Hold') {
+            newMenuHTML += `<a class="dropdown-item status-action" href="#" data-id="${taskId}" data-status="Hold"><i class="bi bi-pause-circle"></i> Set to Hold</a>`;
         }
 
-        if (newStatusName !== 'Delivered') {
-            newMenuHTML += `<a class="dropdown-item" href="#" data-status="Delivered"><i class="bi bi-truck"></i> Set to Delivered</a>`;
+        if (displayStatusName !== 'Delivered') {
+            newMenuHTML += `<a class="dropdown-item status-action" href="#" data-id="${taskId}" data-status="Delivered"><i class="bi bi-truck"></i> Set to Delivered</a>`;
+        }
+        
+        // Pastikan opsi Done and Ready selalu ada jika belum Done
+        if (displayStatusName !== 'Done and Ready' && displayStatusName !== 'Delivered') {
+             newMenuHTML += `<a class="dropdown-item status-action" href="#" data-id="${taskId}" data-status="Done and Ready"><i class="bi bi-check-circle"></i> Set to Done</a>`;
         }
 
         dropdownMenu.innerHTML = newMenuHTML;
+        
+
     }
-    // 4. UPDATE TIME LEFT LIVE
+
+    // --- 4. UPDATE TIME LEFT LIVE ---
     const timeLeftSpan = document.querySelector(`#time-left-${taskId}`);
     if (timeLeftSpan) {
         const deadlineString = timeLeftSpan.dataset.deadline; 
-        
-        // Cek status "Final"
-        const isDone = (newStatusName === 'Done and Ready' || newStatusName === 'Delivered');
+        const isDone = (displayStatusName === 'Done and Ready' || displayStatusName === 'Delivered');
+
+        // Reset Class
+        timeLeftSpan.className = 'badge'; // Hapus class warna, sisakan badge dasar (jika pakai bootstrap)
 
         if (isDone) {
-    
-            if (newStatusName === 'Delivered') {
-                timeLeftSpan.textContent = "Terkirim";
-                timeLeftSpan.className = 'time-delivered';
+            if (displayStatusName === 'Delivered') {
+                const now = new Date();
+                const options = { day: 'numeric', month: 'short', year: 'numeric' };
+                const dateString = now.toLocaleDateString('en-GB', options); 
+            
+                timeLeftSpan.textContent = dateString; 
+                timeLeftSpan.classList.add('time-delivered');
             } else {
                 timeLeftSpan.textContent = "Selesai";
-                timeLeftSpan.className = 'time-completed'; 
-
+                timeLeftSpan.classList.add('time-completed');
             }
-
-        } else {
-   
+        } else if (deadlineString) {
+            // Parsing Tanggal
+            const deadline = new Date(deadlineString);
+            const now = new Date();
             
-            if (deadlineString) {
-                const deadline = new Date(deadlineString);
-                const now = new Date();
-                
-                // Reset jam agar hitungan hari akurat
-                deadline.setHours(0, 0, 0, 0);
-                now.setHours(0, 0, 0, 0);
+            // Set jam ke 00:00:00 agar hitungan murni berdasarkan tanggal kalender
+            deadline.setHours(0, 0, 0, 0);
+            now.setHours(0, 0, 0, 0);
 
-                const diffTime = deadline.getTime() - now.getTime();
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const diffTime = deadline.getTime() - now.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                if (diffDays > 0) {
-                    timeLeftSpan.textContent = `${diffDays} hari lagi`;
-                    timeLeftSpan.className = ''; // Warna hitam biasa
-                } else if (diffDays === 0) {
-                    timeLeftSpan.textContent = 'Hari ini';
-                    timeLeftSpan.className = '';
-                } else {
-                    timeLeftSpan.textContent = `Lewat ${Math.abs(diffDays)} hari`;
-                    timeLeftSpan.className = 'time-late'; // Kuning (Lewat)
+            if (diffDays > 0) {
+                timeLeftSpan.textContent = `${diffDays} hari lagi`;
+                // Logic warna mendekati deadline (H-2)
+                if (diffDays <= 2) {
+                    timeLeftSpan.classList.add('time-mustdo');
                 }
-                
-         
-                if (diffDays >= 0 && diffDays <= 2) {
-                     timeLeftSpan.className = 'time-mustdo'; // Merah
-                }
-
+            } else if (diffDays === 0) {
+                timeLeftSpan.textContent = 'Hari ini';
+                timeLeftSpan.classList.add('time-mustdo');
             } else {
-                timeLeftSpan.textContent = '-';
-                timeLeftSpan.className = '';
+                timeLeftSpan.textContent = `Lewat ${Math.abs(diffDays)} hari`;
+                timeLeftSpan.classList.add('time-late');
             }
+        } else {
+            timeLeftSpan.textContent = '-';
         }
     }
 
-    // 5. Kirim Update ke Server (Kode Anda yang sudah ada)
+    // --- 5. KIRIM KE SERVER ---
+    // Gunakan newStatusName (apa yang diklik user), controller yang akan handle mappingnya
     fetch(`/task/status/update/${taskId}`, {
         method: 'POST',
         headers: {
@@ -509,18 +537,23 @@ function getSizeTableData(popup) {
             'Accept': 'application/json'
         },
         body: JSON.stringify({
-            status_name: newStatusName
+            status_name: newStatusName 
         })
     })
     .then(response => response.json())
     .then(result => {
         if (result.success) {
-            console.log(`Task ${taskId} status updated to ${newStatusName}`);
+            console.log(`Task ${taskId} updated successfully.`);
         } else {
-            console.error('Gagal update status di server:', result.message);
+            alert('Gagal update status: ' + result.message);
+            // Opsional: Reload halaman jika gagal agar UI sinkron kembali
+            // location.reload();
         }
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan jaringan.');
+    });
 }
 
 
@@ -825,13 +858,11 @@ function showValidationErrors(popup, errors) {
         }
     }
 }
-  // --- FUNGSI POPUP UTAMA ---
-
- function showPopup() {
+function showPopup() {
     const overlay = document.querySelector(".popup-overlay");
     if (!overlay) return;
-    
-    // 1. Ambil referensi ke popup (tanpa cloneNode)
+
+    // 1. Ambil referensi ke popup
     const popup = overlay.querySelector(".popup");
     if (!popup) {
         console.error("Elemen .popup tidak ditemukan!");
@@ -852,10 +883,12 @@ function showValidationErrors(popup, errors) {
 
     let mockupsToDelete = [];
 
+    // Reset dataset editing jika ada sisa
     if (taskForm && taskForm.dataset.editingId) {
         delete taskForm.dataset.editingId;
     }
 
+    // Listener Tombol
     if (addLineBtn) {
         addLineBtn.onclick = (e) => { e.preventDefault(); addLine(); };
     } else { console.error("Tombol #addLine tidak ditemukan!"); }
@@ -868,32 +901,27 @@ function showValidationErrors(popup, errors) {
     }
 
     if (addSizeRowBtn) {
-         addSizeRowBtn.onclick = (e) => {
-             e.preventDefault();
-             const lastRow = popup.querySelector("#sizeTable tbody tr:last-child");
-             insertSizeRow(sizeTable, lastRow || sizeTable.querySelector('tbody'));
-         };
+        addSizeRowBtn.onclick = (e) => {
+            e.preventDefault();
+            const lastRow = popup.querySelector("#sizeTable tbody tr:last-child");
+            insertSizeRow(sizeTable, lastRow || sizeTable.querySelector('tbody'));
+        };
     }
 
+    // Listener Mockup Input
     if (mockupInput) {
         mockupInput.onchange = () => {
             if (mockupInput.files.length > 0) {
-                // Daftar tipe file yang diizinkan
                 const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
-
                 for (const file of mockupInput.files) {
-                    // Cek apakah tipe file valid
                     if (!validTypes.includes(file.type)) {
-                        alert(`File "${file.name}" bukan gambar yang didukung! Harap upload JPG, PNG, atau WEBP.`);
-                        continue; // Lewati file ini
+                        alert(`File "${file.name}" bukan gambar yang didukung!`);
+                        continue;
                     }
-                    
-                    // Cek ukuran file (opsional, misal max 2MB)
                     if (file.size > 5 * 1024 * 1024) {
                         alert(`File "${file.name}" terlalu besar! Maksimal 5MB.`);
                         continue;
                     }
-
                     mockupFiles.set(file.name, file);
                 }
                 updateMockupPreview();
@@ -902,8 +930,9 @@ function showValidationErrors(popup, errors) {
         };
     }
     
+    // Listener Mockup Preview (Hapus)
     if (previewArea) {
-        previewArea.onclick = (event) => { // Gunakan .onclick
+        previewArea.onclick = (event) => { 
             if (event.target.classList.contains('remove-mockup-btn')) {
                 const fileName = event.target.dataset.key;
                 const file = mockupFiles.get(fileName);
@@ -916,13 +945,16 @@ function showValidationErrors(popup, errors) {
         };
     }
 
-    // Listener SUBMIT FORM (Fetch) - Gunakan .onsubmit
+    // ============================================================
+    // ▼▼▼ LOGIKA SUBMIT FORM (BARU) ▼▼▼
+    // ============================================================
     if (taskForm) {
-        taskForm.onsubmit = async (e) => { // Gunakan .onsubmit
+        taskForm.onsubmit = async (e) => { 
             e.preventDefault();
             const submitBtn = taskForm.querySelector('button[type="submit"]');
             const loadingOverlay = popup.querySelector('.loading-overlay');
             
+            // Bersihkan error lama
             popup.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
             popup.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
 
@@ -937,6 +969,8 @@ function showValidationErrors(popup, errors) {
                 
                 const loggedInUserName = document.querySelector('.page')?.dataset.userName || 'Unknown';
                 const grandTotalValue = popup.querySelector("#sizeTable tfoot .grand-total")?.textContent || '0';
+                
+                // Append Data Standar
                 formData.append('noInvoice', popup.querySelector("#noInvoice")?.value || '');
                 formData.append('namaPelanggan', popup.querySelector("#namaPelanggan")?.value || '');
                 formData.append('judul', popup.querySelector("#judul")?.value || '');
@@ -948,11 +982,13 @@ function showValidationErrors(popup, errors) {
                 formData.append('model', popup.querySelector("#model")?.value || '');
                 formData.append('bahan', popup.querySelector("#bahan")?.value || '');
                 
+                // Append Data Kompleks (Lines & Sizes)
                 const lineData = getLineData(popup);
                 const sizeData = getSizeTableData(popup);
                 formData.append('lines', JSON.stringify(lineData));
                 formData.append('sizes', JSON.stringify(sizeData));
                 
+                // Append Mockups
                 let existingMockupUrls = [];
                 if (mockupFiles.size > 0) {
                     mockupFiles.forEach(file => {
@@ -966,7 +1002,7 @@ function showValidationErrors(popup, errors) {
                 formData.append('existing_mockup_urls', JSON.stringify(existingMockupUrls));
                 formData.append('mockups_to_delete', JSON.stringify(mockupsToDelete));
                 
-                // Tentukan URL
+                // Tentukan URL (Edit atau Store)
                 const editingId = taskForm.dataset.editingId;
                 let url = '/task/store'; 
                 formData.append('_token', csrfToken);
@@ -995,57 +1031,70 @@ function showValidationErrors(popup, errors) {
                     throw new Error(result.message || 'Error server tidak diketahui');
                 }
                 
-                // Sukses
+                // --- SUKSES ---
                 showNotif(result.message || "Aksi berhasil!");
-                setTimeout(() => { location.reload(); }, 1000); 
+
+                // [UPDATE] Logika: Reload jika Edit, Update Tabel jika Baru
+                if (editingId) {
+                    // KASUS EDIT: Refresh halaman (aman untuk update relasi kompleks)
+                    setTimeout(() => { location.reload(); }, 1000);
+                } else {
+                    // KASUS CREATE: Update tabel tanpa refresh (Instant)
+                    
+                    // 1. Tutup Popup
+                    overlay.style.display = "none";
+                    
+                    // 2. Reset Form
+                    resetForm();
+
+                    // 3. Masukkan Task Baru ke Tabel
+                    if (result.tasks && result.tasks.length > 0) {
+                        // Loop array tasks (jaga-jaga jika split task)
+                        result.tasks.forEach(task => {
+                            addTaskToTable(task); 
+                        });
+                    }
+
+                    // 4. Reset Button & Loading (Karena halaman tidak direfresh)
+                    if (loadingOverlay) loadingOverlay.style.display = 'none';
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit'; }
+                }
                 
             } catch (error) {
                 console.error('Error saat submit:', error);
                 alert(`Gagal: ${error.message}`); 
-                if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit'; }
-            } finally {
+                // Reset button jika error
                 if (loadingOverlay) loadingOverlay.style.display = 'none';
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit'; }
             } 
         };
     }
 
-    // LOGIKA KLIK KANAN (CONTEXT MENU) - PERBAIKAN POSISI
+    // ============================================================
+    // ▼▼▼ LOGIKA INTERFACE LAINNYA (Table, Context Menu) ▼▼▼
+    // ============================================================
+    
+    // LOGIKA KLIK KANAN (CONTEXT MENU)
     if (sizeTable && contextMenu) {
-        
-        // 1. Listener Menu Klik Kanan
         sizeTable.oncontextmenu = (e) => {
             e.preventDefault(); 
-            
-            // Cari sel yang diklik
             clickedCell = e.target.closest('td, th');
             if (!clickedCell) return;
-
-         
             contextMenu.style.top = `${e.clientY}px`;
             contextMenu.style.left = `${e.clientX}px`;
-            
-            // Tampilkan
             contextMenu.classList.add("show");
         };
-
-        // 2. Listener Tutup Menu (Gunakan window agar lebih luas jangkauannya)
         window.addEventListener('click', () => {
-             if (contextMenu.classList.contains("show")) {
-                 contextMenu.classList.remove("show");
-             }
+             if (contextMenu.classList.contains("show")) contextMenu.classList.remove("show");
         });
-
-        // 3. Listener Aksi Menu (Tetap Sama)
         contextMenu.onclick = (e) => {
             if (!clickedCell) return;
             const targetItem = e.target.closest('.context-menu-item');
             if (!targetItem) return;
-            
             const action = targetItem.dataset.action;
             const table = clickedCell.closest('table');
             const cellIndex = clickedCell.cellIndex;
             const parentRow = clickedCell.closest('tr');
-            
             switch (action) {
                 case 'insert-row-after': insertSizeRow(table, parentRow); break;
                 case 'delete-row': deleteSizeRow(table, parentRow); break;
@@ -1053,88 +1102,79 @@ function showValidationErrors(popup, errors) {
                 case 'delete-col': deleteTypeColumn(table, cellIndex); break;
             }
             clickedCell = null;
-            // Menu akan tertutup otomatis oleh listener window di atas
         };
     }
 
-    // LISTENER DOUBLE-CLICK HEADER - Gunakan .ondblclick
+    // LISTENER HEADER & UNDO
     if (sizeTableHead) {
         sizeTableHead.ondblclick = (event) => {
             const thTarget = event.target.closest('th');
-            if (thTarget) {
-                handleHeaderDoubleClick(thTarget);
-            }
+            if (thTarget) handleHeaderDoubleClick(thTarget);
         };
     }
-
-    // LISTENER KEYDOWN (UNDO) - Gunakan .onkeydown
     popup.onkeydown = (event) => {
         if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
-            event.preventDefault();
-            undoLastAction();
+            event.preventDefault(); undoLastAction();
         }
     };
-
-    // LISTENER INPUT JUMLAH - Gunakan .oninput
     if (sizeTableBody) {
         sizeTableBody.oninput = (event) => {
-            if (event.target.classList.contains('quantity-input')) {
-                calculateTotals();
-            }
+            if (event.target.classList.contains('quantity-input')) calculateTotals();
         };
     }
 
-    // Listener untuk Hapus Line, Tambah Checklist, dan Autocomplete
+    // ============================================================
+    // ▼▼▼ LOGIKA LINE CONTAINER (Dropdown & Autocomplete) ▼▼▼
+    // ============================================================
+    // Ini bagian yang tadi hilang, sekarang sudah dikembalikan UTUH.
+    
     const lineContainerArea = popup.querySelector("#lineContainer");
     if (lineContainerArea) {
         
-        // --- 1. LISTENER UNTUK KLIK (Event Delegation) ---
+        // 1. LISTENER KLIK (Event Delegation)
         lineContainerArea.onclick = async (event) => {
             const target = event.target;
 
-            // A. Hapus line pekerjaan
+            // A. Hapus Line
             const removeLineBtn = target.closest('.btn-remove-line');
-            if (removeLineBtn) {
-                event.preventDefault();
-                removeLineBtn.closest('.border.p-3.mb-3.rounded')?.remove();
-                updateLineNumbers();
+            if (removeLineBtn) { 
+                event.preventDefault(); 
+                removeLineBtn.closest('.border.p-3.mb-3.rounded')?.remove(); 
+                updateLineNumbers(); 
             }
 
-            // B. Tambah checklist (membuat widget baru)
+            // B. Tambah Checklist
             const addChecklistLink = target.closest('.addChecklist');
-            if (addChecklistLink) {
-                event.preventDefault();
-                addChecklist(addChecklistLink);
+            if (addChecklistLink) { 
+                event.preventDefault(); 
+                addChecklist(addChecklistLink); 
             }
 
-            // C. Hapus checklist (menghapus widget)
+            // C. Hapus Checklist
             const removeChecklistBtn = target.closest('.btn-remove-checklist'); 
-            if (removeChecklistBtn) {
-                event.preventDefault();
+            if (removeChecklistBtn) { 
+                event.preventDefault(); 
                 removeChecklistBtn.closest('.d-flex.gap-2.mb-2')?.remove(); 
             }
 
-            //  D.  LOGIKA TOMBOL TOGGLE
+            // D. TOGGLE BUTTON (DROPDOWN)
             const toggleBtn = target.closest('.toggle-search-btn');
-            
             if (toggleBtn) {
-                event.preventDefault(); // Mencegah submit form
+                event.preventDefault(); 
                 
-                // 1. Cari elemen terkait (input & container hasil)
                 const wrapper = toggleBtn.closest('.position-relative');
                 const input = wrapper.querySelector('input');
                 const resultsContainer = wrapper.querySelector('.autocomplete-results');
                 
-                // 2. Toggle: Jika sudah ada isinya (terbuka), kosongkan (tutup).
+                // Toggle: Kalau sudah buka, tutup.
                 if (resultsContainer.innerHTML.trim() !== '') {
                     resultsContainer.innerHTML = '';
                     return;
                 }
 
-                // 3. Jika tertutup, ambil data dari server (Query kosong = semua data)
+                // Kalau tutup, ambil data (Trigger fetch)
                 try {
                     let url = '';
-                    // Cek jenis input (Nama Pekerjaan atau Checklist)
                     if (input.classList.contains('line-nama')) {
                         url = `/pekerjaan/search?query=`; 
                     } else {
@@ -1144,17 +1184,14 @@ function showValidationErrors(popup, errors) {
                     const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
                     const data = await response.json();
 
-                    // 4. Tampilkan Hasil
                     let html = '';
                     if (data.length === 0) {
                         html = '<div class="p-2 text-muted small">Tidak ada data.</div>';
                     } else {
                         data.forEach(item => {
                             if (input.classList.contains('line-nama')) {
-                                // Render Item Pekerjaan
                                 html += `<div class="autocomplete-item">${item.nama_pekerjaan}</div>`;
                             } else {
-                                // Render Item Checklist (dengan data items tersembunyi)
                                 const itemsJson = JSON.stringify(item.items || []).replace(/"/g, '&quot;');
                                 let subInfo = (item.items && item.items.length > 0) ? 
                                     `<small class="text-muted d-block" style="font-size:10px;">Isi: ${item.items.map(i => i.name).join(', ')}</small>` : '';
@@ -1163,57 +1200,52 @@ function showValidationErrors(popup, errors) {
                         });
                     }
                     resultsContainer.innerHTML = html;
-                    input.focus(); // Kembalikan fokus ke input
+                    input.focus(); 
 
                 } catch (error) {
                     console.error('Gagal load dropdown:', error);
                 }
-                return; // Selesai
             }
-   
-            
 
-            // E. Klik pada item hasil autocomplete
+            // E. KLIK ITEM AUTOCOMPLETE
             const resultItem = target.closest('.autocomplete-item');
             if (resultItem) {
-                // 1. Cari wrapper & input terdekat (Aman untuk Job & Checklist)
                 const wrapper = resultItem.closest('.position-relative');
                 const inputField = wrapper.querySelector('input');
                 const resultsContainer = wrapper.querySelector('.autocomplete-results');
 
                 if (inputField.classList.contains('line-nama')) {
-                    // --- KASUS NAMA PEKERJAAN ---
-                    // Cukup isi valuenya dan tutup dropdown
+                    // Kasus Nama Pekerjaan
                     inputField.value = resultItem.textContent.trim();
                     resultsContainer.innerHTML = '';
                 
                 } else if (inputField.classList.contains('checklist-item')) {
-                    // --- KASUS CHECKLIST ---
+                    // Kasus Checklist (Bisa Grup)
                     const itemsData = JSON.parse(resultItem.dataset.items || '[]');
                     
                     if (itemsData.length > 0) {
-                        // KASUS GRUP: Pecah jadi banyak input
+                        // Pecah jadi banyak input
                         const checklistContainer = wrapper.closest('.checklist-container');
-                        const currentWidget = wrapper.closest('.d-flex'); // Widget saat ini
+                        const currentWidget = wrapper.closest('.d-flex'); 
 
                         itemsData.forEach(item => {
-                            // PENTING: Gunakan struktur HTML baru (dengan toggle)
                             const newWidget = document.createElement("div");
-                            newWidget.className = "d-flex gap-2 mb-2 align-items-center"; 
+                            newWidget.className = "d-flex gap-2 mb-2 align-items-center checklist-row"; // Tambah checklist-row
                             newWidget.innerHTML = `
+                                 <i class="bi bi-grip-vertical checklist-drag-handle"></i>
                                  <div class="position-relative input-with-toggle" style="flex-grow: 1;">
                                     <input type="search" class="form-control checklist-item" value="${item.name}">
                                     <button class="toggle-search-btn" type="button"><i class="bi bi-chevron-down"></i></button>
                                     <div class="autocomplete-results checklist-results"></div>
                                  </div>
-                                 <span class="btn-remove-checklist">x</span>
+                                 <span class="btn-remove-checklist text-danger" style="cursor:pointer;"><i class="bi bi-x-lg"></i></span>
                             `;
                             checklistContainer.insertBefore(newWidget, currentWidget);
                         });
-                        currentWidget.remove(); // Hapus input pencarian awal
+                        currentWidget.remove(); // Hapus input awal
 
                     } else {
-                        // KASUS SINGLE: Isi saja
+                        // Single Item
                         const nameText = resultItem.querySelector('strong') ? resultItem.querySelector('strong').textContent : resultItem.textContent;
                         inputField.value = nameText.trim(); 
                         resultsContainer.innerHTML = '';
@@ -1222,7 +1254,7 @@ function showValidationErrors(popup, errors) {
             }
         };
 
-        // --- 2. LISTENER UNTUK KEYBOARD (Autocomplete Fetch) ---
+        // 2. LISTENER KEYBOARD (Autocomplete Search)
         lineContainerArea.onkeyup = async (event) => {
             const input = event.target;
             
@@ -1256,7 +1288,6 @@ function showValidationErrors(popup, errors) {
                             const itemNames = check.items.map(i => i.name).join(', ');
                             subInfo = `<small class="text-muted d-block" style="font-size:10px; margin-top:-2px;">Isi: ${itemNames}</small>`;
                         }
-
                         html += `<div class="autocomplete-item" data-items="${itemsJson}">
                                     <strong>${check.name}</strong>
                                     ${subInfo}
@@ -1272,6 +1303,7 @@ function showValidationErrors(popup, errors) {
                 const query = input.value.trim();
                 const resultsContainer = input.parentElement.querySelector('.autocomplete-results');
                 if (!resultsContainer) return;
+                
                 if (event.key === 'Escape') {
                     resultsContainer.innerHTML = '';
                     input.blur();
@@ -1298,18 +1330,18 @@ function showValidationErrors(popup, errors) {
             }
         };
 
-        // --- 3. LISTENER UNTUK FOKUS HILANG ---
+        // 3. LISTENER FOCUS OUT
         lineContainerArea.onfocusout = (event) => {
              if (event.target.classList.contains('checklist-item') || event.target.classList.contains('line-nama')) {
                  setTimeout(() => {
-                    const resultsContainer = event.target.parentElement.querySelector('.autocomplete-results');
-                    if(resultsContainer) resultsContainer.innerHTML = '';
+                    const results = event.target.parentElement.querySelector('.autocomplete-results');
+                    if(results) results.innerHTML = '';
                  }, 200); 
              }
         };
     }
 
-    // Panggil kalkulasi & kosongkan history saat popup dibuka
+    // Inisialisasi Awal Popup
     calculateTotals();
     actionHistory = [];
     mockupFiles.clear();
@@ -1320,12 +1352,10 @@ function showValidationErrors(popup, errors) {
     overlay.style.display = "block";
 }
 
-// Add Line Function
-
-
- function addLine() {
+function addLine() {
     const lineContainer = document.querySelector("#lineContainer");
     if (!lineContainer) return;
+
     const lineDiv = document.createElement("div");
     lineDiv.classList.add("border", "p-3", "mb-3", "rounded");
     lineDiv.innerHTML = `
@@ -1336,17 +1366,14 @@ function showValidationErrors(popup, errors) {
       <div class="row mb-2">
         <div class="col-md-6"> 
           <label>Nama Pekerjaan</label>
-          
           <div class="position-relative input-with-toggle">
              <input type="search" class="form-control line-nama" placeholder="Ketik untuk mencari pekerjaan...">
-             
              <button class="toggle-search-btn" type="button">
                 <i class="bi bi-chevron-down"></i>
              </button>
-             
              <div class="autocomplete-results job-results"></div>
           </div>
-          </div>
+        </div>
         <div class="col-md-6">
           <label>Deadline</label>
           <input type="datetime-local" class="form-control line-deadline">
@@ -1354,11 +1381,18 @@ function showValidationErrors(popup, errors) {
       </div>
       <div class="mb-2">
         <label>Checklist</label>
+        
         <div class="checklist-container"></div>
+        
         <a href="#" class="text-primary small addChecklist">+ Tambah Checklist</a>
       </div>
     `;
+    
     lineContainer.appendChild(lineDiv);
+
+    const checklistContainer = lineDiv.querySelector(".checklist-container");
+    
+    initSortableChecklist(checklistContainer);
     updateLineNumbers();
 }
 
@@ -1378,146 +1412,39 @@ function updateLineNumbers() {
 
 
 
-   function addTaskToTable(task) {
-    if (!mainTableBody) {
-        console.error("Elemen .task table tbody.table-bg tidak ditemukan!");
-        return; 
+function addTaskToTable(task) {
+    const mainTableBody = document.querySelector(".task table tbody");
+    if (!mainTableBody) return;
+
+    const emptyRow = mainTableBody.querySelector('tr td.text-center');
+    if (emptyRow && emptyRow.textContent.includes('Belum ada task')) {
+        emptyRow.closest('tr').remove();
     }
 
-    const newId = 'task-' + task.id;
-    const picName = task.user ? task.user.name : '??';
-    const statusName = task.status ? task.status.name : 'Needs Work';
-    
-    // [FIX #2] Logika Mockup (Tetap sama)
-    const firstMockup = task.mockups && task.mockups.length > 0 ? task.mockups[0].file_path_url : 'assets/img/default.png'; 
-    const mockupsHTML = task.mockups && task.mockups.length > 0 ? task.mockups.map(img => `<img src="${img.file_path_url}" class="mockup-image-data">`).join('') : '<img src="assets/img/default.png" class="mockup-image-data">';
-    const indicatorVisible = task.mockups && task.mockups.length > 1 ? 'visible' : '';
+    fetch(`/task/get-row/${task.id}`)
+        .then(response => {
+            if (!response.ok) throw new Error("Gagal mengambil HTML task");
+            return response.json();
+        })
+        .then(data => {
+            if (data.html) {
+                mainTableBody.insertAdjacentHTML('beforeend', data.html);
+                const newRow = mainTableBody.firstElementChild;
 
-    // ▼▼▼ [FIX #3] LOGIKA LINE & DEADLINE BARU (Tanpa Loop) ▼▼▼
-    const lineCount = task.task_pekerjaans ? task.task_pekerjaans.length : 0;
-    
-    // (Kita masih ambil lineName dari yg pertama, karena task di-split)
-    const linePekerjaan = (lineCount > 0) ? task.task_pekerjaans[0] : null; 
-    const lineName = linePekerjaan ? linePekerjaan.nama_pekerjaan : 'N/A';
-    let timeleft = '-';
-    
-    // (BARU) Cari deadline paling lama (max)
-    let maxDeadline = null;
-    if (lineCount > 0) {
-        task.task_pekerjaans.forEach(line => {
-            if (line.deadline) {
-                const lineDate = new Date(line.deadline);
-                if (maxDeadline === null || lineDate > maxDeadline) {
-                    maxDeadline = lineDate;
+                newRow.style.backgroundColor = '#fff3cd'; 
+                newRow.style.transition = 'background-color 1.5s ease';
+                
+                if (typeof initGalleryIndicator === 'function') {
+                    initGalleryIndicator(newRow);
                 }
+
+                setTimeout(() => {
+                    newRow.style.backgroundColor = 'transparent';
+                }, 1500);
             }
-        });
-    }
-
-    if (maxDeadline) { 
-        const deadline = maxDeadline; 
-        const now = new Date();
-        deadline.setHours(0, 0, 0, 0);
-        now.setHours(0, 0, 0, 0);
-
-        const diffTime = deadline.getTime() - now.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays > 0) {
-            timeleft = `${diffDays} hari lagi`;
-        } else if (diffDays === 0) {
-            timeleft = 'Hari ini';
-        } else {
-            timeleft = `Lewat ${Math.abs(diffDays)} hari`;
-        }
-    }
-
-    let checklistsHTML = '';
-    let completed = 0;
-    let totalChecklists = 0;
-    if (linePekerjaan && linePekerjaan.checklists && linePekerjaan.checklists.length > 0) {
-        checklistsHTML += `<strong class="d-block mt-2 mb-1">${lineName}</strong>`;
-        linePekerjaan.checklists.forEach(check => {
-            totalChecklists++;
-            if (check.is_completed) completed++;
-            checklistsHTML += `
-                <div class="form-check">
-                    <input class="form-check-input progress-check" type="checkbox" 
-                           id="check-${newId}-${check.id}" 
-                           data-id="${check.id}" 
-                           ${check.is_completed ? 'checked' : ''}>
-                    <label class="form-check-label" for="check-${newId}-${check.id}">
-                        ${check.nama_checklist}
-                    </label>
-                </div>
-            `;
-        });
-    }
-    if (checklistsHTML === '') checklistsHTML = '<p class="text-muted small">Belum ada checklist.</p>';
-    const percentage = (totalChecklists > 0) ? Math.round((completed / totalChecklists) * 100) : 0;
-
-    const newRow = document.createElement('tr');
-    
-    // HTML untuk baris baru
-    newRow.innerHTML = `
-        <td>${task.no_invoice}</td>
-        <td>${task.judul}</td>
-        <td>${task.total_jumlah}</td>
-        <td><button class="line-btn" style="background-color: #eee; color: #333;">${lineName}</button></td>
-        <td>${task.urgensi}</td>
-        <td>
-            <div class="dropdown">
-                <button class="status-btn status-${statusName.toLowerCase().replace(' ','-')} dropdown-toggle" 
-                        type="button" id="statusDropdown${newId}" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span class="status-text">${statusName}</span> 
-                </button>
-                <div class="dropdown-menu" aria-labelledby="statusDropdown${newId}">
-                     <a class="dropdown-item" href="#" data-status="Hold"><i class="bi bi-pause-circle"></i> Set to Hold</a>
-                </div>
-            </div>
-        </td>
-        <td>${timeleft}</td>
-        <td class="icon-cell">
-            <div class="mockup-wrapper">
-                ${mockupsHTML}
-                <img src="${firstMockup}" class="mockup-display">
-                <i class="bi bi-stack gallery-indicator ${indicatorVisible}"></i>
-            </div>
-        </td>
-        <td><div class="pic">${buatInisial(picName)}</div></td> 
-        <td>
-            <div class="dropdown">
-                <button class="progress dropdown-toggle" type="button" 
-                        id="progressDropdown${newId}" data-task-id="${task.id}" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span class="progress-text">${percentage}%</span>
-                </button>
-                <div class="dropdown-menu p-3" aria-labelledby="progressDropdown${newId}" style="width: 250px;">
-                    <form class="progress-form">
-                        ${checklistsHTML}
-                    </form>
-                </div>
-            </div>
-        </td>
-        <td class="icon-cell">
-            <i class="bi bi-pencil-square icon-edit"></i>
-            <i class="bi bi-file-earmark-arrow-down icon-download" data-id="${task.id}"></i> 
-            <i class="bi bi-trash3-fill icon-trash" data-id="${task.id}"></i>
-        </td>
-    `;
-    
-    mainTableBody.prepend(newRow); // Tambahkan ke atas
-    initGalleryIndicator(newRow); // Init galeri
-    
-    // Init warna progress bar
-    const newProgressBar = newRow.querySelector('.dropdown-toggle.progress');
-    if (newProgressBar) {
-        const newPercentage = percentage;
-        newProgressBar.classList.remove('status-red', 'status-yellow', 'status-green');
-        if (newPercentage === 0) newProgressBar.classList.add('status-red');
-        else if (newPercentage === 100) newProgressBar.classList.add('status-green');
-        else newProgressBar.classList.add('status-yellow');
-    }
-  }
+        })
+        .catch(error => console.error("Error adding task row:", error));
+}
 
 
  function addChecklist(button) {
@@ -1527,23 +1454,26 @@ function updateLineNumbers() {
     const checklistWidget = document.createElement("div");
     checklistWidget.className = "d-flex gap-2 mb-2 align-items-center"; 
 
-    // 1. Wrapper Input
+    // 1. Icon Drag Handle
+    const dragHandle = document.createElement("i");
+    dragHandle.className = "bi bi-grip-vertical checklist-drag-handle";
+
+    // 2. Wrapper Input
     const inputWrapper = document.createElement("div");
     inputWrapper.className = "position-relative input-with-toggle"; 
     inputWrapper.style.flexGrow = "1"; 
 
-    // 2. Input Field
+    // 3. Input 
     const checklistInput = document.createElement("input");
     checklistInput.type = "search";
     checklistInput.className = "form-control checklist-item";
     checklistInput.placeholder = "Ketik untuk mencari checklist...";
     
-    // ▼▼▼ 3. BUAT TOMBOL TOGGLE ▼▼▼
     const toggleBtn = document.createElement("button");
     toggleBtn.className = "toggle-search-btn"; 
     toggleBtn.type = "button";
     toggleBtn.innerHTML = '<i class="bi bi-chevron-down"></i>';
-    // ▲▲▲ ▲▲▲ ▲▲▲
+
 
     // 4. Container Hasil
     const resultsContainer = document.createElement("div");
@@ -1556,9 +1486,10 @@ function updateLineNumbers() {
     
     // Rakit elemen (JANGAN LUPA appendChild toggleBtn)
     inputWrapper.appendChild(checklistInput);
-    inputWrapper.appendChild(toggleBtn); // <--- Masukkan tombol
+    inputWrapper.appendChild(toggleBtn); 
     inputWrapper.appendChild(resultsContainer);
-    
+
+    checklistWidget.appendChild(dragHandle);
     checklistWidget.appendChild(inputWrapper);
     checklistWidget.appendChild(deleteBtn);
     
@@ -2035,11 +1966,19 @@ document.body.addEventListener('click', function(event) {
             openImageModal(wrapper);
         }
         
-        const statusItem = target.closest('.dropdown-item[data-status]');
-        if (statusItem) {
-            event.preventDefault();
+    const statusItem = target.closest('.dropdown-item[data-status]');
+    if (statusItem) {
+        event.preventDefault();
+        
+        if (statusItem.dataset.id) {
+            const taskId = statusItem.dataset.id;
+            const newStatus = statusItem.dataset.status;
+            updateTaskStatus(taskId, newStatus);
+        } 
+        else {
             handleStatusChange(statusItem);
         }
+    }
 
         return; 
     }

@@ -11,11 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+
         Schema::create('checklist_items', function (Blueprint $table) {
             $table->id();
-            // Relasi ke tabel checklists (Induk/Judul)
+            
             $table->foreignId('checklist_id')->constrained('checklists')->onDelete('cascade');
+            
             $table->string('name'); 
+            
             $table->timestamps();
         });
     }

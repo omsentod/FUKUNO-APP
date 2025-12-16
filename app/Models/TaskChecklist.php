@@ -19,6 +19,7 @@ class TaskChecklist extends Model
         'task_pekerjaan_id',
         'nama_checklist', // Jika pakai FK, ganti ini jadi 'checklist_id'
         'is_completed',
+        'position',
     ];
 
     /**

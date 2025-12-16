@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
+
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
@@ -109,3 +111,13 @@ Route::middleware(['auth', 'admin'])->group(function() {
 
 });
 
+Route::get('/migrate', function () {
+    try {
+        // --force diperlukan karena di hosting biasanya dianggap production
+        Artisan::call('migrate', ['--force' => true]);
+        
+        return 'Migrasi Sukses!<br><br>' . nl2br(Artisan::output());
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});

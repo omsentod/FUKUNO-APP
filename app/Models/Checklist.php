@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 class Checklist extends Model
 {
     use HasFactory;
-    protected $fillable = ['name']; 
+
+    // Tambahkan 'position' di sini agar bisa disimpan
+    protected $fillable = [
+        'name', 
+        'position' 
+    ]; 
 
     public function items()
     {
