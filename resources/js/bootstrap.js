@@ -33,128 +33,152 @@ if (userId) {
 
     window.Echo.private(`notifications.${userId}`)
     .listen('.NewNotification', (e) => {
-        // Ambil data (support struktur e.data atau e langsung)
         const dataNotif = e.data || e;
         console.log("Notifikasi Masuk:", dataNotif.message); 
 
-        // 1. MAINKAN SUARA
-        notificationSound.play().catch(() => {});
+        // Cek apakah ini update diam-diam (Status/Checklist)
+        const isSilent = (dataNotif.message === 'silent_update');
 
-        // 2. UPDATE BADGE ANGKA
-        const badge = document.getElementById('notification-badge'); 
-        if (badge) {
-            let currentCount = parseInt(badge.innerText);
-            if (isNaN(currentCount)) currentCount = 0;
-            badge.innerText = currentCount + 1;
-            badge.style.display = 'flex'; 
-        }
-
-        // 3. BUAT LONCENG BERGOYANG
-        const bell = document.getElementById('bell-icon');
-        if (bell) {
-            bell.classList.remove('is-ringing');
-            void bell.offsetWidth; 
-            bell.classList.add('is-ringing');
-        }
-
-        // 4. UPDATE DROPDOWN NOTIFIKASI (HTML)
-        const notifContainer = document.getElementById('notification-list'); // Pastikan ID ini benar di blade
-        if (notifContainer) {
-            const emptyMsg = notifContainer.querySelector('.notification-empty');
-            if (emptyMsg) emptyMsg.remove();
-
-            const limit = (str, length) => str.length > length ? str.substring(0, length) + '...' : str;
-
-            let messageHtml = '';
-            if (dataNotif.comment_body) {
-                messageHtml = `mengomentari <strong>${limit(dataNotif.task_title, 20)}</strong>: "${limit(dataNotif.comment_body, 20)}"`;
-            } else {
-                messageHtml = `telah membuat task: <strong>${limit(dataNotif.task_title, 25)}</strong>`;
+        // ------------------------------------------
+        // 1. SOUND, BADGE, & LONCENG (Hanya jika BUKAN silent)
+        // ------------------------------------------
+        if (!isSilent) {
+            notificationSound.play().catch(() => {});
+            
+            const badge = document.getElementById('notification-badge'); 
+            if (badge) {
+                let currentCount = parseInt(badge.innerText) || 0;
+                badge.innerText = currentCount + 1;
+                badge.style.display = 'flex'; 
             }
 
-            const mockupHtml = dataNotif.first_mockup_url 
-                ? `<img src="${dataNotif.first_mockup_url}" class="notification-mockup">` 
-                : `<div class="notification-mockup placeholder"></div>`;
-
-            const newItemHtml = `
-              <a href="${dataNotif.url}" class="notification-item new-item" style="background-color: #f0f8ff; transition: background 1s;">
-                  <div class="pic pic-sm" style="background-color: ${dataNotif.creator_color};">
-                       ${dataNotif.creator_initials}
-                  </div>
-                  <div class="notification-content">
-                      <p><strong>${dataNotif.creator_name}</strong> ${messageHtml}</p>
-                      <small>${dataNotif.time}</small>
-                  </div>
-                  ${mockupHtml}
-              </a>
-            `;
-            
-            const firstHeader = notifContainer.querySelector('.notification-group-header');
-            if (firstHeader) {
-                firstHeader.insertAdjacentHTML('afterend', newItemHtml);
-            } else {
-                notifContainer.insertAdjacentHTML('afterbegin', newItemHtml);
+            const bell = document.getElementById('bell-icon');
+            if (bell) {
+                bell.classList.remove('is-ringing');
+                void bell.offsetWidth; 
+                bell.classList.add('is-ringing');
             }
-            
-            const clearBtn = document.getElementById('clear-notif-btn');
-            if(clearBtn) clearBtn.style.display = 'block';
-        }
 
+            // UPDATE DROPDOWN NOTIFIKASI
+            const notifContainer = document.getElementById('notification-list'); 
+            if (notifContainer) {
+                const emptyMsg = notifContainer.querySelector('.notification-empty');
+                if (emptyMsg) emptyMsg.remove();
 
+                const limit = (str, length) => str.length > length ? str.substring(0, length) + '...' : str;
 
-// 5. UPDATE TABEL TASK SECARA REAL-TIME 
-const taskTableBody = document.querySelector("#taskTable tbody");
-
-if (taskTableBody && dataNotif.type === 'new_task' && dataNotif.task_id) {
-    
-    fetch(`/task/get-row/${dataNotif.task_id}`)
-        .then(response => response.json())
-        .then(result => {
-            if (result.html) {
-                const emptyRow = taskTableBody.querySelector('tr td.text-center');
-                if (emptyRow && emptyRow.textContent.includes('Belum ada task')) {
-                    emptyRow.closest('tr').remove();
+                let messageHtml = '';
+                if (dataNotif.comment_body) {
+                    messageHtml = `mengomentari <strong>${limit(dataNotif.task_title, 20)}</strong>: "${limit(dataNotif.comment_body, 20)}"`;
+                } else {
+                    messageHtml = `telah membuat task: <strong>${limit(dataNotif.task_title, 25)}</strong>`;
                 }
 
-                taskTableBody.insertAdjacentHTML('beforeend', result.html);
+                const mockupHtml = dataNotif.first_mockup_url 
+                    ? `<img src="${dataNotif.first_mockup_url}" class="notification-mockup">` 
+                    : `<div class="notification-mockup placeholder"></div>`;
+
+                const newItemHtml = `
+                  <a href="${dataNotif.url}" class="notification-item new-item" style="background-color: #f0f8ff; transition: background 1s;">
+                      <div class="pic pic-sm" style="background-color: ${dataNotif.creator_color};">
+                           ${dataNotif.creator_initials}
+                      </div>
+                      <div class="notification-content">
+                          <p><strong>${dataNotif.creator_name}</strong> ${messageHtml}</p>
+                          <small>${dataNotif.time}</small>
+                      </div>
+                      ${mockupHtml}
+                  </a>
+                `;
                 
-                const newRow = taskTableBody.lastElementChild; 
-                
-                newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                newRow.style.transition = 'background-color 2s ease-out';
-                newRow.style.backgroundColor = '#fff3cd'; 
-                
-                if (typeof window.initGalleryIndicator === 'function') {
-                     window.initGalleryIndicator(newRow);
+                const firstHeader = notifContainer.querySelector('.notification-group-header');
+                if (firstHeader) {
+                    firstHeader.insertAdjacentHTML('afterend', newItemHtml);
+                } else {
+                    notifContainer.insertAdjacentHTML('afterbegin', newItemHtml);
                 }
-
-                setTimeout(() => { 
-                    newRow.style.backgroundColor = ''; 
-                }, 2000);
+                
+                const clearBtn = document.getElementById('clear-notif-btn');
+                if(clearBtn) clearBtn.style.display = 'block';
             }
-        })
-        .catch(err => console.error("Gagal update tabel task:", err));
-}
+        }
 
+        // ------------------------------------------
+        // 2. UPDATE TABEL TASK (TETAP JALAN MAU SILENT ATAU TIDAK)
+        // ------------------------------------------
+        const taskTableBody = document.querySelector("#taskTable tbody");
+
+        // A. KASUS: TASK BARU / RESTORE
+        if (taskTableBody && (dataNotif.type === 'new_task' || dataNotif.type === 'task_restored') && dataNotif.task_id) {
+            fetch(`/task/get-row/${dataNotif.task_id}`)
+                .then(response => response.json())
+                .then(result => {
+                    if (result.html) {
+                        const emptyRow = taskTableBody.querySelector('tr td.text-center');
+                        if (emptyRow && emptyRow.textContent.includes('Belum ada')) emptyRow.closest('tr').remove();
+
+                        const existingRow = document.getElementById(`task-row-${dataNotif.task_id}`);
+                        if (existingRow) existingRow.remove();
+
+                        taskTableBody.insertAdjacentHTML('beforeend', result.html);
+                        const newRow = taskTableBody.lastElementChild;
+                        newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        newRow.style.transition = 'background-color 2s ease-out';
+                        newRow.style.backgroundColor = '#d4edda'; // Hijau muda
+                        
+                        if (typeof window.initGalleryIndicator === 'function') window.initGalleryIndicator(newRow);
+                        setTimeout(() => { newRow.style.backgroundColor = ''; }, 2000);
+                    }
+                })
+                .catch(err => console.error("Gagal update tabel task:", err));
+        }
+
+        // B. KASUS: UPDATE STATUS / PROGRESS (Silent Update Masuk Sini)
+        else if (taskTableBody && dataNotif.type === 'task_updated_row' && dataNotif.task_id) {
+            const existingRow = document.getElementById(`task-row-${dataNotif.task_id}`);
+            if (existingRow) {
+                fetch(`/task/get-row/${dataNotif.task_id}`)
+                    .then(res => res.json())
+                    .then(result => {
+                        if (result.html) {
+                            existingRow.outerHTML = result.html;
+                            const newRow = document.getElementById(`task-row-${dataNotif.task_id}`);
+                            if (newRow) {
+                                newRow.style.transition = 'background-color 1.5s ease-out';
+                                newRow.style.backgroundColor = '#fff3cd'; // Highlight Kuning
+                                if (typeof window.initGalleryIndicator === 'function') window.initGalleryIndicator(newRow);
+                                setTimeout(() => { newRow.style.backgroundColor = ''; }, 1500);
+                            }
+                        }
+                    });
+            }
+        }
+
+        // C. KASUS: DELETE / ARCHIVE
+        else if (taskTableBody && (dataNotif.type === 'task_deleted' || dataNotif.type === 'task_archived') && dataNotif.task_id) {
+            const rowToRemove = document.getElementById(`task-row-${dataNotif.task_id}`);
+            if (rowToRemove) {
+                rowToRemove.style.transition = 'background-color 0.5s';
+                rowToRemove.style.backgroundColor = '#f8d7da'; // Merah muda
+                setTimeout(() => {
+                    rowToRemove.remove();
+                    if (taskTableBody.children.length === 0) {
+                        taskTableBody.innerHTML = '<tr><td colspan="10" class="text-center p-4">Belum ada task.</td></tr>';
+                    }
+                }, 500); 
+            }
+        }
         
+        // ------------------------------------------
+        // 3. UPDATE CHAT (Jika ada komentar baru)
+        // ------------------------------------------
         if (chatContainer && dataNotif.type === 'new_comment' && chatContainer.dataset.taskId == dataNotif.task_id) {
-            
-            console.log("Komentar baru masuk di task ini!");
-
-            // 1. Hapus pesan "Belum ada komentar" jika ada
             const noComments = document.getElementById('no-comments');
             if (noComments) noComments.remove();
 
-            // 2. Buat Elemen Bubble Baru
             const bubble = document.createElement('div');
-            // Karena ini dari Pusher (orang lain), pasti posisinya di KIRI (bukan 'own')
             bubble.className = 'comment-bubble'; 
-            
-            // Format isi (ganti enter jadi <br>)
             const formattedBody = dataNotif.comment_body.replace(/\n/g, '<br>');
-            
-            // Susun HTML (Sesuaikan dengan struktur blade Anda)
             bubble.innerHTML = `
                 <div class="comment-header" style="font-size: 12px; margin-bottom: 2px; color: #666;">
                     <strong>${dataNotif.creator_name}</strong>
@@ -164,15 +188,16 @@ if (taskTableBody && dataNotif.type === 'new_task' && dataNotif.task_id) {
                     Baru saja
                 </div>
             `;
-            
-            // 3. Masukkan ke Container
             chatContainer.appendChild(bubble);
-            
-            // 4. Scroll ke paling bawah
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
-        // 6. TAMPILKAN TOAST
-        showToast(dataNotif.message); 
+
+        // ------------------------------------------
+        // 4. TAMPILKAN TOAST (Hanya jika BUKAN silent)
+        // ------------------------------------------
+        if (!isSilent) {
+            showToast(dataNotif.message); 
+        }
     });
 }
 

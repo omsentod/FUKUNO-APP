@@ -318,12 +318,10 @@ public function store(Request $request)
     }
 
 
-public function updateChecklistStatus(Request $request, $id)
+    public function updateChecklistStatus(Request $request, $id)
 {
-    // 1. Validasi
     $request->validate(['is_completed' => 'required|boolean']);
 
-    // 2. Temukan dan update checklist
     $checklist = TaskChecklist::find($id);
     if (!$checklist) {
         return response()->json(['success' => false, 'message' => 'Checklist not found.'], 404);
@@ -332,25 +330,23 @@ public function updateChecklistStatus(Request $request, $id)
     $checklist->is_completed = $request->input('is_completed');
     $checklist->save();
 
-    // 3. Ambil Task Induk (HANYA 1 task yang memiliki checklist ini)
     $task = $checklist->taskPekerjaan->task;
 
-    // 4. Cek status "Hold"
-    $task->load('status'); 
+    // Cek Hold
     if ($task->status->name == 'Hold') {
-        return response()->json([
-            'success' => true, 
-            'message' => 'Checklist updated, but task is on Hold.'
-        ]);
+        // Tetap kirim update row real-time agar user lain melihat checklist tercentang
+        $this->sendRowUpdateNotification($task, "mengupdate checklist task");
+        return response()->json(['success' => true, 'message' => 'Checklist updated (Task Hold).']);
     }
 
+    // Hitung Ulang
     $task->load('taskPekerjaans.checklists'); 
     $allChecklists = $task->taskPekerjaans->flatMap->checklists;
     $total = $allChecklists->count();
     $completed = $allChecklists->where('is_completed', true)->count();
     $percentage = ($total > 0) ? (int) round(($completed / $total) * 100) : 0;
 
-    // 5. Tentukan status baru HANYA untuk task ini
+    // Update Status Otomatis
     $newStatusName = 'Needs Work';
     if ($percentage === 100) {
         $newStatusName = 'Done and Ready';
@@ -359,25 +355,27 @@ public function updateChecklistStatus(Request $request, $id)
         $newStatusName = 'In Progress';
         $task->completed_at = null;
     } else {
-        $newStatusName = 'Needs Work';
         $task->completed_at = null; 
     }
 
-    // 6. Update status HANYA untuk task ini
     $newStatus = Status::where('name', $newStatusName)->first();
     if ($newStatus && $task->status_id != $newStatus->id) {
         $task->status_id = $newStatus->id;
         $task->save();
     }
 
-    // 7. Kirim respons sukses
+    // --- KIRIM NOTIFIKASI REAL-TIME ---
+    // Saya buat fungsi helper kecil di bawah agar tidak duplikat kode
+    $this->sendRowUpdateNotification($task, "mengupdate progress task ($percentage%)");
+
     return response()->json([
         'success' => true, 
-        'message' => 'Checklist and Task Status updated!',
-        'new_percentage' => $percentage,
-        'task_id' => $task->id // Untuk debugging
+        'message' => 'Checklist and Status updated!',
+        'new_percentage' => $percentage
     ]);
 }
+
+
     public function show($id)
     {
         // 1. Temukan task utama yang diklik
@@ -468,35 +466,56 @@ public function storeComment(Request $request, $task_id)
     public function updateStatus(Request $request, $id)
     {
         $request->validate(['status_name' => 'required|string']);
-    
+        
         $task = Task::find($id);
         if (!$task) {
             return response()->json(['success' => false, 'message' => 'Task not found.'], 404);
         }
-    
+        
         $statusNameInput = $request->status_name;
-    
-
+        
+        // Mapping nama khusus jika ada
         if ($statusNameInput == 'Resume Progress') {
-            $statusNameInput = 'In Progress'; // Sesuaikan dengan nama di DB kamu
+            $statusNameInput = 'In Progress'; 
         }
-    
+        
         $newStatus = Status::where('name', $statusNameInput)->first();
         
         if (!$newStatus) {
-            return response()->json(['success' => false, 'message' => "Status '$statusNameInput' not found in database."], 404);
+            return response()->json(['success' => false, 'message' => "Status '$statusNameInput' not found."], 404);
         }
-    
+        
+        // Update Data
         $task->status_id = $newStatus->id;
         if (in_array($statusNameInput, ['Done and Ready', 'Delivered'])) {
             $task->completed_at = now();
-        } 
-        else if ($statusNameInput != 'Hold') { 
+        } else if ($statusNameInput != 'Hold') { 
             $task->completed_at = null; 
         }
-        
         $task->save();
-    
+        
+        // --- TAMBAHAN REAL-TIME START ---
+        $usersToNotify = User::where('id', '!=', Auth::id())->get();
+        foreach ($usersToNotify as $targetUser) {
+            $notifData = [
+                'message'          => 'silent_update',
+                'type'             => 'task_updated_row', // <--- TIPE BARU (Update Row)
+                'task_id'          => $task->id,
+                
+                // Dummy Data (Wajib ada biar JS gak error)
+                'url'              => route('task', ['highlight' => $task->id]),
+                'creator_initials' => Auth::user()->initials ?? '??',
+                'creator_color'    => Auth::user()->avatar_color ?? '#ccc',
+                'first_mockup_url' => null,
+                'time'             => 'Baru saja',
+                'creator_name'     => Auth::user()->name,
+                'task_title'       => $task->judul,
+                'comment_body'     => null
+            ];
+            event(new NewNotification($notifData, $targetUser->id));
+        }
+        // --- TAMBAHAN REAL-TIME END ---
+        
         return response()->json(['success' => true, 'message' => 'Status updated.']);
     }
 
@@ -748,33 +767,44 @@ public function storeComment(Request $request, $task_id)
 
     public function destroy($id)
     {
-        // 1. Temukan task
         $task = Task::find($id);
-
-        // 2. Jika tidak ketemu, kirim error
         if (!$task) {
             return response()->json(['success' => false, 'message' => 'Task tidak ditemukan.'], 404);
         }
-
+    
         try {
-            // 3. Hapus task
+            $taskId = $task->id;
+            $taskTitle = $task->judul;
+            
+            // Hapus task
             $task->delete();
-            // Catatan: Jika migration Anda punya ->onDelete('cascade'),
-            // semua relasi (line, checklist, size, mockup) akan ikut terhapus.
-
-            // 4. Kirim respons sukses
+    
+            // --- TAMBAHAN REAL-TIME START ---
+            $usersToNotify = User::where('id', '!=', Auth::id())->get();
+            
+            foreach ($usersToNotify as $targetUser) {
+                $notifData = [
+                    'message' => 'silent_update',
+                    'type'    => 'task_deleted', // <--- PENTING UNTUK JS
+                    'task_id' => $taskId,
+                    'url' => '#', 'creator_initials' => '??', 'creator_color' => '#ccc', 
+                    'first_mockup_url' => null, 'time' => 'Baru saja', 'creator_name' => Auth::user()->name, 
+                    'task_title' => $taskTitle, 'comment_body' => null
+                ];
+                // Kirim Sinyal Pusher
+                event(new NewNotification($notifData, $targetUser->id));
+            }
+            // --- TAMBAHAN REAL-TIME END ---
+    
             return response()->json(['success' => true, 'message' => 'Task berhasil dihapus.']);
-
+    
         } catch (\Exception $e) {
-            // Kirim respons gagal jika ada error database
             return response()->json(['success' => false, 'message' => 'Gagal menghapus task: ' . $e->getMessage()], 500);
         }
     }
-    // Di dalam TaskController.php
 
-    /**
-     * Menampilkan task yang sudah di-arsip.
-     */
+
+
     public function showArchive()
     {
         $archivedTasks = Task::with('user', 'status', 'taskPekerjaans')
@@ -800,65 +830,110 @@ public function storeComment(Request $request, $task_id)
 
     public function bulkAction(Request $request)
     {
-        // 1. Update Validasi: Tambahkan aksi baru ke dalam 'in:...'
         $request->validate([
             'action' => 'required|string|in:archive,delete,unarchive_all,delete_permanent_all', 
             'task_ids' => 'required|array',
             'task_ids.*' => 'integer|exists:tasks,id'
         ]);
-
+    
         $taskIds = $request->input('task_ids');
         $action = $request->input('action');
-
-        // --- AKSI DARI HALAMAN TASK UTAMA ---
-        
+        $usersToNotify = User::where('id', '!=', Auth::id())->get();
+    
+        // --- LOGIKA UTAMA ---
+    
         if ($action == 'archive') {
-            // Set is_archived = true
+            // 1. Update DB Massal (Cepat)
             Task::whereIn('id', $taskIds)->update(['is_archived' => true]);
+    
+            // 2. Kirim Notifikasi Loop (Agar JS user lain update per baris)
+            foreach ($taskIds as $tid) {
+                foreach ($usersToNotify as $targetUser) {
+                    $notifData = [
+                        'message' => Auth::user()->name . " mengarsipkan task.",
+                        'type'    => 'task_archived', 
+                        'task_id' => $tid,
+                        'url' => '#', 'creator_initials' => '??', 'creator_color' => '#ccc', 'first_mockup_url' => null, 'time' => 'Baru saja', 'creator_name' => Auth::user()->name, 'task_title' => 'Bulk Action', 'comment_body' => null
+                    ];
+                    event(new NewNotification($notifData, $targetUser->id));
+                }
+            }
             return response()->json(['success' => true, 'message' => 'Task berhasil diarsipkan.']);
         
         } elseif ($action == 'delete') {
-            // Soft Delete (Masuk ke Trash)
+            // 1. Soft Delete Massal
             Task::destroy($taskIds);
+    
+            // 2. Kirim Notifikasi Loop
+            foreach ($taskIds as $tid) {
+                foreach ($usersToNotify as $targetUser) {
+                    $notifData = [
+                        'message' => Auth::user()->name . " menghapus task.",
+                        'type'    => 'task_deleted',
+                        'task_id' => $tid,
+                        'url' => '#', 'creator_initials' => '??', 'creator_color' => '#ccc', 'first_mockup_url' => null, 'time' => 'Baru saja', 'creator_name' => Auth::user()->name, 'task_title' => 'Bulk Action', 'comment_body' => null
+                    ];
+                    event(new NewNotification($notifData, $targetUser->id));
+                }
+            }
             return response()->json(['success' => true, 'message' => 'Task berhasil dipindah ke sampah.']);
         }
-
-        // --- AKSI DARI HALAMAN ARCHIVE (BARU) ---
-
+    
+    
         elseif ($action == 'unarchive_all') {
-            // Restore dari Archive (Set is_archived = false)
+        
+            $tasksToRestore = Task::whereIn('id', $taskIds)->get();
+    
             Task::whereIn('id', $taskIds)->update(['is_archived' => false]);
+    
+    
+            foreach ($tasksToRestore as $task) {
+                foreach ($usersToNotify as $targetUser) {
+                    
+                    $notifData = [
+                        'message'          => 'silent_update',
+                        'type'             => 'task_restored', 
+                        'task_id'          => $task->id,
+                        'url'              => route('task', ['highlight' => $task->id]), 
+                        
+                        'creator_initials' => Auth::user()->initials ?? '??',
+                        'creator_color'    => Auth::user()->avatar_color ?? '#ccc',
+                        'first_mockup_url' => $task->mockups->first() ? Storage::url($task->mockups->first()->file_path) : null,
+                        'time'             => 'Baru saja',
+                        'creator_name'     => Auth::user()->name,
+                        'task_title'       => $task->judul,
+                        'comment_body'     => null
+                    ];
+    
+                    event(new NewNotification($notifData, $targetUser->id));
+                }
+            }
+    
             return response()->json(['success' => true, 'message' => 'Task berhasil dipulihkan dari arsip.']);
         
-        } elseif ($action == 'delete_permanent_all') {
-        
-            $tasks = Task::onlyTrashed()->with('mockups')->whereIn('id', $taskIds)->get();
-            
-            foreach ($tasks as $task) {
-                foreach ($task->mockups as $mockup) {
-                    Storage::disk('public')->delete($mockup->file_path);
-                }
-    
-           
-                DB::table('notifications')
-                    ->whereJsonContains('data->task_id', $task->id)
-                    ->delete();
-    
-                $task->forceDelete();
-            }
-            
-            return response()->json(['success' => true, 'message' => 'Task terkait berhasil dihapus permanen.']);
         }
-
-        return response()->json(['success' => false, 'message' => 'Aksi tidak valid.'], 400);
     }
 
     public function restore($id)
     {
         $task = Task::onlyTrashed()->findOrFail($id);
-        
         $task->restore();
-
+    
+        $usersToNotify = User::where('id', '!=', Auth::id())->get();
+        
+        foreach ($usersToNotify as $targetUser) {
+            $notifData = [
+                'message' => 'silent_update',
+                'type'    => 'task_restored',
+                'task_id' => $task->id,
+                'url'     => route('task', ['highlight' => $task->id]),
+                'creator_initials' => Auth::user()->initials, 'creator_color' => Auth::user()->avatar_color,
+                'first_mockup_url' => null, 'time' => 'Baru saja', 'creator_name' => Auth::user()->name,
+                'task_title' => $task->judul, 'comment_body' => null
+            ];
+            event(new NewNotification($notifData, $targetUser->id));
+        }
+    
         return response()->json(['success' => true, 'message' => 'Task berhasil dipulihkan.']);
     }
 
@@ -910,10 +985,23 @@ public function storeComment(Request $request, $task_id)
     public function unarchive($id)
     {
         $task = Task::findOrFail($id);
-        
         $task->is_archived = false;
         $task->save();
-
+    
+        $usersToNotify = User::where('id', '!=', Auth::id())->get();
+        foreach ($usersToNotify as $targetUser) {
+            $notifData = [
+                'message' => 'silent_update',
+                'type'    => 'task_restored', 
+                'task_id' => $task->id,
+                'url'     => route('task', ['highlight' => $task->id]),
+                'creator_initials' => Auth::user()->initials, 'creator_color' => Auth::user()->avatar_color,
+                'first_mockup_url' => null, 'time' => 'Baru saja', 'creator_name' => Auth::user()->name,
+                'task_title' => $task->judul, 'comment_body' => null
+            ];
+            event(new NewNotification($notifData, $targetUser->id));
+        }
+    
         return response()->json(['success' => true, 'message' => 'Task berhasil dipulihkan dari arsip.']);
     }
     
@@ -960,5 +1048,19 @@ public function storeComment(Request $request, $task_id)
 
         // Download file excel dengan nama tasks_export_(tanggal).xlsx
         return Excel::download(new TasksExport($taskIds), 'tasks_export_' . date('Y-m-d_H-i') . '.xlsx');
+    }
+
+
+    private function sendRowUpdateNotification($task, $actionMessage) {
+        $usersToNotify = User::where('id', '!=', Auth::id())->get();
+        foreach ($usersToNotify as $targetUser) {
+            $notifData = [
+                'message' => 'silent_update', // PASTIKAN PAKAI UNDERSCORE
+                'type'    => 'task_updated_row',
+                'task_id' => $task->id,
+                'url'     => '#', 'creator_initials' => '??', 'creator_color' => '#ccc', 'first_mockup_url' => null, 'time' => 'Baru saja', 'creator_name' => Auth::user()->name, 'task_title' => $task->judul, 'comment_body' => null
+            ];
+            event(new NewNotification($notifData, $targetUser->id));
+        }
     }
 }

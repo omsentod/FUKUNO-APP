@@ -81,7 +81,7 @@
           </div>
 
           <div class="size-table">
-            <h4>Rincian Ukuran</h4>
+            <h4>Rincian</h4>
             <table>
               <thead>
                 <tr>

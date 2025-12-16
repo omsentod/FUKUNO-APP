@@ -100,7 +100,7 @@
 
                 <div class="half-column">
                     <div class="size-table-container">
-                        <h3>Rincian Ukuran</h3>
+                        <h3>Rincian</h3>
                         <table class="size-table">
                             <thead class="table-danger">
                                 <tr>

@@ -14,9 +14,12 @@
 @endphp
 
 <tr class="clickable-row" 
+    id="task-row-{{ $task->id }}"  
     data-url="{{ route('task.show', $task->id) }}"
-    {!! ($highlightId ?? null) == $task->id ? 'id="highlight-task"' : '' !!} >
+    {!! ($highlightId ?? null) == $task->id ? 'style="background-color: #fff3cd;"' : '' !!} >
     
+
+
     {{-- Kolom Checkbox (Hanya Admin) --}}
     @if(Auth::user()->role == 'admin')
         <td class="select-col">

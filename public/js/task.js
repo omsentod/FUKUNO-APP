@@ -483,7 +483,7 @@ function getSizeTableData(popup) {
         const isDone = (displayStatusName === 'Done and Ready' || displayStatusName === 'Delivered');
 
         // Reset Class
-        timeLeftSpan.className = 'badge'; // Hapus class warna, sisakan badge dasar (jika pakai bootstrap)
+        timeLeftSpan.className = 'timeClass'; // Hapus class warna, sisakan badge dasar (jika pakai bootstrap)
 
         if (isDone) {
             if (displayStatusName === 'Delivered') {
