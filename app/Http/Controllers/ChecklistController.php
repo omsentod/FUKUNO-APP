@@ -49,7 +49,6 @@ public function search(Request $request)
 
     $checklists = Checklist::with('items') // <--- PENTING: Muat items-nya
                       ->where('name', 'LIKE', "%{$query}%")
-                      ->limit(5)
                       ->get();
                       
     return response()->json($checklists);

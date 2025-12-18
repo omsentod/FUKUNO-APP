@@ -102,11 +102,7 @@ public function store(Request $request)
 {
     // 1. Validasi
     $validatedData = $request->validate([
-        'noInvoice' => [
-            'required',
-            'string',
-            Rule::unique('tasks', 'no_invoice')->whereNull('deleted_at')
-        ],
+        'noInvoice' => 'required|string',
         'namaPelanggan' => 'required|string|max:255',
         'judul' => 'required|string|max:255',
         'urgensi' => 'required|string',
