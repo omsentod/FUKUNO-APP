@@ -18,7 +18,7 @@ class DashboardController extends Controller
         // --- 1. Ambil Data Kategori Task (To Do, On Progress, Complete) ---
 
         // Cara 1: Menggunakan relasi (Lebih bersih)
-        $countToDo = Task::whereHas('status', fn($q) => $q->where('name', 'Needs Work'))->count();
+        $countToDo = Task::whereHas('status', fn($q) => $q->where('name', 'To Do'))->count();
         $countInProgress = Task::whereHas('status', fn($q) => $q->where('name', 'In Progress'))->count();
         $countComplete = Task::whereHas('status', fn($q) => $q->where('name', 'Done and Ready'))->count();
         $countHold = Task::whereHas('status', fn($q) => $q->where('name', 'Hold'))->count();
@@ -28,16 +28,14 @@ class DashboardController extends Controller
         // --- 2. Ambil Data Tabel (Task Terbaru) ---
         $latestTasks = Task::with('status', 'taskPekerjaans') // Ambil relasi
                             ->orderBy('created_at', 'desc') // Urutkan terbaru
-                            ->take(5) // Ambil 5 saja
                             ->get();
 
 
         // --- 3. Ambil Data Tabel (Deadline Terdekat) ---
         $upcomingDeadlines = Task::with('user', 'status', 'taskPekerjaans')
-        // ▼▼▼ PERBAIKAN DI SINI ▼▼▼
-        // Tambahkan 'task_pekerjaans.deadline' ke dalam select agar valid dengan ORDER BY
+
         ->select('tasks.*', 'task_pekerjaans.deadline') 
-        // ▲▲▲ ▲▲▲ ▲▲▲
+
         
         ->join('task_pekerjaans', 'tasks.id', '=', 'task_pekerjaans.task_id')
         

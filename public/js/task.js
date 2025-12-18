@@ -629,6 +629,12 @@ function getSizeTableData(popup) {
     const tBody = sizeTable.querySelector("tbody");
     const tFootRow = sizeTable.querySelector("tfoot tr");
 
+    // 7.urgent to normazl
+    const urgensiSelect = popup.querySelector("#urgensi");
+    if (urgensiSelect) {
+        urgensiSelect.value = "Normal";
+    }
+
     // Kembalikan Header Standar
     tHeadRow.innerHTML = `
         <th>Size</th>
@@ -921,6 +927,7 @@ function showValidationErrors(popup, errors) {
         }
     }
 }
+
 function showPopup() {
     const overlay = document.querySelector(".popup-overlay");
     if (!overlay) return;
@@ -943,12 +950,19 @@ function showPopup() {
     const sizeTableBody = popup.querySelector("#sizeTable tbody");
     const mockupInput = popup.querySelector("#mockups");
     const previewArea = popup.querySelector("#mockup-preview-area");
+    
+    // PJ Elements
     const pjInput = popup.querySelector("#penanggungJawabInput");
     const pjToggle = popup.querySelector("#togglePjBtn");
     const pjResults = popup.querySelector("#pjSearchResults");
 
+    // [BARU] Customer Elements
+    const custInput = popup.querySelector("#namaPelanggan");
+    const custResults = popup.querySelector("#customerSearchResults");
+
     let mockupsToDelete = [];
 
+    // --- LOGIKA PJ (PENANGGUNG JAWAB) ---
     const renderUserList = (users) => {
         if (users.length === 0) {
             pjResults.innerHTML = '<div class="p-2 text-muted small">User tidak ditemukan.</div>';
@@ -957,23 +971,19 @@ function showPopup() {
 
         let html = '';
         users.forEach(user => {
-   
             const initials = user.name.substring(0, 2).toUpperCase();
-
-          
             let hash = 0;
             for (let i = 0; i < user.name.length; i++) {
                 hash = user.name.charCodeAt(i) + ((hash << 5) - hash);
             }
             const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
             const color = '#' + "00000".substring(0, 6 - c.length) + c; 
+            
             html += `
             <div class="autocomplete-item pj-item" data-name="${user.name}">
-                
                 <div class="pic" style="background-color: ${color};">
                     ${initials}
                 </div>
-                
                 <span>${user.name}</span>
             </div>
         `;
@@ -981,7 +991,6 @@ function showPopup() {
         pjResults.innerHTML = html;
     };
 
-    // Fungsi Helper: Fetch Data User
     const fetchUsers = async (query = '') => {
         try {
             const response = await fetch(`/users/search?query=${query}`);
@@ -993,7 +1002,6 @@ function showPopup() {
     };
 
     if (pjInput && pjResults && pjToggle) {
-        // 1. Saat mengetik (Input)
         pjInput.onkeyup = (e) => {
             const query = e.target.value.trim();
             if (query.length > 0) {
@@ -1003,34 +1011,89 @@ function showPopup() {
             }
         };
 
-        // 2. Saat klik tombol panah (Toggle)
-        if (pjToggle) {
-            pjToggle.onclick = (e) => {
-                e.preventDefault();
-                // Jika kosong, load semua/populer user (query kosong)
-                if (pjResults.innerHTML.trim() === '') {
-                    fetchUsers(''); 
-                } else {
-                    pjResults.innerHTML = ''; // Tutup jika sudah terbuka
-                }
-            };
-        }
-
-        // 3. Saat memilih item (Klik user)
-        pjResults.onclick = (e) => {
-            const item = e.target.closest('.pj-item');
-            if (item) {
-                pjInput.value = item.dataset.name; // Isi input dengan nama
-                pjResults.innerHTML = ''; // Tutup dropdown
+        pjToggle.onclick = (e) => {
+            e.preventDefault();
+            if (pjResults.innerHTML.trim() === '') {
+                fetchUsers(''); 
+            } else {
+                pjResults.innerHTML = '';
             }
         };
 
-        // 4. Tutup dropdown jika klik di luar (Focus Out)
+        pjResults.onclick = (e) => {
+            const item = e.target.closest('.pj-item');
+            if (item) {
+                pjInput.value = item.dataset.name;
+                pjResults.innerHTML = ''; 
+            }
+        };
+
         pjInput.onblur = () => {
-            // Beri delay agar klik item sempat tereksekusi sebelum list hilang
             setTimeout(() => { pjResults.innerHTML = ''; }, 200);
         };
     }
+
+    // ============================================================
+    // [BARU] LOGIKA NAMA PELANGGAN (CUSTOMER)
+    // ============================================================
+    
+    // Fungsi Helper Customer
+    const fetchCustomers = async (query) => {
+        try {
+            const response = await fetch(`/customers/search?query=${query}`);
+            const customers = await response.json();
+            
+            if (customers.length === 0) {
+                custResults.innerHTML = ''; 
+                return;
+            }
+
+            let html = '';
+            customers.forEach(c => {
+                html += `
+                    <div class="autocomplete-item customer-item" data-name="${c.nama_pelanggan}">
+                        <i class="bi bi-clock-history text-muted me-2"></i> 
+                        <span>${c.nama_pelanggan}</span>
+                    </div>
+                `;
+            });
+            custResults.innerHTML = html;
+        } catch (error) {
+            console.error("Error search customer:", error);
+        }
+    };
+
+    // Event Listeners Customer
+    if (custInput && custResults) {
+        // 1. Saat Mengetik
+        custInput.onkeyup = (e) => {
+            const query = e.target.value.trim();
+            if (query.length > 0) {
+                fetchCustomers(query);
+            } else {
+                custResults.innerHTML = '';
+            }
+        };
+
+        // 2. Saat Klik Item
+        custResults.onclick = (e) => {
+            const item = e.target.closest('.customer-item');
+            if (item) {
+                custInput.value = item.dataset.name;
+                custResults.innerHTML = '';
+            }
+        };
+
+        // 3. Saat Blur
+        custInput.onblur = () => {
+            setTimeout(() => { custResults.innerHTML = ''; }, 200);
+        };
+    }
+    // ============================================================
+    // AKHIR LOGIKA PELANGGAN
+    // ============================================================
+
+
     // Reset dataset editing jika ada sisa
     if (taskForm && taskForm.dataset.editingId) {
         delete taskForm.dataset.editingId;
@@ -1270,9 +1333,8 @@ function showPopup() {
     }
 
     // ============================================================
-    // ▼▼▼ LOGIKA LINE CONTAINER (Dropdown & Autocomplete) ▼▼▼
+    // LOGIKA AUTO COMPLETE (Line Pekerjaan & Checklist)
     // ============================================================
-    // Ini bagian yang tadi hilang, sekarang sudah dikembalikan UTUH.
     
     const lineContainerArea = popup.querySelector("#lineContainer");
     if (lineContainerArea) {
@@ -1378,13 +1440,13 @@ function showPopup() {
                             const newWidget = document.createElement("div");
                             newWidget.className = "d-flex gap-2 mb-2 align-items-center checklist-row"; // Tambah checklist-row
                             newWidget.innerHTML = `
-                                 <i class="bi bi-grip-vertical checklist-drag-handle"></i>
-                                 <div class="position-relative input-with-toggle" style="flex-grow: 1;">
-                                    <input type="search" class="form-control checklist-item" value="${item.name}">
-                                    <button class="toggle-search-btn" type="button"><i class="bi bi-chevron-down"></i></button>
-                                    <div class="autocomplete-results checklist-results"></div>
-                                 </div>
-                                 <span class="btn-remove-checklist" style="cursor:pointer;">x</span>
+                                     <i class="bi bi-grip-vertical checklist-drag-handle"></i>
+                                     <div class="position-relative input-with-toggle" style="flex-grow: 1;">
+                                        <input type="search" class="form-control checklist-item" value="${item.name}">
+                                        <button class="toggle-search-btn" type="button"><i class="bi bi-chevron-down"></i></button>
+                                        <div class="autocomplete-results checklist-results"></div>
+                                     </div>
+                                     <span class="btn-remove-checklist" style="cursor:pointer;">x</span>
                             `;
                             checklistContainer.insertBefore(newWidget, currentWidget);
                         });
@@ -1497,6 +1559,7 @@ function showPopup() {
     // TAMPILKAN POP-UP
     overlay.style.display = "block";
 }
+
 
 function addLine() {
     const lineContainer = document.querySelector("#lineContainer");
@@ -1712,8 +1775,10 @@ function updateProgress(checkbox) {
     } else if (percentage > 0) {
         newStatusName = 'In Progress';
     } else {
-        newStatusName = 'Needs Work';
+        newStatusName = 'To Do';
     }
+
+
 
     // Hanya panggil update jika statusnya berubah
     if (newStatusName !== currentStatus) {
@@ -1751,7 +1816,7 @@ function updateProgress(checkbox) {
         }
 
         // 3. Tentukan status baru berdasarkan persentase yang ditemukan
-        let autoStatusName = 'Needs Work'; // Default (0%)
+        let autoStatusName = 'To Do'; // Default (0%)
         
         if (percentage === 100) {
             autoStatusName = 'Done and Ready';

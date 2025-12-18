@@ -54,8 +54,7 @@ Route::middleware(['auth'])->group(function() {
     Route::delete('/notifications/clear', [TaskController::class, 'clearNotifications'])->name('notifications.clear');
 
     
-    Route::get('/checklists/search', [ChecklistController::class, 'search'])->name('checklist.search');
-    Route::get('/pekerjaan/search', [PekerjaansController::class, 'search'])->name('pekerjaan.search');
+
 });
 
 
@@ -82,7 +81,10 @@ Route::middleware(['auth', 'admin'])->group(function() {
     Route::post('/trash/bulk-action', [TaskController::class, 'trashBulkAction'])->name('trash.bulkAction'); 
 
     // -- SEARCH --
-    Route::get('/users/search', [App\Http\Controllers\TaskController::class, 'searchUsers'])->name('users.search');
+    Route::get('/users/search', [TaskController::class, 'searchUsers'])->name('users.search');
+    Route::get('/customers/search', [TaskController::class, 'searchCustomers'])->name('customers.search');
+    Route::get('/checklists/search', [ChecklistController::class, 'search'])->name('checklist.search');
+    Route::get('/pekerjaan/search', [PekerjaansController::class, 'search'])->name('pekerjaan.search');
 
     // --- MASTER DATA: CHECKLISTS ---
     Route::get('/checklist', function () { return view('checklist-sb'); })->name('checklist');

@@ -384,7 +384,7 @@ public function store(Request $request)
     $percentage = ($total > 0) ? (int) round(($completed / $total) * 100) : 0;
 
     // Update Status Otomatis
-    $newStatusName = 'Needs Work';
+    $newStatusName = 'To Do';
     if ($percentage === 100) {
         $newStatusName = 'Done and Ready';
         $task->completed_at = now();
@@ -730,7 +730,7 @@ public function storeComment(Request $request, $task_id)
                 // Hitung ulang status otomatis
                 if ($totalCheck > 0) {
                     $percentage = round(($totalCompleted / $totalCheck) * 100);
-                    $newStatusName = 'Needs Work';
+                    $newStatusName = 'To Do';
                     $completedAt = null;
                     if ($percentage === 100) {
                         $newStatusName = 'Done and Ready';
@@ -1153,4 +1153,17 @@ public function storeComment(Request $request, $task_id)
         return response()->json($users);
     }
 
+    public function searchCustomers(Request $request)
+{
+    $query = $request->get('query');
+
+    
+    $customers = Task::where('nama_pelanggan', 'LIKE', "%{$query}%")
+                    ->select('nama_pelanggan')
+                    ->distinct() 
+                    
+                    ->get();
+
+    return response()->json($customers);
+}
 }

@@ -14,9 +14,9 @@
 @endphp
 
 <tr class="clickable-row" 
-    id="task-row-{{ $task->id }}"  
-    data-url="{{ route('task.show', $task->id) }}"
-    {!! ($highlightId ?? null) == $task->id ? 'style="background-color: #fff3cd;"' : '' !!} >
+    id="{{ ($highlightId ?? null) == $task->id ? 'highlight-task' : 'task-row-' . $task->id }}"
+    
+    data-url="{{ route('task.show', $task->id) }}">
     
 
 

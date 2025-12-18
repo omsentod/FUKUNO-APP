@@ -179,11 +179,14 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
                     <input type="text" id="noInvoice" class="form-control" placeholder="No. Invoice" required>
                 </div>
 
-                <div class="mb-2">
-                    <label>Nama Pelanggan</label>
-                    <input type="text" id="namaPelanggan" class="form-control" placeholder="Nama Pelanggan" required>
+                <div class="mb-3 position-relative"> 
+                    <label for="namaPelanggan" class="form-label">Nama Pelanggan</label>
+                    
+                    <input type="text" class="form-control" id="namaPelanggan" name="namaPelanggan" 
+                           placeholder="Ketik nama pelanggan..." autocomplete="off" required>
+                    
+                    <div class="autocomplete-results" id="customerSearchResults"></div>
                 </div>
-                
                
 
                 <div class="mb-2">
@@ -212,14 +215,16 @@ $bgColor = "hsl({$hue}, 65%, 40%)"; // Format HSL
 
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <label>Urgensi</label>
-                        <select id="urgensi" class="form-select">
-                            <option value="">Pilih</option>
-                            <option value="Urgent">Urgent</option>
-                            <option value="Normal">Normal</option>
-                        </select>
+                        <label for="urgensi" class="form-label">Urgensi</label>
+                    <select class="form-select" id="urgensi" name="urgensi" required>
+
+                        <option value="Normal" selected>Normal</option> 
+                        <option value="Urgent">Urgent</option>
+                    </select>
                     </div>
                 </div>
+
+         
 
                 <hr>
 
