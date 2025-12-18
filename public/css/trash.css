@@ -450,13 +450,7 @@ body{
   }
 
   /* ===== HEADER (judul + tombol) ===== */
-/* 
-  .trash-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    width: 100%;
-  } */
+
 
   .trash-header h3 {
     font-size: 20px;
