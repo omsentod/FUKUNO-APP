@@ -28,6 +28,16 @@ const userId = document.querySelector('meta[name="user-id"]')?.getAttribute('con
 const notificationSound = new Audio('/assets/audio/notif.mp3');
 const chatContainer = document.getElementById('chat-container');
 
+// --- DEFINISI TAMPILAN KOSONG BARU ---
+const emptyRowHTML = `
+    <tr id="emptyRow">
+        <td colspan="12" class="text-center py-4 text-muted">
+            <i class="bi bi-inbox display-6 d-block mb-2"></i>
+            Belum ada task yang tersedia.
+        </td>
+    </tr>
+`;
+
 if (userId) {
     console.log("Mendengarkan notifikasi untuk user:", userId);
 
@@ -104,7 +114,7 @@ if (userId) {
         }
 
         // ------------------------------------------
-        // 2. UPDATE TABEL TASK (TETAP JALAN MAU SILENT ATAU TIDAK)
+        // 2. UPDATE TABEL TASK
         // ------------------------------------------
         const taskTableBody = document.querySelector("#taskTable tbody");
 
@@ -114,9 +124,11 @@ if (userId) {
                 .then(response => response.json())
                 .then(result => {
                     if (result.html) {
-                        const emptyRow = taskTableBody.querySelector('tr td.text-center');
-                        if (emptyRow && emptyRow.textContent.includes('Belum ada')) emptyRow.closest('tr').remove();
+                        // [UPDATE] Hapus Empty Row berdasarkan ID barunya
+                        const emptyPlaceholder = document.getElementById('emptyRow');
+                        if (emptyPlaceholder) emptyPlaceholder.remove();
 
+                        // Hapus baris duplikat jika ada (untuk safety)
                         const existingRow = document.getElementById(`task-row-${dataNotif.task_id}`);
                         if (existingRow) existingRow.remove();
 
@@ -133,7 +145,7 @@ if (userId) {
                 .catch(err => console.error("Gagal update tabel task:", err));
         }
 
-        // B. KASUS: UPDATE STATUS / PROGRESS (Silent Update Masuk Sini)
+        // B. KASUS: UPDATE STATUS / PROGRESS (Silent Update)
         else if (taskTableBody && dataNotif.type === 'task_updated_row' && dataNotif.task_id) {
             const existingRow = document.getElementById(`task-row-${dataNotif.task_id}`);
             if (existingRow) {
@@ -162,8 +174,9 @@ if (userId) {
                 rowToRemove.style.backgroundColor = '#f8d7da'; // Merah muda
                 setTimeout(() => {
                     rowToRemove.remove();
+                    // [UPDATE] Jika tabel kosong, masukkan HTML baru
                     if (taskTableBody.children.length === 0) {
-                        taskTableBody.innerHTML = '<tr><td colspan="10" class="text-center p-4">Belum ada task.</td></tr>';
+                        taskTableBody.innerHTML = emptyRowHTML;
                     }
                 }, 500); 
             }
@@ -193,7 +206,7 @@ if (userId) {
         }
 
         // ------------------------------------------
-        // 4. TAMPILKAN TOAST (Hanya jika BUKAN silent)
+        // 4. TAMPILKAN TOAST
         // ------------------------------------------
         if (!isSilent) {
             showToast(dataNotif.message); 
