@@ -175,7 +175,7 @@ body{
 .popup {
   display: none;
   position: fixed;
-  z-index: 9999;
+  z-index: 999999;
   left: 0;
   top: 0;
   width: 100%;
@@ -186,9 +186,13 @@ body{
 }
 
 .popup img {
-  max-width: 80%;
-  max-height: 80%;
-  border-radius: 10px;
+  width: 80%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 8px;
+  padding: 5px;
 }
 
 .popup #close-popup {
@@ -400,3 +404,284 @@ body{
   justify-content: center;
   cursor: pointer;
 }
+
+
+
+
+
+
+/* MOBILE */
+#navbar-hamburger-btn {
+  display: none;
+  font-size: 1.8rem;
+  color: var(--main-color, #CF221B); 
+  cursor: pointer;
+  margin-left: 15px; 
+}
+
+/* Responsive Page */
+@media (max-width: 1200px) {
+
+
+}
+
+@media (max-width: 992px) {
+
+  .navbar{
+    height: 80px;
+  }
+
+  #navbar-hamburger-btn {
+    display: block; 
+  }
+
+  .navbarkanan {
+    margin-left: auto;
+  }
+  .header-logo img{
+    width: 50%;
+  }
+  .sidebar-toggle {
+    display: none;
+  }
+
+  .sidebar {
+    position: fixed;
+    display: flex;
+    justify-content: space-between;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1040; 
+    transform: translateY(-100%); 
+    transition: transform 0.3s ease-in-out;
+    padding-top: 50px;
+    
+  }
+
+  .sidebar-menu {
+    width: 100%; 
+  }
+
+  .sidebar-item{
+    padding: 5px 0 0 10px ;
+  }
+
+
+
+
+  .sidebar-cell {
+    display: flex;
+    justify-content: flex-start ;
+    /* align-items: center; */
+    border-bottom: 1px solid #ddd;
+    height: 40px;
+    width: 98%;
+    -decoration: none;
+    padding-left: 10px;
+    font-size: 12px;
+    color: var(--txt-color);
+    font-weight: var(--font-semibold);
+  }
+
+.sidebar .sidebar-item .sidebar-cell:hover {
+  border-radius: 0%;
+  background-color: var(--ctn-color);
+  color: #c5c5c5;
+  font-weight: var(--font-semibold);
+}
+.sidebar-item.active a {
+  border-radius: 0%;
+}
+
+.sidebar-item.active a:hover {
+  border-radius: 0%;
+  background-color: var(--main-color);  
+  color: var(--txt-color);  
+}
+.sidebar-close-toggle {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    z-index: 2000;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color:var(--main-color);
+    color: var(--ctn-color);
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.sidebar-close-toggle:hover{
+  transform: translateY(-5px);
+}
+
+body.sidebar-open-mobile .sidebar {
+    transform: translateY(0); 
+}
+
+.setting{
+  display: none;
+  margin-top: 20px;
+  margin-left: 10px;
+  z-index: 1;
+}
+
+.page{
+  left:0;
+  width: 100%;
+}
+
+.dashboard{
+  display: flex;
+  flex-direction: row;
+  gap: 20px; 
+  width: 100%; 
+}
+
+}
+
+@media (max-width: 768px) {
+
+  /* Page agar full width */
+  .page {
+    width: 100% !important;
+    left: 0 !important;
+    padding: 15px !important;
+    margin-left: 0 !important;
+  }
+
+  .detail-task-container {
+    padding: 15px;
+  }
+
+  /* Header */
+  .task-header {
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .task-header h2 {
+    font-size: 20px;
+  }
+
+  /* Tabs lebih kecil */
+  .task-tabs .tab {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  /* Layout kiri-kanan jadi 1 kolom */
+  .task-detail-table {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .left-section,
+  .right-section {
+    width: 100%;
+    flex: none;
+  }
+
+  /* Tables mengecil */
+  .task-detail-table table th,
+  .task-detail-table table td {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  /* Spesifikasi dan note stack */
+  .spec-note {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .note textarea {
+    height: 20vh;
+  }
+
+  /* Image gallery mengecil */
+  .image-gallery img {
+    width: 120px;
+    height: 120px;
+  }
+
+  /* Dropdown checklist */
+  .dropdown-btn {
+    width: 100%;
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .dropdown-content {
+    max-width: 100% !important;
+  }
+
+  /* Progress bar */
+  #progress-text {
+    font-size: 11px;
+  }
+
+  /* Comment Area */
+  .chat-container {
+    height: 250px;
+  }
+
+  .comment-input-area textarea {
+    height: 70px;
+  }
+}
+
+
+@media (max-width: 480px) {
+
+  .task-header h2 {
+    font-size: 18px;
+  }
+
+  .task-tabs {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .task-tabs .tab {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Semua tabel bisa discroll horizontal */
+  .task-detail-table table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .image-gallery img {
+    width: 100px;
+    height: 100px;
+  }
+
+  .comment-bubble {
+    max-width: 90%;
+    font-size: 13px;
+  }
+
+  .comment-input-area {
+    gap: 6px;
+  }
+
+  .comment-input-area textarea {
+    height: 60px;
+  }
+
+  .comment-input-area button {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+}
+

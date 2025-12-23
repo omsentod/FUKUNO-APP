@@ -61,6 +61,7 @@
     <img src="assets/img/Rectangle1.png" alt="Footer Image">
 </div>
 
+<script src="{{ asset('js/script.js') }}"></script>
 </body>
-<script src="script.js"></script>
+
 </html>
