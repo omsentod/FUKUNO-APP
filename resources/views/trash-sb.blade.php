@@ -92,10 +92,27 @@
         </tbody>
       </table>
 
-      {{-- Pagination Links --}}
-      <div class="pagination-wrapper" style="margin-top: 20px; display: flex; justify-content: center;">
-        {{ $tasks->links() }}
-      </div>
+      {{-- Pagination & Show All --}}
+      {{-- Pagination & Show All --}}
+      @if($tasks->count() > 0)
+        <div class="d-flex flex-column align-items-center gap-2 mt-3">
+
+          {{-- 1. Pagination Links --}}
+          <div>{{ $tasks->links() }}</div>
+
+          {{-- 3. Show All Button --}}
+          @if(request()->has('show_all'))
+            <a href="{{ route(Route::currentRouteName()) }}" class="btn btn-sm btn-outline-secondary">
+              Show Paged
+            </a>
+          @else
+            <a href="{{ route(Route::currentRouteName(), array_merge(request()->all(), ['show_all' => 'true'])) }}"
+              class="btn btn-sm btn-outline-secondary">
+              Show All
+            </a>
+          @endif
+        </div>
+      @endif
     </div>
   </div>
 

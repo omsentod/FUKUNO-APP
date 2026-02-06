@@ -71,7 +71,7 @@
 
         <div class="task">
             <table id="taskTable">
-                @if(request()->has('sort'))
+                @if(request()->has('sort') && $currentSort != 'created_at')
                     <a href="{{ route('task') }}" class="reset-sort">
                         <i class="bi bi-x-circle reset-sort-icon"></i> Reset Sort
                     </a>
@@ -181,6 +181,27 @@
 
                 </tbody>
             </table>
+
+            {{-- Pagination & Show All --}}
+            @if($tasks->count() > 0)
+                <div class="d-flex flex-column align-items-center gap-2 mt-3">
+
+                    {{-- 2. Pagination Links --}}
+                    <div>{{ $tasks->links() }}</div>
+
+                    {{-- 3. Show All Button --}}
+                    @if(request()->has('show_all'))
+                        <a href="{{ route(Route::currentRouteName()) }}" class="btn btn-sm btn-outline-secondary">
+                            Show Paged
+                        </a>
+                    @else
+                        <a href="{{ route(Route::currentRouteName(), array_merge(request()->all(), ['show_all' => 'true'])) }}"
+                            class="btn btn-sm btn-outline-secondary">
+                            Show All
+                        </a>
+                    @endif
+                </div>
+            @endif
         </div>
     </div>
 

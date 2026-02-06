@@ -3,8 +3,10 @@
 namespace App\Providers;
 use Illuminate\Support\Facades\View;
 use App\View\Composers\NotificationComposer;
-use Carbon\Carbon; 
+use Carbon\Carbon;
 use Illuminate\Support\ServiceProvider;
+
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,7 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Carbon::setLocale('id'); 
+        Paginator::useBootstrapFive();
+        Carbon::setLocale('id');
         View::composer('layouts.nav-side', NotificationComposer::class);
     }
 }

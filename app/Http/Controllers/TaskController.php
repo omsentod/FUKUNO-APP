@@ -87,11 +87,15 @@ class TaskController extends Controller
             $query->orderBy($sortColumn, $sortOrder);
         }
 
-        // [OPTIMASI] Pakai pagination: 50 task per halaman
-        $tasks = $query->paginate(50)->appends([
-            'sort' => $sortColumn,
-            'order' => $sortOrder
-        ]);
+        // [OPTIMASI] Pagination atau Show All
+        if ($request->has('show_all')) {
+            $tasks = $query->paginate(9999)->appends(['show_all' => 'true']);
+        } else {
+            $tasks = $query->paginate(50)->appends([
+                'sort' => $sortColumn,
+                'order' => $sortOrder
+            ]);
+        }
 
         $highlightId = $request->query('highlight');
 
@@ -844,10 +848,15 @@ class TaskController extends Controller
 
     public function showArchive()
     {
-        $archivedTasks = Task::with('user', 'status', 'taskPekerjaans')
+        $query = Task::with('user', 'status', 'taskPekerjaans')
             ->where('is_archived', true)
-            ->orderBy('updated_at', 'desc')
-            ->paginate(50); // [OPTIMASI] Pagination
+            ->orderBy('updated_at', 'desc');
+
+        if (request()->has('show_all')) {
+            $archivedTasks = $query->paginate(9999)->appends(['show_all' => 'true']);
+        } else {
+            $archivedTasks = $query->paginate(50);
+        }
 
         return view('archive-sb', ['tasks' => $archivedTasks]);
     }
@@ -857,10 +866,15 @@ class TaskController extends Controller
      */
     public function showTrash()
     {
-        $trashedTasks = Task::with('user', 'status', 'taskPekerjaans')
-            ->onlyTrashed() // <-- Ini mengambil HANYA yang di-trash
-            ->orderBy('deleted_at', 'desc')
-            ->paginate(50); // [OPTIMASI] Pagination
+        $query = Task::with('user', 'status', 'taskPekerjaans')
+            ->onlyTrashed()
+            ->orderBy('deleted_at', 'desc');
+
+        if (request()->has('show_all')) {
+            $trashedTasks = $query->paginate(9999)->appends(['show_all' => 'true']);
+        } else {
+            $trashedTasks = $query->paginate(50);
+        }
 
         return view('trash-sb', ['tasks' => $trashedTasks]);
     }
