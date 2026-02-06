@@ -3,61 +3,61 @@
 // ==========================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-    
+
     // === 1. PILIH ELEMEN ===
     const trashTableBody = document.querySelector(".trash-table tbody");
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    
+
     const selectToggleBtn = document.querySelector(".select-toggle");
     const selectAllCheckbox = document.getElementById('selectAllTrash');
-    const bulkActionBar = document.querySelector('.trash-actions'); 
+    const bulkActionBar = document.querySelector('.trash-actions');
     const restoreAllBtn = document.querySelector(".restore-all");
     const deleteAllBtn = document.querySelector(".delete-all");
-  
-    let selectMode = false; 
-    
-    
+
+    let selectMode = false;
+
+
     // === 2. FUNGSI HELPER ===
     function toggleSelectMode() {
         selectMode = !selectMode;
         const table = document.querySelector(".trash-table");
         if (!table) return;
         table.classList.toggle("checkbox-mode", selectMode);
-        table.classList.toggle("selection-mode", selectMode); 
-  
-  
+        table.classList.toggle("selection-mode", selectMode);
+
+
         if (selectMode) {
             selectToggleBtn.innerHTML = '<i class="bi bi-x-lg"></i> Batal';
             selectToggleBtn.classList.add("active");
-           
-            if(bulkActionBar) bulkActionBar.style.display = 'flex'; 
 
-  
+            if (bulkActionBar) bulkActionBar.style.display = 'flex';
+
+
         } else {
             selectToggleBtn.innerHTML = '<i class="bi bi-check-square"></i> Pilih';
-          
+
             selectToggleBtn.classList.remove("active");
-            
+
             // Sembunyikan Bar
-            if(bulkActionBar) bulkActionBar.style.display = 'none';
-            
+            if (bulkActionBar) bulkActionBar.style.display = 'none';
+
             // Reset checkbox
-            if(selectAllCheckbox) selectAllCheckbox.checked = false;
+            if (selectAllCheckbox) selectAllCheckbox.checked = false;
             document.querySelectorAll('.row-select-trash').forEach(cb => cb.checked = false);
         }
     }
-  
+
     function updateBulkActionBar() {
         const selectedCount = document.querySelectorAll('.row-select-trash:checked').length;
-  
-        
-        if(selectAllCheckbox) {
+
+
+        if (selectAllCheckbox) {
             const totalRows = document.querySelectorAll('.row-select-trash').length;
             selectAllCheckbox.checked = (selectedCount > 0 && selectedCount === totalRows);
             selectAllCheckbox.indeterminate = (selectedCount > 0 && selectedCount < totalRows);
         }
     }
-  
+
     /**
      * Mengirim request fetch (Bisa Massal atau Satuan)
      * @param {string} action - 'restore_all' atau 'delete_permanent_all'
@@ -65,36 +65,36 @@ document.addEventListener("DOMContentLoaded", () => {
      */
     async function performBulkAction(action, ids = null) {
         let selectedIds = ids;
-  
+
         // Jika ID tidak diberikan, ambil dari checkbox (Aksi Massal)
         if (!selectedIds) {
             selectedIds = Array.from(document.querySelectorAll(".row-select-trash:checked"))
-                               .map(cb => cb.dataset.id);
+                .map(cb => cb.dataset.id);
         }
-  
+
         if (selectedIds.length === 0) {
             alert("Pilih minimal satu task!");
             return;
         }
-  
+
         try {
-            const response = await fetch('/trash/bulk-action', { 
+            const response = await fetch('/trash/bulk-action', {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json', 
+                headers: {
+                    'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ 
-                    action: action, 
-                    task_ids: selectedIds 
+                body: JSON.stringify({
+                    action: action,
+                    task_ids: selectedIds
                 })
             });
-  
+
             const result = await response.json();
             if (result.success) {
                 alert(result.message);
-                location.reload(); 
+                location.reload();
             } else {
                 throw new Error(result.message);
             }
@@ -102,19 +102,19 @@ document.addEventListener("DOMContentLoaded", () => {
             alert('Gagal: ' + error.message);
         }
     }
-  
+
     function showConfirmPopup(message, onConfirm) {
         if (confirm(message)) {
             onConfirm();
         }
     }
-  
+
     // === 3. EVENT LISTENERS ===
-  
+
     if (selectToggleBtn) {
         selectToggleBtn.addEventListener("click", toggleSelectMode);
     }
-  
+
     if (selectAllCheckbox) {
         selectAllCheckbox.addEventListener('change', (e) => {
             document.querySelectorAll('.row-select-trash').forEach(cb => {
@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
             updateBulkActionBar();
         });
     }
-  
+
     if (trashTableBody) {
         trashTableBody.addEventListener('change', (e) => {
             if (e.target.classList.contains('row-select-trash')) {
@@ -131,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-  
+
     // Restore All (Massal)
     if (restoreAllBtn) {
         restoreAllBtn.addEventListener('click', () => {
@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     }
-  
+
     // Delete All (Massal)
     if (deleteAllBtn) {
         deleteAllBtn.addEventListener('click', () => {
@@ -151,18 +151,18 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     }
-  
+
     // Listener Tabel (Aksi Satuan)
     if (trashTableBody) {
         trashTableBody.addEventListener('click', (e) => {
             const target = e.target;
             const row = target.closest('tr');
-            
+
             // Validasi
-            if (!row || !target.dataset.id || selectMode) return; 
-  
+            if (!row || !target.dataset.id || selectMode) return;
+
             const id = target.dataset.id;
-  
+
             // 1. RESTORE SATUAN
             if (target.classList.contains('restore-icon')) {
                 showConfirmPopup('Pulihkan task ini?', () => {
@@ -171,40 +171,40 @@ document.addEventListener("DOMContentLoaded", () => {
                         method: 'POST',
                         headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
                     })
-                    .then(res => res.json())
-                    .then(result => {
-                        if (result.success) {
-                            row.remove(); 
-                            alert('Task berhasil dipulihkan.');
-                        } else {
-                            alert('Gagal: ' + result.message);
-                        }
-                    })
-                    .catch(err => alert('Error: ' + err.message));
+                        .then(res => res.json())
+                        .then(result => {
+                            if (result.success) {
+                                row.remove();
+                                alert('Task berhasil dipulihkan.');
+                            } else {
+                                alert('Gagal: ' + result.message);
+                            }
+                        })
+                        .catch(err => alert('Error: ' + err.message));
                 });
-                return; 
+                return;
             }
-  
+
             // 2. DELETE PERMANENT SATUAN
             if (target.classList.contains('delete-icon')) {
                 showConfirmPopup('Yakin ingin menghapus permanen?', () => {
                     // Gunakan fungsi helper kita, kirim ID sebagai array
-                    performBulkAction('delete_permanent_all', [id]); 
+                    performBulkAction('delete_permanent_all', [id]);
                 });
-                return; 
+                return;
             }
-  
+
             // 3. PINDAH KE DETAIL
             if (row.classList.contains('clickable-row')) {
-                if (target.closest('.select-col') || 
-                    target.closest('.actions') || 
+                if (target.closest('.select-col') ||
+                    target.closest('.actions') ||
                     target.tagName === 'INPUT'
-                    ) {
-                    return; 
+                ) {
+                    return;
                 }
                 const url = row.dataset.url;
                 if (url) {
-                    
+
                     window.location.href = url + '?from=trash';
                 }
             }
@@ -214,24 +214,106 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById('taskSearchInput');
     const tableRows = document.querySelectorAll("#trashTable tbody tr");
 
-  if (searchInput) {
-      searchInput.addEventListener('keyup', function(e) {
-          const searchTerm = e.target.value.toLowerCase();
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function (e) {
+            const searchTerm = e.target.value.toLowerCase();
 
-          tableRows.forEach(row => {
-              // Abaikan baris pesan "Tidak ada data"
-              if (row.querySelector('td.text-center')) return;
+            tableRows.forEach(row => {
+                // Abaikan baris pesan "Tidak ada data"
+                if (row.querySelector('td.text-center')) return;
 
-              // Ambil seluruh teks dalam satu baris
-              const rowText = row.textContent.toLowerCase();
+                // Ambil seluruh teks dalam satu baris
+                const rowText = row.textContent.toLowerCase();
 
-              // Cek apakah kata kunci ada di dalam teks baris
-              if (rowText.includes(searchTerm)) {
-                  row.style.display = ""; // Tampilkan
-              } else {
-                  row.style.display = "none"; // Sembunyikan
-              }
-          });
-      });
-  }
-  });
+                // Cek apakah kata kunci ada di dalam teks baris
+                if (rowText.includes(searchTerm)) {
+                    row.style.display = ""; // Tampilkan
+                } else {
+                    row.style.display = "none"; // Sembunyikan
+                }
+            });
+        });
+    }
+
+    // ============================================================
+    // ▼▼▼ SCROLL, SEARCH & HIGHLIGHT PERSISTENCE (TRASH) ▼▼▼
+    // ============================================================
+    const stateTrashSearchInput = document.getElementById('taskSearchInput');
+
+    // [BARU] Cek Referrer
+    const fromDetail = document.referrer && document.referrer.includes('/task/detail/');
+
+    if (!fromDetail) {
+        sessionStorage.removeItem("trashScrollPos");
+        sessionStorage.removeItem("trashSearchQuery");
+        sessionStorage.removeItem("clickedTrashId");
+    }
+
+    // 1. Restore State
+    const savedTrashScroll = sessionStorage.getItem("trashScrollPos");
+    const savedTrashQuery = sessionStorage.getItem("trashSearchQuery");
+    const savedTrashClickedId = sessionStorage.getItem("clickedTrashId");
+
+    // A. Restore Search
+    if (savedTrashQuery && stateTrashSearchInput) {
+        stateTrashSearchInput.value = savedTrashQuery;
+        // Trigger pencarian
+        const event = new Event('keyup', { bubbles: true }); // Trash pakai 'keyup' listener
+        stateTrashSearchInput.dispatchEvent(event);
+    }
+
+    // B. Restore Scroll & Highlight
+    if (savedTrashClickedId) {
+        setTimeout(() => {
+            const targetRow = document.querySelector(`tr.clickable-row[data-url*="/task/detail/${savedTrashClickedId}"]`);
+
+            if (targetRow) {
+                targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Highlight
+                const oldHighlight = document.getElementById('highlight-task');
+                if (oldHighlight) oldHighlight.removeAttribute('id');
+                targetRow.setAttribute('id', 'highlight-task');
+
+                setTimeout(() => {
+                    if (targetRow.id === 'highlight-task') {
+                        targetRow.removeAttribute('id');
+                    }
+                    sessionStorage.removeItem("clickedTrashId");
+                }, 8000);
+            } else if (savedTrashScroll) {
+                window.scrollTo(0, parseInt(savedTrashScroll));
+            }
+        }, 300);
+    } else if (savedTrashScroll) {
+        setTimeout(() => {
+            window.scrollTo(0, parseInt(savedTrashScroll));
+        }, 100);
+    }
+
+    // 2. Save State on Click
+    if (trashTableBody) {
+        trashTableBody.addEventListener("click", (e) => {
+            const row = e.target.closest("tr.clickable-row");
+
+            // Pastikan bukan klik checkbox/icon action (sudah dihandle di atas, tapi double check safety)
+            if (row && !e.target.closest('.select-col') && !e.target.closest('.actions')) {
+                sessionStorage.setItem("trashScrollPos", window.scrollY);
+
+                // Extract ID from URL
+                const url = row.dataset.url;
+                if (url) {
+                    const matches = url.match(/\/task\/detail\/(\d+)/);
+                    if (matches && matches[1]) {
+                        sessionStorage.setItem("clickedTrashId", matches[1]);
+                    }
+                }
+
+                if (stateTrashSearchInput) {
+                    sessionStorage.setItem("trashSearchQuery", stateTrashSearchInput.value);
+                }
+            }
+        });
+    }
+
+});

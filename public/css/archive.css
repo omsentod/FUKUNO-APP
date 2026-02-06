@@ -667,5 +667,17 @@ body.sidebar-open-mobile .sidebar {
     }
 
 }
+
+/* CSS untuk highlight task (Persistence) */
+@keyframes highlight-flash {
+    0% { background-color: transparent; }
+    30% { background-color: #fbefbc;
+    color: var(--txt-color); }
+    100% { background-color: transparent; }
+}
+
+#highlight-task {
+    animation: highlight-flash 8.0s 1;
+}
   
   

@@ -1,109 +1,112 @@
 @extends('layouts.nav-side')
 
-@section('title', 'Trash') 
+@section('title', 'Trash')
 
 @section('content')
 
   <!-- Konten utama Trash Frame -->
   <div class="page">
-    <div class="trash-page">
-      <div class="trash-header">
-        
-        <div class="tp-1">
-          <h3>Trashed</h3> 
-          <div class="search-container mb-3">
-              <div class="input-with-icon">
-                  <i class="bi bi-search search-icon"></i>
-              <input type="text" id="taskSearchInput" class="form-control" placeholder="Cari">
-          </div>
-      </div>
-          </div>
- 
 
-        <div class="trash-header-actions">
-          <button class="select-toggle">
-            <i class="bi bi-check-square"></i> Pilih</button>
-          <div class="trash-actions">
-            <button class="restore-all">
-              <i class="bi bi-arrow-clockwise"></i> Restored All
-            </button>
-            <button class="delete-all">
-              <i class="bi bi-trash-fill"></i> Delete All
-            </button>
+    <div class="trash-header">
+
+      <div class="tp-1">
+        <h3>Trashed</h3>
+        <div class="search-container mb-3">
+          <div class="input-with-icon">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" id="taskSearchInput" class="form-control" placeholder="Cari">
           </div>
         </div>
       </div>
 
-      <div class="trash-table-container">
-        <table class="trash-table" id="trashTable">
-          <thead>
-            <tr>
-              <th class="select-col"><input type="checkbox" id="selectAllTrash"></th>
-              <th>No. PO</th>
-              <th>Tasks Title</th>
-              <th>Jumlah</th>
-              <th>Line Pekerjaan</th>
-              <th>Status</th>
-              <th>Deleted At</th>
-              <th>Klien</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          @php
-              use Illuminate\Support\Str;
-              use Carbon\Carbon;
-          @endphp
-         <tbody>
-          @forelse($tasks as $task)
-          
-          @php
-              $linePekerjaan = $task->taskPekerjaans->first();
-          @endphp
-          <tr class="clickable-row" 
-          data-url="{{ route('task.show', $task->id) }}?from=trash" 
-          style="cursor: pointer;">
-            <td class="select-col">
-                <input type="checkbox" class="row-select-trash" data-id="{{ $task->id }}">
-            </td>
-            <td>{{ $task->no_invoice }}</td>
-            <td>
-                 {{ $task->judul }}
-            </td>
-            <td>{{ $task->total_jumlah }}</td>
-            
-            <td>{{ $linePekerjaan ? $linePekerjaan->nama_pekerjaan : 'N/A' }}</td>
-            <td><span class="status status-{{ Str::slug($task->status->name) }}">{{ $task->status->name }}</span></td>
-            
-            <td>{{ $task->deleted_at->format('j M Y') }}</td>
-            <td>{{ $task->nama_pelanggan }}</td>
-            <td class="actions">
-              <i class="bi bi-arrow-clockwise restore-icon" data-id="{{ $task->id }}"></i>
-              <i class="bi bi-trash-fill delete-icon" data-id="{{ $task->id }}"></i>
-            </td>
-          </tr>
-          @empty
-          <tr>
-            
-            <td colspan="9" class="text-center">
-              <i class="bi bi-trash display-6 d-block mb-2"></i>
-              Tidak ada task di dalam sampah.
 
-            </td>
+      <div class="trash-header-actions">
+        <button class="select-toggle">
+          <i class="bi bi-check-square"></i> Pilih</button>
+        <div class="trash-actions">
+          <button class="restore-all">
+            <i class="bi bi-arrow-clockwise"></i> Restored All
+          </button>
+          <button class="delete-all">
+            <i class="bi bi-trash-fill"></i> Delete All
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="trash-table-container">
+      <table class="trash-table" id="trashTable">
+        <thead>
+          <tr>
+            <th class="select-col"><input type="checkbox" id="selectAllTrash"></th>
+            <th>No. PO</th>
+            <th>Tasks Title</th>
+            <th>Jumlah</th>
+            <th>Line Pekerjaan</th>
+            <th>Status</th>
+            <th>Deleted At</th>
+            <th>Klien</th>
+            <th>Action</th>
           </tr>
+        </thead>
+        @php
+          use Illuminate\Support\Str;
+          use Carbon\Carbon;
+        @endphp
+        <tbody>
+          @forelse($tasks as $task)
+
+            @php
+              $linePekerjaan = $task->taskPekerjaans->first();
+            @endphp
+            <tr class="clickable-row" data-url="{{ route('task.show', $task->id) }}?from=trash" style="cursor: pointer;">
+              <td class="select-col">
+                <input type="checkbox" class="row-select-trash" data-id="{{ $task->id }}">
+              </td>
+              <td>{{ $task->no_invoice }}</td>
+              <td>
+                {{ $task->judul }}
+              </td>
+              <td>{{ $task->total_jumlah }}</td>
+
+              <td>{{ $linePekerjaan ? $linePekerjaan->nama_pekerjaan : 'N/A' }}</td>
+              <td><span class="status status-{{ Str::slug($task->status->name) }}">{{ $task->status->name }}</span></td>
+
+              <td>{{ $task->deleted_at->format('j M Y') }}</td>
+              <td>{{ $task->nama_pelanggan }}</td>
+              <td class="actions">
+                <i class="bi bi-arrow-clockwise restore-icon" data-id="{{ $task->id }}"></i>
+                <i class="bi bi-trash-fill delete-icon" data-id="{{ $task->id }}"></i>
+              </td>
+            </tr>
+          @empty
+            <tr>
+
+              <td colspan="9" class="text-center">
+                <i class="bi bi-trash display-6 d-block mb-2"></i>
+                Tidak ada task di dalam sampah.
+
+              </td>
+            </tr>
           @endforelse
         </tbody>
-        </table>
+      </table>
+
+      {{-- Pagination Links --}}
+      <div class="pagination-wrapper" style="margin-top: 20px; display: flex; justify-content: center;">
+        {{ $tasks->links() }}
       </div>
     </div>
   </div>
 
 
+
 @endsection
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/trash.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/trash.css') }}">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('js/trash.js') }}"></script>
+  <script src="{{ asset('js/trash.js') }}"></script>
 @endpush

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -59,7 +60,7 @@ class AuthController extends Controller
         }
 
         // login manual ke session Laravel
-        auth()->login($user);
+        Auth::login($user);
         $request->session()->regenerate();
 
         // buat token sanctum (kalau butuh API access)
@@ -68,5 +69,24 @@ class AuthController extends Controller
         // redirect ke dashboard
         return redirect()->route('dashboard')->with('success', 'Login successful');
     }
-    
+
+    // LOGOUT
+    public function logout(Request $request)
+    {
+        // Hapus semua token Sanctum milik user
+        $request->user()->tokens()->delete();
+
+        // Logout dari session Laravel
+        Auth::logout();
+
+        // Invalidate session yang ada
+        $request->session()->invalidate();
+
+        // Regenerate CSRF token untuk keamanan
+        $request->session()->regenerateToken();
+
+        // Redirect ke halaman login dengan pesan sukses
+        return redirect()->route('login')->with('success', 'Logout berhasil');
+    }
+
 }

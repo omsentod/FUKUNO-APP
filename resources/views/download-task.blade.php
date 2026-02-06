@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,11 +8,12 @@
     <link rel="stylesheet" href="{{ asset('css/print.css') }}">
     <link rel="icon" href="{{ asset('assets/img/print-logo.ico') }}" type="image/x-icon">
 </head>
+
 <body>
     <div class="po-container">
         <header>
-            <img src="{{ asset('assets/img/web-logo.png') }}" alt="Logo" class="header-logo-img">
-            <h2>PURCHASE ORDER</h2>
+            <img src="{{ asset('assets/img/PURCHASE-LOGO.png') }}" alt="Logo" class="header-logo-img">
+            <h2>{{ $task->judul }}</h2>
         </header>
 
         <table class="po-details">
@@ -25,79 +27,55 @@
                 <tr>
                     <th>KLIEN</th>
                     <td>{{ $task->nama_pelanggan }}</td>
-                    
+
                     <th>TANGGAL SELESAI</th>
                     <td>
                         {{ $projectFinishDate ? \Carbon\Carbon::parse($projectFinishDate)->format('j-M-Y') : '-' }}
                     </td>
                 </tr>
                 <tr>
-                    <th>JUDUL</th>
-                    <td colspan="3">{{ $task->judul }}</td>
+             
+
+                    {{-- CELL SIGNATURE (MERGED) --}}
+                    <td colspan="2" rowspan="2" class="signature-cell">
+                        <div class="signature-content">
+                            <div class="signature-wrapper">
+                                <div class="signature-spacer"></div>
+                                <p class="signature-name">HEAD PRODUCTION</p>
+                            </div>
+                            <div class="signature-wrapper">
+                                <div class="signature-spacer"></div>
+                                <p class="signature-name">ADMIN</p>
+                            </div>
+                        </div>
+                    </td>
                 </tr>
-                
+
                 <tr>
                     <th>LINE PEKERJAAN</th>
-                    <td colspan="3" style="padding: 5px 10px;">
-                        <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                    <td class="line-cell">
+                        <div class="line-wrapper">
                             @foreach($lineList as $item)
-                                <span style="background: #eee; padding: 2px 8px; border-radius: 4px; font-size: 13px; border: 1px solid #ddd;">
-                                    <b>{{ $item->name }}</b> 
-                                    <span style="color: #000; font-size: 12px;">({{ $item->date }})</span>
-                                </span>
+                                <div class="line-item">
+                                    <b>{{ $item->name }}</b>
+                                    <span class="line-date">({{ $item->date }})</span>
+                                </div>
                             @endforeach
                         </div>
                     </td>
                 </tr>
 
-                {{-- <tr>
-                    <th>LINE PEKERJAAN</th>
-                    <td colspan="3" style="text-transform: capitalize;">
-                        {{ $lineListString ?: 'N/A' }}
-                    </td>
-                </tr> --}}
 
             </tbody>
         </table>
 
         <main class="main-content">
-            
-            {{-- BARIS 1: SPESIFIKASI & TANDA TANGAN --}}
+
+            {{-- BARIS 1: SPESIFIKASI & RINCIAN (Side by Side) --}}
+            {{-- BARIS 1: RINCIAN (Kiri) & SPESIFIKASI + NOTE (Kanan) --}}
             <section class="row-section">
-                <div class="half-column">
-                    <div class="specs-list">
-                        <h3>Spesifikasi</h3>
-                        <ul>
-                            <li><strong>WARNA</strong>: {{ $task->warna ?? '-' }}</li>
-                            <li><strong>BAHAN</strong> : {{ $task->bahan ?? '-' }}</li>
-                            <li><strong>MODEL</strong>: {{ $task->model ?? '-' }}</li>
-                        </ul>
-                    </div>
-                </div>
 
-                <div class="half-column">
-                    <div class="signature-box">
-                        <div class="sign-wrapper">
-                            <p class="sign-title">HEAD PRODUCTION</p>
-                        </div>
-                        <div class="sign-wrapper">
-                            <p class="sign-title">ADMIN</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {{-- BARIS 2: NOTE & SIZE --}}
-            <section class="row-section">
-                <div class="half-column">
-                    <div class="notes-box">
-                        <h3>Note</h3>
-                        <div class="notes-content">
-                            {{ $task->catatan ?? 'Tidak ada catatan.' }}
-                        </div>
-                    </div>
-                </div>
-
+                {{-- KOLOM KIRI: RINCIAN --}}
                 <div class="half-column">
                     <div class="size-table-container">
                         <h3>Rincian</h3>
@@ -108,7 +86,7 @@
                                     @foreach($tipeHeaders as $tipe)
                                         <th>{{ strtoupper($tipe) }}</th>
                                     @endforeach
-                                    <th>JUMLAH</th> 
+                                    <th>JUMLAH</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -142,6 +120,25 @@
                         </table>
                     </div>
                 </div>
+
+                {{-- KOLOM KANAN: SPESIFIKASI (Atas) & NOTE (Bawah) --}}
+                <div class="half-column column-stack">
+
+                    <div class="specs-list specs-container">
+                        <h3>Spesifikasi</h3>
+                        <ul>
+                            <li><strong>WARNA</strong>: {{ $task->warna ?? '-' }}</li>
+                            <li><strong>BAHAN</strong>: {{ $task->bahan ?? '-' }}</li>
+                            <li><strong>MODEL</strong>: {{ $task->model ?? '-' }}</li>
+                        </ul>
+                    </div>
+
+                    <div class="notes-box notes-container">
+                        <h3>Note</h3>
+                        <div class="notes-content">{{ $task->catatan ?? 'Tidak ada catatan.' }}</div>
+                    </div>
+
+                </div>
             </section>
 
             {{-- BARIS 3: MOCKUP (FULL WIDTH) --}}
@@ -161,16 +158,17 @@
     </div>
 
 
-    
+
     @php
         use Illuminate\Support\Facades\Storage;
         use Carbon\Carbon;
     @endphp
 
     <script>
-        window.onload = function() {
+        window.onload = function () {
             window.print();
         }
     </script>
 </body>
+
 </html>

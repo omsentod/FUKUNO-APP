@@ -29,10 +29,10 @@ class TasksExport implements FromCollection, WithHeadings, WithMapping, WithDraw
             'taskSizes',
             'comments'
         ])
-        ->whereIn('id', $ids)
-        ->orderBy('no_invoice')
-        ->orderBy('id')
-        ->get();
+            ->whereIn('id', $ids)
+            ->orderBy('no_invoice')
+            ->orderBy('id')
+            ->get();
     }
 
     public function headings(): array
@@ -48,6 +48,8 @@ class TasksExport implements FromCollection, WithHeadings, WithMapping, WithDraw
             'Warna',
             'Model',
             'Bahan',
+            'Bahan Terpakai',
+            'Bahan Reject',
 
             'Line Pekerjaan',
             'Deadline Pekerjaan',
@@ -65,29 +67,32 @@ class TasksExport implements FromCollection, WithHeadings, WithMapping, WithDraw
     public function map($task): array
     {
         // ============ CATATAN TASK ============
-        $taskNote = ($task->catatan !== null && trim((string)$task->catatan) !== '')
-            ? (string)$task->catatan
+        $taskNote = ($task->catatan !== null && trim((string) $task->catatan) !== '')
+            ? (string) $task->catatan
             : '-';
 
         // ============ LINE PEKERJAAN ============
         $linesText = $task->taskPekerjaans->pluck('nama_pekerjaan')->filter()->implode(" | ");
-        if ($linesText === '') $linesText = '-';
+        if ($linesText === '')
+            $linesText = '-';
 
         // ============ DEADLINE PEKERJAAN ============
-        $deadlineText = $task->taskPekerjaans->map(function($l){
+        $deadlineText = $task->taskPekerjaans->map(function ($l) {
             return $l->deadline
                 ? Carbon::parse($l->deadline)->format("Y-m-d H:i")
                 : '-';
         })->implode(" | ");
-        if ($deadlineText === '') $deadlineText = '-';
+        if ($deadlineText === '')
+            $deadlineText = '-';
 
         // ============ SIZE DETAIL ============
-        $sizeText = $task->taskSizes->groupBy('jenis')->map(function($group){
+        $sizeText = $task->taskSizes->groupBy('jenis')->map(function ($group) {
             $jenis = $group->first()->jenis ?? '';
             $items = $group->map(fn($s) => ($s->tipe ?? '') . "=" . ($s->jumlah ?? 0))->implode(", ");
             return trim($jenis) !== '' ? "{$jenis}: {$items}" : $items;
         })->filter()->implode(" | ");
-        if ($sizeText === '') $sizeText = '-';
+        if ($sizeText === '')
+            $sizeText = '-';
 
         // ============ RETURN ROW (tanpa catatan pekerjaan) ============
         return [
@@ -101,6 +106,8 @@ class TasksExport implements FromCollection, WithHeadings, WithMapping, WithDraw
             $task->warna ?? '-',
             $task->model ?? '-',
             $task->bahan ?? '-',
+            $task->bahan_terpakai ?? '-',
+            $task->bahan_reject ?? '-',
 
             $linesText,
             $deadlineText,
@@ -118,7 +125,8 @@ class TasksExport implements FromCollection, WithHeadings, WithMapping, WithDraw
         foreach ($this->tasks as $task) {
             foreach ($task->mockups as $i => $mock) {
                 $file = storage_path('app/public/' . ($mock->file_path ?? ''));
-                if (!file_exists($file)) continue;
+                if (!file_exists($file))
+                    continue;
 
                 $drawing = new Drawing();
                 $drawing->setName('Mockup');
@@ -139,7 +147,7 @@ class TasksExport implements FromCollection, WithHeadings, WithMapping, WithDraw
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function(AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event) {
 
                 $sheet = $event->sheet->getDelegate();
                 $rowCount = $this->tasks->count() + 1;

@@ -39,20 +39,16 @@ body{
     flex-direction: column;
     padding: 20px;
     width: 135vh;
-    height: 100%;
+    min-height: 100%; 
     top: 130px;
     left: 320px;
     padding: 20px;
     z-index: -2;
-    /* background-color: var(--main-color); */
+    background-color: var(--ctn-color);
   }
   
-/* Trash Page */
-.trash-page {
-    background: var(--ctn-color);
-    padding: 20px;
-    border-radius: 10px;
-  }
+
+
   
 /* === HEADER TRASH (JUDUL & SEARCH) === */
 .trash-header {
@@ -145,16 +141,24 @@ body{
   }
   
   .trash-table th, .trash-table td {
-    padding: 12px;
     border-bottom: 1px solid #ddd;
     text-align: left;
-    word-wrap: break-word;
-    white-space: normal;
+    word-wrap: break-word; /* Opsional: jika ingin text wrap */
+    padding: 10px;        /* Match task.css th padding */
+    font-size: 12px;      /* Match task.css font size */
+  }
+
+  .trash-table td {
+      padding: 5px 0;    /* Match task.css td padding */
+      height: 35px;      /* Match task.css row height */
+      text-align: center; /* Match task.css alignment */
+      white-space: nowrap; /* Agar rapi satu baris seperti task */
   }
   
   .trash-table th {
     background-color: #f5f5f5;
     font-weight: var(--font-semibold);
+    text-align: center; /* Agar header tabel rata tengah */
   }
   
   .trash-table td .dot {
@@ -523,4 +527,16 @@ body{
   .trash-table-container {
     margin-top: 10px;
   }
+}
+
+/* CSS untuk highlight task (Persistence) */
+@keyframes highlight-flash {
+    0% { background-color: transparent; }
+    30% { background-color: #fbefbc;
+    color: var(--txt-color); }
+    100% { background-color: transparent; }
+}
+
+#highlight-task {
+    animation: highlight-flash 8.0s 1;
 }

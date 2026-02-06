@@ -10,6 +10,7 @@ use App\Http\Controllers\StatusController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\PekerjaansController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -21,18 +22,22 @@ Route::get('/login', function () {
 
 Route::post('/', [AuthController::class, 'login'])->name('login.submit');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
-Route::get('/register', function () {
-    return view('regis');
-})->name('regis');
+
 
 // AUTH ROUTES (User & Admin)
 
-Route::middleware(['auth'])->group(function() {
+Route::middleware(['auth'])->group(function () {
 
     // --- GLOBAL ---
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+
     Route::get('/user-name', [AuthController::class, 'getUserName']);
+
+    // --- PROFILE ---
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
     // --- TASK READ & INTERACTION ---
     Route::get('/task', [TaskController::class, 'index'])->name('task');
@@ -45,7 +50,7 @@ Route::middleware(['auth'])->group(function() {
     Route::post('/checklist/update/{id}', [TaskController::class, 'updateChecklistStatus'])->name('checklist.updateStatus');
     // Komentar
     Route::post('/task/comment/{task_id}', [TaskController::class, 'storeComment'])->name('task.storeComment');
-    
+
     // Update Status Manual (Hold/Resume)
     Route::post('/task/status/update/{id}', [TaskController::class, 'updateStatus'])->name('task.updateStatus');
 
@@ -53,7 +58,7 @@ Route::middleware(['auth'])->group(function() {
     Route::post('/notifications/mark-as-read', [TaskController::class, 'markNotificationsAsRead'])->name('notifications.markAsRead');
     Route::delete('/notifications/clear', [TaskController::class, 'clearNotifications'])->name('notifications.clear');
 
-    
+
 
 });
 
@@ -61,7 +66,7 @@ Route::middleware(['auth'])->group(function() {
 
 // ADMIN ROUTES (Hanya Admin)
 
-Route::middleware(['auth', 'admin'])->group(function() { 
+Route::middleware(['auth', 'admin'])->group(function () {
 
     // --- TASK CRUD ---
     Route::post('/task/store', [TaskController::class, 'store'])->name('task.store');
@@ -69,16 +74,16 @@ Route::middleware(['auth', 'admin'])->group(function() {
     Route::get('/task/edit/{id}', [TaskController::class, 'edit'])->name('task.edit');
     Route::delete('/task/delete/{id}', [TaskController::class, 'destroy'])->name('task.destroy');
     Route::get('/task/export', [TaskController::class, 'exportExcel'])->name('task.export');
-    
+
     // --- ARCHIVE & TRASH ---
     Route::get('/archive', [TaskController::class, 'showArchive'])->name('archive');
     Route::get('/trash', [TaskController::class, 'showTrash'])->name('trash');
     Route::post('/task/restore/{id}', [TaskController::class, 'restore'])->name('task.restore');
     Route::post('/task/unarchive/{id}', [TaskController::class, 'unarchive'])->name('task.unarchive');
-    
+
     // --- BULK ACTIONS ---
     Route::post('/tasks/bulk-action', [TaskController::class, 'bulkAction'])->name('task.bulkAction');
-    Route::post('/trash/bulk-action', [TaskController::class, 'trashBulkAction'])->name('trash.bulkAction'); 
+    Route::post('/trash/bulk-action', [TaskController::class, 'trashBulkAction'])->name('trash.bulkAction');
 
     // -- SEARCH --
     Route::get('/users/search', [TaskController::class, 'searchUsers'])->name('users.search');
@@ -87,7 +92,9 @@ Route::middleware(['auth', 'admin'])->group(function() {
     Route::get('/pekerjaan/search', [PekerjaansController::class, 'search'])->name('pekerjaan.search');
 
     // --- MASTER DATA: CHECKLISTS ---
-    Route::get('/checklist', function () { return view('checklist-sb'); })->name('checklist');
+    Route::get('/checklist', function () {
+        return view('checklist-sb');
+    })->name('checklist');
     Route::get('/checklist/all', [ChecklistController::class, 'index'])->name('checklist.all');
     Route::post('/checklist/store', [ChecklistController::class, 'store'])->name('checklist.store');
     Route::put('/checklist/update/{id}', [ChecklistController::class, 'update'])->name('checklist.update');
@@ -108,7 +115,9 @@ Route::middleware(['auth', 'admin'])->group(function() {
     Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.delete');
 
     // --- STATUS MASTER ---
-    Route::get('/status', function () { return view('status-sb'); })->name('status');
+    Route::get('/status', function () {
+        return view('status-sb');
+    })->name('status');
     Route::get('/status/all', [StatusController::class, 'index'])->name('status.all');
     Route::post('/status/store', [StatusController::class, 'store'])->name('status.store');
     Route::put('/status/update/{id}', [StatusController::class, 'update'])->name('status.update');
@@ -120,7 +129,7 @@ Route::get('/migrate', function () {
     try {
         // --force diperlukan karena di hosting biasanya dianggap production
         Artisan::call('migrate', ['--force' => true]);
-        
+
         return 'Migrasi Sukses!<br><br>' . nl2br(Artisan::output());
     } catch (\Exception $e) {
         return 'Error: ' . $e->getMessage();

@@ -17,12 +17,7 @@
         <img src="assets/img/web-logo.png" alt="header logo">
     </div>
 
-    <div class="regis-whisp">
-    <p>Belum punya akun?</p>
-    <a href="{{ route('regis') }}">
-        <button> Daftar</button>
-    </a>
-    </div>
+ 
 </div>
 
 

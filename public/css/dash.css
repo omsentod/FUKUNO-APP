@@ -577,33 +577,33 @@ body.sidebar-closed .sidebar-toggle i {
         border-radius: 20px;
     }
 
-      .status-needs-work {
-        background-color: #3498db !important;
-        color: var(--ctn-color) !important;
-    }
-    
-    /* Status: In Progress (Kuning) */
-    .status-in-progress {
-        background-color: #f1c40f !important;
-        color:var(--ctn-color) !important;
-    }
-    
-    /* Status: Done and Ready (Hijau) */
-    .status-done-and-ready {
-        background-color: #2ecc71 !important;
-        color: var(--ctn-color) !important;
-    }
-    
-    /* Status: Hold (Abu-abu/Biru Muda) */
-    .status-hold {
-        background-color: var(--main-color) !important;
-        color: var(--ctn-color) !important;
-    }
 
-    .status-delivered {
-      background-color: #17a2b8; /* Warna Cyan */
-      color: white;
-  }
+  /* --- STANDARDIZED STATUS COLORS (From task.css) --- */
+.status-to-do {
+    background-color: #3498db !important;
+    color: #fff !important;
+}
+
+.status-in-progress {
+    background-color: #f1c40f !important;
+    color: #fff !important;
+}
+
+.status-done-and-ready {
+    background-color: #2ecc71 !important;
+    color: #fff !important;
+}
+
+.status-hold {
+    background-color: #CF221B !important;
+    color: #fff !important;
+}
+
+.status-delivered {
+    background-color: #076225 !important;
+    color: #fff !important;
+}
+
 
     
 

@@ -32,9 +32,9 @@ return [
     |
     */
 
-    'lifetime' => (int) env('SESSION_LIFETIME', 120),
+    'lifetime' => (int) env('SESSION_LIFETIME', 43200), // 30 hari (43200 menit)
 
-    'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
+    'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false), // Session tidak expire saat browser ditutup
 
     /*
     |--------------------------------------------------------------------------
@@ -129,7 +129,7 @@ return [
 
     'cookie' => env(
         'SESSION_COOKIE',
-        Str::slug(env('APP_NAME', 'laravel')).'-session'
+        Str::slug(env('APP_NAME', 'laravel')) . '-session'
     ),
 
     /*

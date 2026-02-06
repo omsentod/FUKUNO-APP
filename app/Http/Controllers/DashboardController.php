@@ -28,6 +28,7 @@ class DashboardController extends Controller
         // --- 2. Ambil Data Tabel (Task Terbaru) ---
         $latestTasks = Task::with('status', 'taskPekerjaans') // Ambil relasi
                             ->orderBy('created_at', 'desc') // Urutkan terbaru
+                            ->take(5)
                             ->get();
 
 

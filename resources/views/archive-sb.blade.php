@@ -1,23 +1,23 @@
 @extends('layouts.nav-side')
 
-@section('title', 'Archive') 
+@section('title', 'Archive')
 
 
 @section('content')
-<!--KONTEN UTAMA -->
-<div class="page">
+  <!--KONTEN UTAMA -->
+  <div class="page">
     <div class="archive-container">
       <div class="archive-header">
         <div class="ap-1">
 
           <h3>Archive</h3>
           <div class="search-container">
-              <div class="input-with-icon">
-                  <i class="bi bi-search search-icon"></i>
-                  <input type="text" id="archiveSearchInput" class="form-control" placeholder="Cari">
-              </div>
+            <div class="input-with-icon">
+              <i class="bi bi-search search-icon"></i>
+              <input type="text" id="archiveSearchInput" class="form-control" placeholder="Cari">
+            </div>
           </div>
-      </div>
+        </div>
 
         <div class="archive-header-actions">
           <button class="select-toggle">
@@ -31,9 +31,9 @@
             </button>
           </div>
         </div>
-        
+
       </div>
-  
+
       <div class="archive-table-container">
         <table class="archive-table" id="archiveTable">
           <thead>
@@ -50,43 +50,47 @@
             </tr>
           </thead>
           @php
-          use Illuminate\Support\Str;
-          use Carbon\Carbon;
-      @endphp
+            use Illuminate\Support\Str;
+            use Carbon\Carbon;
+          @endphp
 
-      <tbody>
-        @forelse($tasks as $task)
-        @php
-            $linePekerjaan = $task->taskPekerjaans->first();
-        @endphp
-        <tr class="clickable-row" 
-        data-url="{{ route('task.show', $task->id) }}" 
-        style="cursor: pointer;">
-          <td class="select-col"><input type="checkbox" class="row-select" data-id="{{ $task->id }}"></td>
-          <td>{{ $task->no_invoice }}</td>
-          <td>{{ $task->judul }}</td>
-          <td>{{ $task->total_jumlah }}</td>
-          <td>{{ $linePekerjaan ? $linePekerjaan->nama_pekerjaan : 'N/A' }}</td>
-          <td><span class="status status-{{ Str::slug($task->status->name) }}">{{ $task->status->name }}</span></td>
-          <td>{{ $task->updated_at->format('j M Y') }}</td>
-          <td>{{ $task->nama_pelanggan }}</td>
-          <td> 
-            <div class="action-icons"> <i class="bi bi-arrow-counterclockwise" title="Restore" data-id="{{ $task->id }}"></i>
-            {{-- <i class="bi bi-file-earmark-text" title="Detail" data-id="{{ $task->id }}"></i> --}}
-            <i class="bi bi-trash-fill" title="Delete" data-id="{{ $task->id }}"></i>
-          </div>
-          </td>
-        </tr>
-        @empty
-        <tr>
-          <td colspan="9" class="text-center">
-            <i class="bi bi-archive-fill display-6 d-block mb-2"></i>
-            Belum ada task yang diarsipkan.
-          </td>
-        </tr>
-        @endforelse
-      </tbody>
+          <tbody>
+            @forelse($tasks as $task)
+              @php
+                $linePekerjaan = $task->taskPekerjaans->first();
+              @endphp
+              <tr class="clickable-row" data-url="{{ route('task.show', $task->id) }}" style="cursor: pointer;">
+                <td class="select-col"><input type="checkbox" class="row-select" data-id="{{ $task->id }}"></td>
+                <td>{{ $task->no_invoice }}</td>
+                <td>{{ $task->judul }}</td>
+                <td>{{ $task->total_jumlah }}</td>
+                <td>{{ $linePekerjaan ? $linePekerjaan->nama_pekerjaan : 'N/A' }}</td>
+                <td><span class="status status-{{ Str::slug($task->status->name) }}">{{ $task->status->name }}</span></td>
+                <td>{{ $task->updated_at->format('j M Y') }}</td>
+                <td>{{ $task->nama_pelanggan }}</td>
+                <td>
+                  <div class="action-icons"> <i class="bi bi-arrow-counterclockwise" title="Restore"
+                      data-id="{{ $task->id }}"></i>
+                    {{-- <i class="bi bi-file-earmark-text" title="Detail" data-id="{{ $task->id }}"></i> --}}
+                    <i class="bi bi-trash-fill" title="Delete" data-id="{{ $task->id }}"></i>
+                  </div>
+                </td>
+              </tr>
+            @empty
+              <tr>
+                <td colspan="9" class="text-center">
+                  <i class="bi bi-archive-fill display-6 d-block mb-2"></i>
+                  Belum ada task yang diarsipkan.
+                </td>
+              </tr>
+            @endforelse
+          </tbody>
         </table>
+
+        {{-- Pagination Links --}}
+        <div class="pagination-wrapper" style="margin-top: 20px; display: flex; justify-content: center;">
+          {{ $tasks->links() }}
+        </div>
       </div>
     </div>
   </div>
@@ -95,9 +99,9 @@
 @endsection
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/archive.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/archive.css') }}">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('js/archive.js') }}"></script>
+  <script src="{{ asset('js/archive.js') }}"></script>
 @endpush

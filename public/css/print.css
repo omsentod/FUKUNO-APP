@@ -90,13 +90,21 @@ header h2 {
 }
 
 .half-column {
+    flex: 0 0 50%;
+    max-width: 50%;
+    display: flex;
+    flex-direction: column;
+}
+
+.full-column {
     flex: 1;
-    width: 50%;
+    width: 100%;
     display: flex;
     flex-direction: column;
 }
 
 .specs-list, .notes-box {
+    margin-top: 10px;
     padding: 12px;
     background-color: #fdfdfd;
     border: 1px solid #ccc;
@@ -209,14 +217,14 @@ header h2 {
 .mockup-item img {
     max-width: 100%;
     height: auto;
-    max-height: 900px;
+    max-height: 400px; 
     object-fit: contain;
 }
 
 @media print {
     @page {
         size: A4;
-        margin: 15mm;
+        margin: 5mm;
     }
 
     body {
@@ -242,6 +250,11 @@ header h2 {
         page-break-inside: avoid;
     }
 
+    .mockup-item img{
+        max-width: 500px;
+        max-height: 400px;
+    }
+
     .row-section, .notes-box, .notes-content {
         page-break-inside: auto;
         display: block;
@@ -251,4 +264,39 @@ header h2 {
     .row-section {
         display: flex; 
     }
+}
+
+/* --- SIGNATURE TABLE STYLES --- */
+.signature-cell {
+    text-align: center;
+    vertical-align: bottom;
+    height: 120px;
+    padding: 0;
+    /* Removed specific border, will follow table rules or be none as requested */
+}
+
+.signature-content {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    height: 100%;
+    align-items: flex-end;
+    padding-bottom: 20px;
+}
+
+.signature-wrapper {
+    text-align: center;
+}
+
+.signature-spacer {
+    height: 60px;
+}
+
+.signature-name {
+    font-size: 10px;
+    font-weight: bold;
+    border-top: 1px solid #000;
+    padding-top: 5px;
+    min-width: 100px;
+    margin: 0;
 }
