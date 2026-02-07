@@ -59,6 +59,30 @@ class TaskController extends Controller
             ->select('tasks.*')
             ->where('is_archived', false);
 
+        // [BARU] Filter Search (Server-Side) - HARUS SEBELUM JOIN!
+        if ($request->has('search') && $request->search != '') {
+            $keyword = $request->search;
+            $query->where(function ($q) use ($keyword) {
+                // Search di kolom tasks
+                $q->where('tasks.judul', 'like', "%{$keyword}%")
+                    ->orWhere('tasks.nama_pelanggan', 'like', "%{$keyword}%")
+                    ->orWhere('tasks.no_invoice', 'like', "%{$keyword}%")
+                    ->orWhere('tasks.urgensi', 'like', "%{$keyword}%")
+                    ->orWhere('tasks.catatan', 'like', "%{$keyword}%")
+                    // Search di relasi User (creator)
+                    ->orWhereHas('user', function ($subQ) use ($keyword) {
+                        $subQ->where('name', 'like', "%{$keyword}%");
+                    })
+                    // Search di relasi Status
+                    ->orWhereHas('status', function ($subQ) use ($keyword) {
+                        $subQ->where('name', 'like', "%{$keyword}%");
+                    })
+                    // Search di relasi Line/Pekerjaan
+                    ->orWhereHas('taskPekerjaans', function ($subQ) use ($keyword) {
+                        $subQ->where('nama_pekerjaan', 'like', "%{$keyword}%");
+                    });
+            });
+        }
 
         if ($sortColumn == 'status') {
             $query->join('statuses', 'tasks.status_id', '=', 'statuses.id')
@@ -87,13 +111,45 @@ class TaskController extends Controller
             $query->orderBy($sortColumn, $sortOrder);
         }
 
+
+        // [BARU] Logika Deep Link (Highlight ID di halaman berapa?)
+        // Hanya jalan jika ada param 'highlight' TAPI tidak ada param 'page' (artinya baru klik dari notif)
+        if ($request->has('highlight') && !$request->has('page') && !$request->has('search')) {
+            $targetId = $request->highlight;
+
+            // 1. Ambil semua ID dengan urutan yang SAMA persis dengan query utama
+            // Clone query agar tidak merusak query asli
+            $positionQuery = clone $query;
+
+            // Kita butuh list ID saja untuk mencari posisi
+            $allIds = $positionQuery->pluck('tasks.id')->toArray();
+
+            // 2. Cari index ID target
+            $index = array_search($targetId, $allIds);
+
+            if ($index !== false) {
+                // 3. Hitung halaman (Index dimulai dari 0, jadi +1)
+                $perPage = 50; // Sesuaikan dengan pagination
+                $targetPage = ceil(($index + 1) / $perPage);
+
+                // 4. Redirect ke halaman yang benar
+                if ($targetPage > 1) {
+                    return redirect()->route('task', array_merge(
+                        $request->all(),
+                        ['page' => $targetPage]
+                    ));
+                }
+            }
+        }
+
         // [OPTIMASI] Pagination atau Show All
         if ($request->has('show_all')) {
             $tasks = $query->paginate(9999)->appends(['show_all' => 'true']);
         } else {
             $tasks = $query->paginate(50)->appends([
                 'sort' => $sortColumn,
-                'order' => $sortOrder
+                'order' => $sortOrder,
+                'search' => $request->search // Append search param agar navigasi page tetap membawa keyword
             ]);
         }
 
@@ -852,10 +908,31 @@ class TaskController extends Controller
             ->where('is_archived', true)
             ->orderBy('updated_at', 'desc');
 
+        // [BARU] Filter Search (Server-Side)
+        if (request()->has('search') && request()->search != '') {
+            $keyword = request()->search;
+            $query->where(function ($q) use ($keyword) {
+                $q->where('tasks.judul', 'like', "%{$keyword}%")
+                    ->orWhere('tasks.nama_pelanggan', 'like', "%{$keyword}%")
+                    ->orWhere('tasks.no_invoice', 'like', "%{$keyword}%")
+                    ->orWhere('tasks.urgensi', 'like', "%{$keyword}%")
+                    ->orWhere('tasks.catatan', 'like', "%{$keyword}%")
+                    ->orWhereHas('user', function ($subQ) use ($keyword) {
+                        $subQ->where('name', 'like', "%{$keyword}%");
+                    })
+                    ->orWhereHas('status', function ($subQ) use ($keyword) {
+                        $subQ->where('name', 'like', "%{$keyword}%");
+                    })
+                    ->orWhereHas('taskPekerjaans', function ($subQ) use ($keyword) {
+                        $subQ->where('nama_pekerjaan', 'like', "%{$keyword}%");
+                    });
+            });
+        }
+
         if (request()->has('show_all')) {
-            $archivedTasks = $query->paginate(9999)->appends(['show_all' => 'true']);
+            $archivedTasks = $query->paginate(9999)->appends(['show_all' => 'true', 'search' => request()->search]);
         } else {
-            $archivedTasks = $query->paginate(50);
+            $archivedTasks = $query->paginate(50)->appends(['search' => request()->search]);
         }
 
         return view('archive-sb', ['tasks' => $archivedTasks]);
@@ -870,10 +947,31 @@ class TaskController extends Controller
             ->onlyTrashed()
             ->orderBy('deleted_at', 'desc');
 
+        // [BARU] Filter Search (Server-Side)
+        if (request()->has('search') && request()->search != '') {
+            $keyword = request()->search;
+            $query->where(function ($q) use ($keyword) {
+                $q->where('tasks.judul', 'like', "%{$keyword}%")
+                    ->orWhere('tasks.nama_pelanggan', 'like', "%{$keyword}%")
+                    ->orWhere('tasks.no_invoice', 'like', "%{$keyword}%")
+                    ->orWhere('tasks.urgensi', 'like', "%{$keyword}%")
+                    ->orWhere('tasks.catatan', 'like', "%{$keyword}%")
+                    ->orWhereHas('user', function ($subQ) use ($keyword) {
+                        $subQ->where('name', 'like', "%{$keyword}%");
+                    })
+                    ->orWhereHas('status', function ($subQ) use ($keyword) {
+                        $subQ->where('name', 'like', "%{$keyword}%");
+                    })
+                    ->orWhereHas('taskPekerjaans', function ($subQ) use ($keyword) {
+                        $subQ->where('nama_pekerjaan', 'like', "%{$keyword}%");
+                    });
+            });
+        }
+
         if (request()->has('show_all')) {
-            $trashedTasks = $query->paginate(9999)->appends(['show_all' => 'true']);
+            $trashedTasks = $query->paginate(9999)->appends(['show_all' => 'true', 'search' => request()->search]);
         } else {
-            $trashedTasks = $query->paginate(50);
+            $trashedTasks = $query->paginate(50)->appends(['search' => request()->search]);
         }
 
         return view('trash-sb', ['tasks' => $trashedTasks]);

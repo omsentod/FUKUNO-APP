@@ -14,7 +14,8 @@
           <div class="search-container">
             <div class="input-with-icon">
               <i class="bi bi-search search-icon"></i>
-              <input type="text" id="archiveSearchInput" class="form-control" placeholder="Cari">
+              <input type="text" id="archiveSearchInput" class="form-control" placeholder="Cari"
+                value="{{ request('search') }}">
             </div>
           </div>
         </div>

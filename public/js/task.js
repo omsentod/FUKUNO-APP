@@ -1967,29 +1967,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-
-    const searchInput = document.getElementById("taskSearchInput");
-
-    if (searchInput && mainTableBody) {
-
-        searchInput.addEventListener("input", function () {
-
-            const searchTerm = searchInput.value.toLowerCase();
-
-            const rows = mainTableBody.querySelectorAll("tr");
-
-            rows.forEach(row => {
-                const rowText = row.textContent.toLowerCase();
-
-                if (rowText.includes(searchTerm)) {
-                    row.style.display = "";
-                } else {
-                    row.style.display = "none";
-                }
-            });
-        });
-    }
-
+    // ============================================================
+    // ▼▼▼ HIGHLIGHT FALLBACK (Older Logic) ▼▼▼
+    // ============================================================
     const highlightedTask = document.getElementById('highlight-task');
     if (highlightedTask) {
         highlightedTask.scrollIntoView({
@@ -2213,36 +2193,83 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // ============================================================
+    // 3. SEARCH & FILTER (SERVER-SIDE)
+    // ============================================================
+    const realSearchInput = document.getElementById("taskSearchInput");
+
+    if (realSearchInput) {
+        let timeout = null;
+
+        realSearchInput.addEventListener("input", function () {
+            clearTimeout(timeout);
+            const query = this.value.trim();
+
+            timeout = setTimeout(() => {
+                const url = new URL(window.location.href);
+                if (query.length > 0) {
+                    url.searchParams.set('search', query);
+                } else {
+                    url.searchParams.delete('search');
+                }
+                // Reset ke halaman 1 saat search baru
+                url.searchParams.delete('page');
+
+                window.location.href = url.toString();
+            }, 800); // Debounce 800ms
+        });
+
+        // Set value dari URL param jika ada (agar sync setelah reload)
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentSearch = urlParams.get('search');
+        if (currentSearch) {
+            realSearchInput.value = currentSearch;
+            // Fokus kembali ke input agar user sadar masih mode search
+            realSearchInput.focus();
+            // Pindahkan kursor ke akhir teks
+            const val = realSearchInput.value;
+            realSearchInput.value = '';
+            realSearchInput.value = val;
+        }
+    }
+
+
+    // ============================================================
     // ▼▼▼ SCROLL, SEARCH & HIGHLIGHT PERSISTENCE ▼▼▼
     // ============================================================
     const stateSearchInput = document.getElementById("taskSearchInput");
 
-    // [BARU] Cek Referrer: Hapus cache jika TIDAK dari detail task
+    // [BARU] Smart Persistence: Hapus cache hanya jika benar-benar "fresh visit"
+    // JANGAN hapus jika:
+    // 1. Dari detail page (back button)
+    // 2. Dari halaman task itu sendiri (server-side search reload)
     const fromDetail = document.referrer && document.referrer.includes('/task/detail/');
+    const fromTask = document.referrer && document.referrer.includes('/task');
 
-    if (!fromDetail) {
+    // Hapus state HANYA jika dari luar (dashboard, notifikasi baru, dll)
+    if (!fromDetail && !fromTask) {
         sessionStorage.removeItem("taskScrollPos");
-        sessionStorage.removeItem("taskSearchQuery");
         sessionStorage.removeItem("clickedTaskId");
     }
 
-    // 1. Restore State
+
+    // 1. Restore State and Deep Link
     const savedScrollPos = sessionStorage.getItem("taskScrollPos");
-    const savedSearchQuery = sessionStorage.getItem("taskSearchQuery");
     const savedClickedId = sessionStorage.getItem("clickedTaskId");
 
-    // A. Restore Search
-    if (savedSearchQuery && stateSearchInput) {
-        stateSearchInput.value = savedSearchQuery;
-        const event = new Event('input', { bubbles: true });
-        stateSearchInput.dispatchEvent(event);
-    }
+    // [BARU] Priority: Cek URL Param 'highlight' dulu
+    const urlParams = new URLSearchParams(window.location.search);
+    const highlightId = urlParams.get('highlight');
+
+    // Gunakan highlight ID dari URL jika ada, jika tidak gunakan dari session
+    const targetId = highlightId || savedClickedId;
 
     // B. Restore Scroll & Highlight
-    if (savedClickedId) {
+    if (targetId) {
         // Tunggu sebentar agar render tabel selesai (terutama jika ada search)
         setTimeout(() => {
-            const targetRow = document.querySelector(`tr.clickable-row[data-url*="/task/detail/${savedClickedId}"]`);
+            // Selector ini harus cocok dengan format data-url di tr
+            // Contoh data-url: /task/detail/123
+            const targetRow = document.querySelector(`tr.clickable-row[data-url*="/task/detail/${targetId}"]`);
 
             if (targetRow) {
                 // 1. Scroll ke elemen tersebut (tengah layar)
@@ -2289,11 +2316,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     sessionStorage.setItem("clickedTaskId", matches[1]);
                 }
             }
-
-            if (stateSearchInput) {
-                sessionStorage.setItem("taskSearchQuery", stateSearchInput.value);
-            }
+            // Note: Search term sudah tersimpan di URL param, tidak perlu sessionStorage
         }
     });
+
 
 }); // END DOC

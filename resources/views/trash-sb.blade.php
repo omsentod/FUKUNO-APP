@@ -14,7 +14,8 @@
         <div class="search-container mb-3">
           <div class="input-with-icon">
             <i class="bi bi-search search-icon"></i>
-            <input type="text" id="taskSearchInput" class="form-control" placeholder="Cari">
+            <input type="text" id="taskSearchInput" class="form-control" placeholder="Cari"
+              value="{{ request('search') }}">
           </div>
         </div>
       </div>

@@ -200,29 +200,32 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // ============================================================
+    // SERVER-SIDE SEARCH
+    // ============================================================
     const searchInput = document.getElementById('archiveSearchInput');
-    const tableRows = document.querySelectorAll("#archiveTable tbody tr");
 
     if (searchInput) {
-        searchInput.addEventListener('keyup', function (e) {
-            const searchTerm = e.target.value.toLowerCase();
+        let timeout = null;
 
-            tableRows.forEach(row => {
-                // Abaikan baris pesan "Tidak ada data"
-                if (row.querySelector('td.text-center')) return;
+        searchInput.addEventListener("input", function () {
+            clearTimeout(timeout);
+            const query = this.value.trim();
 
-                // Ambil seluruh teks dalam satu baris
-                const rowText = row.textContent.toLowerCase();
-
-                // Cek apakah kata kunci ada di dalam teks baris
-                if (rowText.includes(searchTerm)) {
-                    row.style.display = ""; // Tampilkan
+            timeout = setTimeout(() => {
+                const url = new URL(window.location.href);
+                if (query.length > 0) {
+                    url.searchParams.set('search', query);
                 } else {
-                    row.style.display = "none"; // Sembunyikan
+                    url.searchParams.delete('search');
                 }
-            });
+                url.searchParams.delete('page');
+
+                window.location.href = url.toString();
+            }, 800);
         });
     }
+
 
     // ============================================================
     // ▼▼▼ SCROLL, SEARCH & HIGHLIGHT PERSISTENCE (ARCHIVE) ▼▼▼
