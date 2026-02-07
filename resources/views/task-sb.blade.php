@@ -371,5 +371,7 @@
 
 
 @push('scripts')
+    {{-- SortableJS untuk Drag and Drop Checklist --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <script src="{{ asset('js/task.js') }}"></script>
 @endpush
