@@ -204,8 +204,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 const url = row.dataset.url;
                 if (url) {
-
-                    window.location.href = url + '?from=trash';
+                    // URL sudah include ?from= di data-url dari Blade template
+                    window.location.href = url;
                 }
             }
         });
@@ -242,32 +242,34 @@ document.addEventListener("DOMContentLoaded", () => {
     // ============================================================
     const stateTrashSearchInput = document.getElementById('taskSearchInput');
 
-    // [BARU] Cek Referrer
+    // [BARU] Smart Persistence: Hapus cache hanya jika benar-benar "fresh visit"
+    // JANGAN hapus jika:
+    // 1. Dari detail page (back button)
+    // 2. Dari halaman trash itu sendiri (server-side search reload)
     const fromDetail = document.referrer && document.referrer.includes('/task/detail/');
+    const fromTrash = document.referrer && document.referrer.includes('/trash');
 
-    if (!fromDetail) {
+    // Hapus state HANYA jika dari luar (dashboard, task page, dll)
+    if (!fromDetail && !fromTrash) {
         sessionStorage.removeItem("trashScrollPos");
-        sessionStorage.removeItem("trashSearchQuery");
         sessionStorage.removeItem("clickedTrashId");
     }
 
     // 1. Restore State
     const savedTrashScroll = sessionStorage.getItem("trashScrollPos");
-    const savedTrashQuery = sessionStorage.getItem("trashSearchQuery");
     const savedTrashClickedId = sessionStorage.getItem("clickedTrashId");
 
-    // A. Restore Search
-    if (savedTrashQuery && stateTrashSearchInput) {
-        stateTrashSearchInput.value = savedTrashQuery;
-        // Trigger pencarian
-        const event = new Event('keyup', { bubbles: true }); // Trash pakai 'keyup' listener
-        stateTrashSearchInput.dispatchEvent(event);
-    }
+    // [BARU] Priority: Cek URL Param 'highlight' dulu (untuk deep linking)
+    const urlParams = new URLSearchParams(window.location.search);
+    const highlightId = urlParams.get('highlight');
+
+    // Gunakan highlight ID dari URL jika ada, jika tidak gunakan dari session
+    const targetId = highlightId || savedTrashClickedId;
 
     // B. Restore Scroll & Highlight
-    if (savedTrashClickedId) {
+    if (targetId) {
         setTimeout(() => {
-            const targetRow = document.querySelector(`tr.clickable-row[data-url*="/task/detail/${savedTrashClickedId}"]`);
+            const targetRow = document.querySelector(`tr.clickable-row[data-url*="/task/detail/${targetId}"]`);
 
             if (targetRow) {
                 targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });

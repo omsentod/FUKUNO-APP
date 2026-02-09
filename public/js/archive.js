@@ -193,7 +193,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!target.closest('.action-icons')) {
                     const url = row.dataset.url;
                     if (url) {
-                        window.location.href = url + '?from=archive';
+                        // URL sudah include ?from= di data-url dari Blade template
+                        window.location.href = url;
                     }
                 }
             }
@@ -233,32 +234,34 @@ document.addEventListener("DOMContentLoaded", () => {
     // Gunakan variabel unik agar tidak bentrok dengan scope lain
     const stateArchiveSearchInput = document.getElementById('archiveSearchInput');
 
-    // 1. Restore State
-    const savedArchiveScroll = sessionStorage.getItem("archiveScrollPos");
-    const savedArchiveQuery = sessionStorage.getItem("archiveSearchQuery");
-    const savedArchiveClickedId = sessionStorage.getItem("clickedArchiveId");
-
-    // A. Restore Search
-    // [BARU] Cek Referrer
+    // [BARU] Smart Persistence: Hapus cache hanya jika benar-benar "fresh visit"
+    // JANGAN hapus jika:
+    // 1. Dari detail page (back button)
+    // 2. Dari halaman archive itu sendiri (server-side search reload)
     const fromDetail = document.referrer && document.referrer.includes('/task/detail/');
+    const fromArchive = document.referrer && document.referrer.includes('/archive');
 
-    if (!fromDetail) {
+    // Hapus state HANYA jika dari luar (dashboard, task page, dll)
+    if (!fromDetail && !fromArchive) {
         sessionStorage.removeItem("archiveScrollPos");
-        sessionStorage.removeItem("archiveSearchQuery");
         sessionStorage.removeItem("clickedArchiveId");
     }
 
-    if (savedArchiveQuery && stateArchiveSearchInput) {
-        stateArchiveSearchInput.value = savedArchiveQuery;
-        // Trigger pencarian
-        const event = new Event('keyup', { bubbles: true }); // Archive pakai 'keyup' listener
-        stateArchiveSearchInput.dispatchEvent(event);
-    }
+    // 1. Restore State
+    const savedArchiveScroll = sessionStorage.getItem("archiveScrollPos");
+    const savedArchiveClickedId = sessionStorage.getItem("clickedArchiveId");
+
+    // [BARU] Priority: Cek URL Param 'highlight' dulu (untuk deep linking)
+    const urlParams = new URLSearchParams(window.location.search);
+    const highlightId = urlParams.get('highlight');
+
+    // Gunakan highlight ID dari URL jika ada, jika tidak gunakan dari session
+    const targetId = highlightId || savedArchiveClickedId;
 
     // B. Restore Scroll & Highlight
-    if (savedArchiveClickedId) {
+    if (targetId) {
         setTimeout(() => {
-            const targetRow = document.querySelector(`tr.clickable-row[data-url*="/task/detail/${savedArchiveClickedId}"]`);
+            const targetRow = document.querySelector(`tr.clickable-row[data-url*="/task/detail/${targetId}"]`);
 
             if (targetRow) {
                 targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });

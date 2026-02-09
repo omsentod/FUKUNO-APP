@@ -144,6 +144,13 @@ class TaskController extends Controller
 
         // [OPTIMASI] Pagination atau Show All
         if ($request->has('show_all')) {
+            // [FIX] Redirect jika ada param 'page' untuk menghindari offset error
+            if ($request->has('page')) {
+                return redirect()->route('task', array_merge(
+                    $request->except('page'),
+                    ['show_all' => 'true']
+                ));
+            }
             $tasks = $query->paginate(9999)->appends(['show_all' => 'true']);
         } else {
             $tasks = $query->paginate(50)->appends([
@@ -930,6 +937,13 @@ class TaskController extends Controller
         }
 
         if (request()->has('show_all')) {
+            // [FIX] Redirect jika ada param 'page' untuk menghindari offset error
+            if (request()->has('page')) {
+                return redirect()->route('archive', array_merge(
+                    request()->except('page'),
+                    ['show_all' => 'true']
+                ));
+            }
             $archivedTasks = $query->paginate(9999)->appends(['show_all' => 'true', 'search' => request()->search]);
         } else {
             $archivedTasks = $query->paginate(50)->appends(['search' => request()->search]);
@@ -969,6 +983,13 @@ class TaskController extends Controller
         }
 
         if (request()->has('show_all')) {
+            // [FIX] Redirect jika ada param 'page' untuk menghindari offset error
+            if (request()->has('page')) {
+                return redirect()->route('trash', array_merge(
+                    request()->except('page'),
+                    ['show_all' => 'true']
+                ));
+            }
             $trashedTasks = $query->paginate(9999)->appends(['show_all' => 'true', 'search' => request()->search]);
         } else {
             $trashedTasks = $query->paginate(50)->appends(['search' => request()->search]);
