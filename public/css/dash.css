@@ -266,6 +266,59 @@ body{
   background-color: #f0f0f0;
   border: 1px solid #eee;
 }
+/* Wrapper untuk "Notifikasi" title + toggle button */
+.notif-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Toggle Notification Button - Modern Design */
+.toggle-notif-btn {
+    /* background: transparent !important; */
+    border: none !important;
+    outline: none !important; /* Remove outline saat focus */
+    box-shadow: none !important; /* Pastikan tidak ada shadow */
+    color:#ffff;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-notif-btn:focus {
+    outline: none !important; /* Pastikan tidak ada border saat diklik */
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.toggle-notif-btn:hover {
+    background: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Icon states dengan warna yang lebih soft */
+.toggle-notif-btn i.bi-bell-fill {
+    color: #28a745; /* Green untuk enabled */
+}
+
+.toggle-notif-btn i.bi-bell-slash-fill {
+    color: #6c757d; /* Gray untuk muted (lebih soft dari merah) */
+    opacity: 0.6;
+}
+
+/* Hover effect */
+.toggle-notif-btn:hover i.bi-bell-fill {
+    color: #218838;
+}
+
+.toggle-notif-btn:hover i.bi-bell-slash-fill {
+    color: #5a6268;
+    opacity: 0.8;
+}
 
       .profile {
         display: flex;
@@ -703,7 +756,7 @@ body.sidebar-closed .sidebar-toggle i {
 /* Container untuk Toast */
 #toast-container {
   position: fixed;
-  top: 20px;
+  top: 80px; /* Turunkan agar tidak nutupin navbar */
   right: 20px;
   z-index: 99999;
   display: flex;

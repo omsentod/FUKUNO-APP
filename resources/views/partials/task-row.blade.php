@@ -25,6 +25,7 @@
         </td>
     @endif
 
+    <td>{{ $task->created_at->format('j M Y') }}</td>
     <td>{{ $task->no_invoice }}</td>
     <td>{{ $task->judul }}</td>
     <td>{{ $task->total_jumlah }}</td>

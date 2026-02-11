@@ -14,6 +14,12 @@
 
     @stack('styles')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{-- Pass user notification preference to JavaScript --}}
+    <script>
+        const userNotificationEnabled = {{ Auth::user()->notification_enabled ? 'true' : 'false' }};
+        const currentUserId = {{ Auth::id() }};
+    </script>
 </head>
 
 <body>
@@ -65,7 +71,14 @@
             <div class="notification" id="notification">
 
                 <div class="notification-header-top">
-                    <span class="notif-title">Notifikasi</span>
+                    <div class="notif-title-wrapper">
+                        <span class="notif-title">Notifikasi</span>
+                        <button id="toggle-notif-btn" class="toggle-notif-btn"
+                            title="{{ Auth::user()->notification_enabled ? 'Matikan notifikasi' : 'Aktifkan notifikasi' }}">
+                            <i
+                                class="bi {{ Auth::user()->notification_enabled ? 'bi-bell-fill' : 'bi-bell-slash-fill' }}"></i>
+                        </button>
+                    </div>
                     @if(isset($unreadNotificationsCount) && ($unreadNotificationsCount > 0 || count($groupedNotifications) > 0))
                         <button id="clear-notif-btn" class="clear-btn">Clear All</button>
                     @endif

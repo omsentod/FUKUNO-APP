@@ -42,53 +42,55 @@ if (userId) {
     console.log("Mendengarkan notifikasi untuk user:", userId);
 
     window.Echo.private(`notifications.${userId}`)
-    .listen('.NewNotification', (e) => {
-        const dataNotif = e.data || e;
-        console.log("Notifikasi Masuk:", dataNotif.message); 
+        .listen('.NewNotification', (e) => {
+            const dataNotif = e.data || e;
+            console.log("Notifikasi Masuk:", dataNotif.message);
 
-        // Cek apakah ini update diam-diam (Status/Checklist)
-        const isSilent = (dataNotif.message === 'silent_update');
+            // Cek apakah ini update diam-diam (Status/Checklist)
+            const isSilent = (dataNotif.message === 'silent_update');
 
-        // ------------------------------------------
-        // 1. SOUND, BADGE, & LONCENG (Hanya jika BUKAN silent)
-        // ------------------------------------------
-        if (!isSilent) {
-            notificationSound.play().catch(() => {});
-            
-            const badge = document.getElementById('notification-badge'); 
-            if (badge) {
-                let currentCount = parseInt(badge.innerText) || 0;
-                badge.innerText = currentCount + 1;
-                badge.style.display = 'flex'; 
-            }
+            // ------------------------------------------
+            // 1. SOUND, BADGE, & LONCENG (Hanya jika BUKAN silent)
+            // ------------------------------------------
+            if (!isSilent) {
+                notificationSound.play().catch(() => { });
 
-            const bell = document.getElementById('bell-icon');
-            if (bell) {
-                bell.classList.remove('is-ringing');
-                void bell.offsetWidth; 
-                bell.classList.add('is-ringing');
-            }
-
-            // UPDATE DROPDOWN NOTIFIKASI
-            const notifContainer = document.getElementById('notification-list'); 
-            if (notifContainer) {
-                const emptyMsg = notifContainer.querySelector('.notification-empty');
-                if (emptyMsg) emptyMsg.remove();
-
-                const limit = (str, length) => str.length > length ? str.substring(0, length) + '...' : str;
-
-                let messageHtml = '';
-                if (dataNotif.comment_body) {
-                    messageHtml = `mengomentari <strong>${limit(dataNotif.task_title, 20)}</strong>: "${limit(dataNotif.comment_body, 20)}"`;
-                } else {
-                    messageHtml = `telah membuat task: <strong>${limit(dataNotif.task_title, 25)}</strong>`;
+                const badge = document.getElementById('notification-badge');
+                if (badge) {
+                    let currentCount = parseInt(badge.innerText) || 0;
+                    badge.innerText = currentCount + 1;
+                    badge.style.display = 'flex';
                 }
 
-                const mockupHtml = dataNotif.first_mockup_url 
-                    ? `<img src="${dataNotif.first_mockup_url}" class="notification-mockup">` 
-                    : `<div class="notification-mockup placeholder"></div>`;
+                const bell = document.getElementById('bell-icon');
+                if (bell) {
+                    bell.classList.remove('is-ringing');
+                    void bell.offsetWidth;
+                    bell.classList.add('is-ringing');
+                }
 
-                const newItemHtml = `
+                // UPDATE DROPDOWN NOTIFIKASI
+                const notifContainer = document.getElementById('notification-list');
+                if (notifContainer) {
+                    const emptyMsg = notifContainer.querySelector('.notification-empty');
+                    if (emptyMsg) emptyMsg.remove();
+
+                    const limit = (str, length) => str.length > length ? str.substring(0, length) + '...' : str;
+
+                    let messageHtml = '';
+                    if (dataNotif.comment_body) {
+                        messageHtml = `mengomentari <strong>${limit(dataNotif.task_title, 20)}</strong>: "${limit(dataNotif.comment_body, 20)}"`;
+                    } else if (dataNotif.type && dataNotif.type.includes('bulk')) {
+                        messageHtml = dataNotif.message.replace(dataNotif.creator_name + ' ', '');
+                    } else {
+                        messageHtml = `telah membuat task: <strong>${limit(dataNotif.task_title, 25)}</strong>`;
+                    }
+
+                    const mockupHtml = dataNotif.first_mockup_url
+                        ? `<img src="${dataNotif.first_mockup_url}" class="notification-mockup">`
+                        : `<div class="notification-mockup placeholder"></div>`;
+
+                    const newItemHtml = `
                   <a href="${dataNotif.url}" class="notification-item new-item" style="background-color: #f0f8ff; transition: background 1s;">
                       <div class="pic pic-sm" style="background-color: ${dataNotif.creator_color};">
                            ${dataNotif.creator_initials}
@@ -100,99 +102,99 @@ if (userId) {
                       ${mockupHtml}
                   </a>
                 `;
-                
-                const firstHeader = notifContainer.querySelector('.notification-group-header');
-                if (firstHeader) {
-                    firstHeader.insertAdjacentHTML('afterend', newItemHtml);
-                } else {
-                    notifContainer.insertAdjacentHTML('afterbegin', newItemHtml);
-                }
-                
-                const clearBtn = document.getElementById('clear-notif-btn');
-                if(clearBtn) clearBtn.style.display = 'block';
-            }
-        }
 
-        // ------------------------------------------
-        // 2. UPDATE TABEL TASK
-        // ------------------------------------------
-        const taskTableBody = document.querySelector("#taskTable tbody");
-
-        // A. KASUS: TASK BARU / RESTORE
-        if (taskTableBody && (dataNotif.type === 'new_task' || dataNotif.type === 'task_restored') && dataNotif.task_id) {
-            fetch(`/task/get-row/${dataNotif.task_id}`)
-                .then(response => response.json())
-                .then(result => {
-                    if (result.html) {
-                        // [UPDATE] Hapus Empty Row berdasarkan ID barunya
-                        const emptyPlaceholder = document.getElementById('emptyRow');
-                        if (emptyPlaceholder) emptyPlaceholder.remove();
-
-                        // Hapus baris duplikat jika ada (untuk safety)
-                        const existingRow = document.getElementById(`task-row-${dataNotif.task_id}`);
-                        if (existingRow) existingRow.remove();
-
-                        taskTableBody.insertAdjacentHTML('beforeend', result.html);
-                        const newRow = taskTableBody.lastElementChild;
-                        newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        newRow.style.transition = 'background-color 2s ease-out';
-                        newRow.style.backgroundColor = '#d4edda'; // Hijau muda
-                        
-                        if (typeof window.initGalleryIndicator === 'function') window.initGalleryIndicator(newRow);
-                        setTimeout(() => { newRow.style.backgroundColor = ''; }, 2000);
+                    const firstHeader = notifContainer.querySelector('.notification-group-header');
+                    if (firstHeader) {
+                        firstHeader.insertAdjacentHTML('afterend', newItemHtml);
+                    } else {
+                        notifContainer.insertAdjacentHTML('afterbegin', newItemHtml);
                     }
-                })
-                .catch(err => console.error("Gagal update tabel task:", err));
-        }
 
-        // B. KASUS: UPDATE STATUS / PROGRESS (Silent Update)
-        else if (taskTableBody && dataNotif.type === 'task_updated_row' && dataNotif.task_id) {
-            const existingRow = document.getElementById(`task-row-${dataNotif.task_id}`);
-            if (existingRow) {
+                    const clearBtn = document.getElementById('clear-notif-btn');
+                    if (clearBtn) clearBtn.style.display = 'block';
+                }
+            }
+
+            // ------------------------------------------
+            // 2. UPDATE TABEL TASK
+            // ------------------------------------------
+            const taskTableBody = document.querySelector("#taskTable tbody");
+
+            // A. KASUS: TASK BARU / RESTORE
+            if (taskTableBody && (dataNotif.type === 'new_task' || dataNotif.type === 'task_restored') && dataNotif.task_id) {
                 fetch(`/task/get-row/${dataNotif.task_id}`)
-                    .then(res => res.json())
+                    .then(response => response.json())
                     .then(result => {
                         if (result.html) {
-                            existingRow.outerHTML = result.html;
-                            const newRow = document.getElementById(`task-row-${dataNotif.task_id}`);
-                            if (newRow) {
-                                newRow.style.transition = 'background-color 1.5s ease-out';
-                                newRow.style.backgroundColor = '#fff3cd'; // Highlight Kuning
-                                if (typeof window.initGalleryIndicator === 'function') window.initGalleryIndicator(newRow);
-                                setTimeout(() => { newRow.style.backgroundColor = ''; }, 1500);
-                            }
+                            // [UPDATE] Hapus Empty Row berdasarkan ID barunya
+                            const emptyPlaceholder = document.getElementById('emptyRow');
+                            if (emptyPlaceholder) emptyPlaceholder.remove();
+
+                            // Hapus baris duplikat jika ada (untuk safety)
+                            const existingRow = document.getElementById(`task-row-${dataNotif.task_id}`);
+                            if (existingRow) existingRow.remove();
+
+                            taskTableBody.insertAdjacentHTML('beforeend', result.html);
+                            const newRow = taskTableBody.lastElementChild;
+                            newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            newRow.style.transition = 'background-color 2s ease-out';
+                            newRow.style.backgroundColor = '#d4edda'; // Hijau muda
+
+                            if (typeof window.initGalleryIndicator === 'function') window.initGalleryIndicator(newRow);
+                            setTimeout(() => { newRow.style.backgroundColor = ''; }, 2000);
                         }
-                    });
+                    })
+                    .catch(err => console.error("Gagal update tabel task:", err));
             }
-        }
 
-        // C. KASUS: DELETE / ARCHIVE
-        else if (taskTableBody && (dataNotif.type === 'task_deleted' || dataNotif.type === 'task_archived') && dataNotif.task_id) {
-            const rowToRemove = document.getElementById(`task-row-${dataNotif.task_id}`);
-            if (rowToRemove) {
-                rowToRemove.style.transition = 'background-color 0.5s';
-                rowToRemove.style.backgroundColor = '#f8d7da'; // Merah muda
-                setTimeout(() => {
-                    rowToRemove.remove();
-                    // [UPDATE] Jika tabel kosong, masukkan HTML baru
-                    if (taskTableBody.children.length === 0) {
-                        taskTableBody.innerHTML = emptyRowHTML;
-                    }
-                }, 500); 
+            // B. KASUS: UPDATE STATUS / PROGRESS (Silent Update)
+            else if (taskTableBody && dataNotif.type === 'task_updated_row' && dataNotif.task_id) {
+                const existingRow = document.getElementById(`task-row-${dataNotif.task_id}`);
+                if (existingRow) {
+                    fetch(`/task/get-row/${dataNotif.task_id}`)
+                        .then(res => res.json())
+                        .then(result => {
+                            if (result.html) {
+                                existingRow.outerHTML = result.html;
+                                const newRow = document.getElementById(`task-row-${dataNotif.task_id}`);
+                                if (newRow) {
+                                    newRow.style.transition = 'background-color 1.5s ease-out';
+                                    newRow.style.backgroundColor = '#fff3cd'; // Highlight Kuning
+                                    if (typeof window.initGalleryIndicator === 'function') window.initGalleryIndicator(newRow);
+                                    setTimeout(() => { newRow.style.backgroundColor = ''; }, 1500);
+                                }
+                            }
+                        });
+                }
             }
-        }
-        
-        // ------------------------------------------
-        // 3. UPDATE CHAT (Jika ada komentar baru)
-        // ------------------------------------------
-        if (chatContainer && dataNotif.type === 'new_comment' && chatContainer.dataset.taskId == dataNotif.task_id) {
-            const noComments = document.getElementById('no-comments');
-            if (noComments) noComments.remove();
 
-            const bubble = document.createElement('div');
-            bubble.className = 'comment-bubble'; 
-            const formattedBody = dataNotif.comment_body.replace(/\n/g, '<br>');
-            bubble.innerHTML = `
+            // C. KASUS: DELETE / ARCHIVE
+            else if (taskTableBody && (dataNotif.type === 'task_deleted' || dataNotif.type === 'task_archived') && dataNotif.task_id) {
+                const rowToRemove = document.getElementById(`task-row-${dataNotif.task_id}`);
+                if (rowToRemove) {
+                    rowToRemove.style.transition = 'background-color 0.5s';
+                    rowToRemove.style.backgroundColor = '#f8d7da'; // Merah muda
+                    setTimeout(() => {
+                        rowToRemove.remove();
+                        // [UPDATE] Jika tabel kosong, masukkan HTML baru
+                        if (taskTableBody.children.length === 0) {
+                            taskTableBody.innerHTML = emptyRowHTML;
+                        }
+                    }, 500);
+                }
+            }
+
+            // ------------------------------------------
+            // 3. UPDATE CHAT (Jika ada komentar baru)
+            // ------------------------------------------
+            if (chatContainer && dataNotif.type === 'new_comment' && chatContainer.dataset.taskId == dataNotif.task_id) {
+                const noComments = document.getElementById('no-comments');
+                if (noComments) noComments.remove();
+
+                const bubble = document.createElement('div');
+                bubble.className = 'comment-bubble';
+                const formattedBody = dataNotif.comment_body.replace(/\n/g, '<br>');
+                bubble.innerHTML = `
                 <div class="comment-header" style="font-size: 12px; margin-bottom: 2px; color: #666;">
                     <strong>${dataNotif.creator_name}</strong>
                 </div>
@@ -201,17 +203,17 @@ if (userId) {
                     Baru saja
                 </div>
             `;
-            chatContainer.appendChild(bubble);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
+                chatContainer.appendChild(bubble);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
 
-        // ------------------------------------------
-        // 4. TAMPILKAN TOAST
-        // ------------------------------------------
-        if (!isSilent) {
-            showToast(dataNotif.message); 
-        }
-    });
+            // ------------------------------------------
+            // 4. TAMPILKAN TOAST (Hanya jika user enable notifikasi)
+            // ------------------------------------------
+            if (!isSilent && typeof userNotificationEnabled !== 'undefined' && userNotificationEnabled) {
+                showToast(dataNotif.message);
+            }
+        });
 }
 
 // --- FUNGSI HELPER TOAST ---
@@ -227,7 +229,7 @@ function showToast(message) {
     toast.innerHTML = `<i class="bi bi-bell-fill" style="color: #CF221B; font-size: 1.2em;"></i><span>${message}</span>`;
     container.appendChild(toast);
     setTimeout(() => {
-        toast.classList.add('hide'); 
+        toast.classList.add('hide');
         toast.addEventListener('animationend', () => toast.remove());
     }, 4000);
 }

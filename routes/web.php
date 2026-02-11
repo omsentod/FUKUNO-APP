@@ -113,6 +113,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/user/store', [UserController::class, 'store'])->name('user.store');
     Route::post('/user/update/{id}', [UserController::class, 'update'])->name('user.update');
     Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.delete');
+    Route::post('/user/toggle-notification', [UserController::class, 'toggleNotification'])->name('user.toggleNotification');
 
     // --- STATUS MASTER ---
     Route::get('/status', function () {

@@ -39,18 +39,19 @@ class TaskController extends Controller
             'nama_pelanggan',
             'status',
             'line',
-            'deadline'
+            'deadline',
+            'created_at' // Untuk Tanggal Mulai
         ];
 
 
-        $sortColumn = $request->query('sort', 'created_at');
-        $sortOrder = $request->query('order', 'asc');
+        $sortColumn = $request->query('sort', null); // Default null agar arrow tidak muncul
+        $sortOrder = $request->query('order', 'desc'); // Default desc untuk ID terbaru di atas
 
-        if (!in_array($sortColumn, $allowedSorts) && $sortColumn != 'created_at') {
-            $sortColumn = 'created_at';
+        if ($sortColumn && !in_array($sortColumn, $allowedSorts)) {
+            $sortColumn = null; // Invalid sort jadi null
         }
         if (!in_array($sortOrder, ['asc', 'desc'])) {
-            $sortOrder = 'asc';
+            $sortOrder = 'desc';
         }
 
         // [OPTIMASI] Hanya load relasi yang BENAR-BENAR dipakai di task list
@@ -84,31 +85,37 @@ class TaskController extends Controller
             });
         }
 
-        if ($sortColumn == 'status') {
-            $query->join('statuses', 'tasks.status_id', '=', 'statuses.id')
-                ->orderBy('statuses.name', $sortOrder);
+        // [OPTIMASI] Sort - hanya jika user klik header (ada param sort)
+        if ($sortColumn) {
+            if ($sortColumn == 'status') {
+                $query->join('statuses', 'tasks.status_id', '=', 'statuses.id')
+                    ->orderBy('statuses.name', $sortOrder);
 
-        } elseif ($sortColumn == 'line') {
-            $query->join('task_pekerjaans', 'tasks.id', '=', 'task_pekerjaans.task_id')
-                ->orderBy('task_pekerjaans.nama_pekerjaan', $sortOrder);
+            } elseif ($sortColumn == 'line') {
+                $query->join('task_pekerjaans', 'tasks.id', '=', 'task_pekerjaans.task_id')
+                    ->orderBy('task_pekerjaans.nama_pekerjaan', $sortOrder);
 
-        } elseif ($sortColumn == 'deadline') {
+            } elseif ($sortColumn == 'deadline') {
 
-            $query->join('task_pekerjaans', 'tasks.id', '=', 'task_pekerjaans.task_id')
-                ->join('statuses', 'tasks.status_id', '=', 'statuses.id');
+                $query->join('task_pekerjaans', 'tasks.id', '=', 'task_pekerjaans.task_id')
+                    ->join('statuses', 'tasks.status_id', '=', 'statuses.id');
 
 
 
-            if ($sortOrder == 'asc') {
-                $query->orderByRaw("CASE WHEN statuses.name = 'Done and Ready' THEN 1 ELSE 0 END ASC");
-                $query->orderBy('task_pekerjaans.deadline', 'asc');
+                if ($sortOrder == 'asc') {
+                    $query->orderByRaw("CASE WHEN statuses.name = 'Done and Ready' THEN 1 ELSE 0 END ASC");
+                    $query->orderBy('task_pekerjaans.deadline', 'asc');
+                } else {
+
+                    $query->orderByRaw("CASE WHEN statuses.name = 'Done and Ready' THEN 1 ELSE 0 END DESC");
+                    $query->orderBy('task_pekerjaans.deadline', 'desc');
+                }
             } else {
-
-                $query->orderByRaw("CASE WHEN statuses.name = 'Done and Ready' THEN 1 ELSE 0 END DESC");
-                $query->orderBy('task_pekerjaans.deadline', 'desc');
+                $query->orderBy($sortColumn, $sortOrder);
             }
         } else {
-            $query->orderBy($sortColumn, $sortOrder);
+            // Default: urutkan berdasarkan ID terbaru (tidak ada sort param)
+            $query->orderBy('tasks.id', 'desc');
         }
 
 
@@ -165,7 +172,7 @@ class TaskController extends Controller
         return view('task-sb', [
             'tasks' => $tasks,
             'highlightId' => $highlightId ?? null,
-            'currentSort' => $sortColumn,
+            'currentSort' => $sortColumn ?? null, // Kalau null, jangan pass 'created_at'
             'currentOrder' => $sortOrder,
         ]);
     }
@@ -1016,24 +1023,23 @@ class TaskController extends Controller
             // 1. Update DB Massal (Cepat)
             Task::whereIn('id', $taskIds)->update(['is_archived' => true]);
 
-            // 2. Kirim Notifikasi Loop (Agar JS user lain update per baris)
-            foreach ($taskIds as $tid) {
-                foreach ($usersToNotify as $targetUser) {
-                    $notifData = [
-                        'message' => Auth::user()->name . " mengarsipkan task.",
-                        'type' => 'task_archived',
-                        'task_id' => $tid,
-                        'url' => '#',
-                        'creator_initials' => '??',
-                        'creator_color' => '#ccc',
-                        'first_mockup_url' => null,
-                        'time' => 'Baru saja',
-                        'creator_name' => Auth::user()->name,
-                        'task_title' => 'Bulk Action',
-                        'comment_body' => null
-                    ];
-                    event(new NewNotification($notifData, $targetUser->id));
-                }
+            // 2. Kirim SATU notifikasi summary per user (bukan per-task)
+            $count = count($taskIds);
+            foreach ($usersToNotify as $targetUser) {
+                $notifData = [
+                    'message' => Auth::user()->name . " telah mengarsip {$count} task",
+                    'type' => 'bulk_archived',
+                    'task_id' => null,
+                    'url' => route('archive'),
+                    'creator_initials' => Auth::user()->initials ?? '??',
+                    'creator_color' => Auth::user()->avatar_color ?? '#ccc',
+                    'first_mockup_url' => null,
+                    'time' => 'Baru saja',
+                    'creator_name' => Auth::user()->name,
+                    'task_title' => "Bulk Archive ({$count} task)",
+                    'comment_body' => null
+                ];
+                event(new NewNotification($notifData, $targetUser->id));
             }
             return response()->json(['success' => true, 'message' => 'Task berhasil diarsipkan.']);
 
@@ -1041,24 +1047,23 @@ class TaskController extends Controller
             // 1. Soft Delete Massal
             Task::destroy($taskIds);
 
-            // 2. Kirim Notifikasi Loop
-            foreach ($taskIds as $tid) {
-                foreach ($usersToNotify as $targetUser) {
-                    $notifData = [
-                        'message' => 'silent_update',
-                        'type' => 'task_deleted',
-                        'task_id' => $tid,
-                        'url' => '#',
-                        'creator_initials' => '??',
-                        'creator_color' => '#ccc',
-                        'first_mockup_url' => null,
-                        'time' => 'Baru saja',
-                        'creator_name' => Auth::user()->name,
-                        'task_title' => 'Bulk Action',
-                        'comment_body' => null
-                    ];
-                    event(new NewNotification($notifData, $targetUser->id));
-                }
+            // 2. Kirim SATU notifikasi summary per user (bukan per-task)
+            $count = count($taskIds);
+            foreach ($usersToNotify as $targetUser) {
+                $notifData = [
+                    'message' => 'silent_update',
+                    'type' => 'bulk_deleted',
+                    'task_id' => null,
+                    'url' => route('trash'),
+                    'creator_initials' => Auth::user()->initials ?? '??',
+                    'creator_color' => Auth::user()->avatar_color ?? '#ccc',
+                    'first_mockup_url' => null,
+                    'time' => 'Baru saja',
+                    'creator_name' => Auth::user()->name,
+                    'task_title' => "Bulk Delete ({$count} task)",
+                    'comment_body' => null
+                ];
+                event(new NewNotification($notifData, $targetUser->id));
             }
             return response()->json(['success' => true, 'message' => 'Task berhasil dipindah ke sampah.']);
         } elseif ($action == 'unarchive_all') {
@@ -1068,26 +1073,23 @@ class TaskController extends Controller
             Task::whereIn('id', $taskIds)->update(['is_archived' => false]);
 
 
-            foreach ($tasksToRestore as $task) {
-                foreach ($usersToNotify as $targetUser) {
-
-                    $notifData = [
-                        'message' => 'silent_update',
-                        'type' => 'task_restored',
-                        'task_id' => $task->id,
-                        'url' => route('task', ['highlight' => $task->id]),
-
-                        'creator_initials' => Auth::user()->initials ?? '??',
-                        'creator_color' => Auth::user()->avatar_color ?? '#ccc',
-                        'first_mockup_url' => $task->mockups->first() ? Storage::url($task->mockups->first()->file_path) : null,
-                        'time' => 'Baru saja',
-                        'creator_name' => Auth::user()->name,
-                        'task_title' => $task->judul,
-                        'comment_body' => null
-                    ];
-
-                    event(new NewNotification($notifData, $targetUser->id));
-                }
+            // Kirim SATU notifikasi summary per user (bukan per-task)
+            $count = count($taskIds);
+            foreach ($usersToNotify as $targetUser) {
+                $notifData = [
+                    'message' => 'silent_update',
+                    'type' => 'bulk_restored',
+                    'task_id' => null,
+                    'url' => route('task'),
+                    'creator_initials' => Auth::user()->initials ?? '??',
+                    'creator_color' => Auth::user()->avatar_color ?? '#ccc',
+                    'first_mockup_url' => null,
+                    'time' => 'Baru saja',
+                    'creator_name' => Auth::user()->name,
+                    'task_title' => "Bulk Restore ({$count} task)",
+                    'comment_body' => null
+                ];
+                event(new NewNotification($notifData, $targetUser->id));
             }
 
             return response()->json(['success' => true, 'message' => 'Task berhasil dipulihkan dari arsip.']);

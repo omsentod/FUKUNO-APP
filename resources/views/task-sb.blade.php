@@ -38,7 +38,7 @@
                     <div class="input-with-icon">
                         <i class="bi bi-search search-icon"></i>
                         <input type="text" id="taskSearchInput" class="form-control" placeholder="Cari"
-                            value="{{ request('search') }}">
+                            value="{{ request('search') }}" autocomplete="off" name="search">
                     </div>
                 </div>
             </div>
@@ -72,7 +72,7 @@
 
         <div class="task">
             <table id="taskTable">
-                @if(request()->has('sort') && $currentSort != 'created_at')
+                @if(request()->has('sort'))
                     <a href="{{ route('task') }}" class="reset-sort">
                         <i class="bi bi-x-circle reset-sort-icon"></i> Reset Sort
                     </a>
@@ -80,6 +80,15 @@
                 <thead>
                     <tr>
                         <th class="select-col" style="width: 10px;"><input type="checkbox" id="selectAllCheckbox"></th>
+                        <th>
+                            @php $newOrder = ($currentSort == 'created_at' && $currentOrder == 'asc') ? 'desc' : 'asc'; @endphp
+                            <a href="{{ route('task', ['sort' => 'created_at', 'order' => $newOrder]) }}">
+                                Tanggal Mulai
+                                @if($currentSort == 'created_at') <i
+                                    class="bi {{ $currentOrder == 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill' }}"></i>
+                                @endif
+                            </a>
+                        </th>
                         <th>
                             @php $newOrder = ($currentSort == 'no_invoice' && $currentOrder == 'asc') ? 'desc' : 'asc'; @endphp
                             <a href="{{ route('task', ['sort' => 'no_invoice', 'order' => $newOrder]) }}">

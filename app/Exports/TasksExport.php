@@ -38,6 +38,7 @@ class TasksExport implements FromCollection, WithHeadings, WithMapping, WithDraw
     public function headings(): array
     {
         return [
+            'Tanggal Mulai',
             'No. PO',
             'Task Title',
             'Customer',
@@ -96,6 +97,7 @@ class TasksExport implements FromCollection, WithHeadings, WithMapping, WithDraw
 
         // ============ RETURN ROW (tanpa catatan pekerjaan) ============
         return [
+            $task->created_at->format('j M Y'),
             $task->no_invoice,
             $task->judul,
             $task->nama_pelanggan,
@@ -133,7 +135,7 @@ class TasksExport implements FromCollection, WithHeadings, WithMapping, WithDraw
                 $drawing->setPath($file);
                 $drawing->setHeight(60);
 
-                $drawing->setCoordinates('N' . $row);
+                $drawing->setCoordinates('O' . $row); // Pindah dari N ke O
                 $drawing->setOffsetX($i * 65);
 
                 $drawings[] = $drawing;
@@ -160,7 +162,7 @@ class TasksExport implements FromCollection, WithHeadings, WithMapping, WithDraw
                 $current = null;
                 $start = 2;
                 for ($row = 2; $row <= $rowCount; $row++) {
-                    $po = $sheet->getCell("A{$row}")->getValue();
+                    $po = $sheet->getCell("B{$row}")->getValue(); // Kolom B sekarang No PO
                     if ($current === null) {
                         $current = $po;
                         $start = $row;
@@ -168,22 +170,22 @@ class TasksExport implements FromCollection, WithHeadings, WithMapping, WithDraw
                     }
                     if ($po != $current) {
                         if ($start < $row - 1) {
-                            $sheet->mergeCells("A{$start}:A" . ($row - 1));
+                            $sheet->mergeCells("B{$start}:B" . ($row - 1)); // Merge kolom B (No PO)
                         }
                         $current = $po;
                         $start = $row;
                     }
                 }
                 if ($start < $rowCount) {
-                    $sheet->mergeCells("A{$start}:A{$rowCount}");
+                    $sheet->mergeCells("B{$start}:B{$rowCount}"); // Merge No PO pindah ke kolom B
                 }
 
                 // Wrap teks catatan task
                 $sheet->getStyle('E2:E' . $rowCount)->getAlignment()->setWrapText(true);
                 $sheet->getColumnDimension('E')->setWidth(60);
 
-                $sheet->getStyle('A1:N1')->getFont()->setBold(true);
-
+                $sheet->getStyle('A1:O1')->getFont()->setBold(true); // N jadi O
+    
                 $sheet->getStyle('J2:J' . $rowCount)->getAlignment()->setWrapText(true);
                 $sheet->getColumnDimension('J')->setWidth(30);
 
