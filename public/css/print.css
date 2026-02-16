@@ -162,16 +162,21 @@ header h2 {
 
 .size-table {
     width: 100%;
+    max-width: 100%; /* Prevent exceeding container */
     border-collapse: collapse;
     text-align: center;
     font-size: 11px;
+    table-layout: fixed; /* Fix column widths */
 }
 
 .size-table th,
 .size-table td {
     border: 1px solid #000;
     padding: 4px;
-    white-space: nowrap;
+    word-wrap: break-word; /* Wrap long text instead of expanding */
+    overflow-wrap: break-word;
+    hyphens: auto;
+    /* Removed: white-space: nowrap; to allow wrapping */
 }
 
 .size-table th {
